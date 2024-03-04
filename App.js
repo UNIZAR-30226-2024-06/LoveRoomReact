@@ -3,18 +3,16 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
 import HomeScreen from './src/components/HomeScreen';
 import SettingsScreen from './src/components/SettingsScreen';
-import { Button } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 
 
 const Drawer = createDrawerNavigator();
 
 export default function App() {
   const register = () => (
-    <Button
-      onPress={() => alert('This is a button!')}
-      title="Info"
-      color="#000"
-    />
+    <TouchableOpacity style={styles.button} onPress={() => alert('This is a button!')}>
+      <Text style={styles.text}>Usuario</Text>
+    </TouchableOpacity>
   );
   return (
     <NavigationContainer >
@@ -38,7 +36,6 @@ export default function App() {
           drawerLabel: 'Ajustes',
             headerStyle: {
               backgroundColor: '#f4511e',
-              textAlign: 'center',
             },
             headerTintColor: '#fff',
             headerTitleStyle: {
@@ -50,3 +47,14 @@ export default function App() {
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  button: {
+    alignItems: 'center',
+    padding: 10,
+  },
+  text: {
+    fontSize: 16,
+    color: '#fff', 
+  },
+});
