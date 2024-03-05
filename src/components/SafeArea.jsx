@@ -1,12 +1,23 @@
 import React from 'react';
+import { useDeviceOrientation } from '@react-native-community/hooks';
 import { SafeAreaView, Text, StyleSheet, Platform } from 'react-native';
 
+const {landscape} = useDeviceOrientation();
+console.log(landscape);
+//SafeAreaView se puede usar para ajustar el contenido en el dispositivo, es decir, para que en iOS el
+// Notch no nos tape el contenido ( mete un poco de padding automaticamente en el top)
 export default function SafeArea() {
   const handlePress = () => console.log('Texto presionado');
   return (
     <SafeAreaView style={styles.container}>
       <Text onPress={handlePress}> Prueba de G</Text>
-      </SafeAreaView>
+      <View 
+          style={{
+            backgroundColor: 'dodgerblue',
+            width: '100%',
+            height: landscape ? '100%' : '30%',
+            }}></View>
+    </SafeAreaView>
   );
 }
 
@@ -18,3 +29,4 @@ const styles = StyleSheet.create({
     },
   }
 )
+
