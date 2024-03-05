@@ -3,7 +3,7 @@
     "name": "reactnat",
     "slug": "reactnat",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default", //originalmente estaba en portrait, con default se ajusta a la orientacion del dispositivo
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {

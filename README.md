@@ -15,3 +15,7 @@ instalar android debugger bridge (adb)
 iniciar un emulador del android studio
 
 npx expo start
+
+Para poder usar hooks varios (hay algunos bastante útiles, se pueden ver en github.com/react-native-community/hooks):
+npm i @react-native-community/hooks
+npm install
