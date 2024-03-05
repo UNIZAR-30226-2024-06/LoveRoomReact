@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Platform, StatusBar } from "react-native";
 
-export default function Login() {
+export default function Login({ navigation}) {
   return (
     <View style={styles.container}>
       <View style={styles.logoContainer}>
@@ -26,7 +26,7 @@ export default function Login() {
           secureTextEntry={true}
         />
 
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={()=> navigation.navigate('Cuenta')}>
           <Text style={styles.buttonText}>Iniciar sesión</Text>
         </TouchableOpacity>
 
