@@ -13,7 +13,9 @@ const Tab = createBottomTabNavigator();
 
 export default function BottomTab() {
   return (
-      <Tab.Navigator initialRouteName="Home">
+      <Tab.Navigator initialRouteName="Home" screenOptions={{
+        "tabBarActiveTintColor": 'black', 
+      }}>
         <Tab.Screen 
         name="Inicio" 
         component={HomeScreen} 
@@ -39,8 +41,8 @@ export default function BottomTab() {
         options={{
           tabBarIcon: ({ focused, color, size }) => (
             <Image
-              source={require('../img/MisSalasTab.png')}
-              style={{ width: 25, height: 18, tintColor: color }}
+              source={require('../img/video-camara-alt.png')}
+              style={{ width: size, height: size, tintColor: color }}
             />
           ),
         }}/>

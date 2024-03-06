@@ -1,7 +1,14 @@
 import React from "react";
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Platform, StatusBar } from "react-native";
+import AuthContext from '../components/AuthContext';
 
 export default function Login({ navigation}) {
+  const {setIsRegistered} = React.useContext(AuthContext);
+
+  const handleLogin = () => {
+    setIsRegistered(true);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.logoContainer}>
@@ -26,7 +33,8 @@ export default function Login({ navigation}) {
           secureTextEntry={true}
         />
 
-        <TouchableOpacity style={styles.button} onPress={()=> navigation.navigate('Cuenta')}>
+        <TouchableOpacity style={styles.button} onPress={()=> {
+          handleLogin();navigation.navigate('Cuenta');}}>
           <Text style={styles.buttonText}>Iniciar sesión</Text>
         </TouchableOpacity>
 
