@@ -11,12 +11,11 @@ export default function Login({ navigation}) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.logoContainer}>
+      <View style={[styles.logoContainer, { marginBottom: -90 }]}>
         <Image
           style={styles.logo}
-          source={{ uri: "https://tecdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/lotus.webp" }}
+          source={require("../img/logoTexto.png")}
         />
-        <Text style={styles.logoText}>Iniciar sesión</Text>
       </View>
 
       <View style={styles.formContainer}>
@@ -43,6 +42,8 @@ export default function Login({ navigation}) {
         </TouchableOpacity>
       </View>
 
+      <View style={styles.line}></View>
+
       <View style={styles.registerContainer}>
         <Text style={styles.registerText}>¿No tienes una cuenta?</Text>
         <TouchableOpacity>
@@ -57,16 +58,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    padding: 20,
-    justifyContent: "flex-start",
+    justifyContent: "space-between", // Ajuste para posicionar el registro al final
   },
   logoContainer: {
     alignItems: "center",
-    marginBottom: 20,
+    paddingTop: 130,
   },
   logo: {
-    width: 150,
-    height: 150,
+    width: 200,
+    height: 200,
     resizeMode: "contain",
   },
   logoText: {
@@ -76,6 +76,7 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     backgroundColor: "#ffffff",
+    marginTop: 20,
     padding: 20,
     borderRadius: 10,
   },
@@ -110,6 +111,7 @@ const styles = StyleSheet.create({
   registerContainer: {
     flexDirection: "row",
     justifyContent: "center",
+    paddingBottom:  '10%',
   },
   registerText: {
     fontSize: 16,
@@ -120,4 +122,10 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     color: "#E58080",
   },
+  line: {
+    borderBottomColor: "#ccc",
+    borderBottomWidth: 1,
+    paddingBottom: '45%',
+    alignSelf: "stretch", // Ajuste para que la línea ocupe todo el ancho
+  },  
 });
