@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Platform, StatusBar } from "react-native";
+import {ScrollView, View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Platform, StatusBar } from "react-native";
 import AuthContext from '../components/AuthContext';
 
 export default function Login({ navigation}) {
@@ -10,7 +10,7 @@ export default function Login({ navigation}) {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <View style={[styles.logoContainer, { marginBottom: -90 }]}>
         <Image
           style={styles.logo}
@@ -50,7 +50,7 @@ export default function Login({ navigation}) {
           <Text style={styles.registerLink}>Regístrate</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -58,7 +58,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    justifyContent: "space-between", // Ajuste para posicionar el registro al final
   },
   logoContainer: {
     alignItems: "center",

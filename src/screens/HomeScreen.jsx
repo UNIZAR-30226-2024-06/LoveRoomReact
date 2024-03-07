@@ -1,7 +1,10 @@
 import React from 'react';
-import { Button, View, Text } from 'react-native';
+import { View, Button} from 'react-native';
 import NotRegisteredScreen from './NotRegisteredScreen';
 import AuthContext from '../components/AuthContext';
+import YouTubeIframe from 'react-native-youtube-iframe';
+
+
 
 export default function HomeScreen({ navigation}) {
   const {isRegistered} = React.useContext(AuthContext);
@@ -11,12 +14,15 @@ export default function HomeScreen({ navigation}) {
   }
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Estamos en home</Text>
-      <Button
-        onPress={() => navigation.navigate('Cuenta')}
-        title="Go to settings"
+      <YouTubeIframe
+        videoId={'TQtT9QgWjIY'}
+        height={220}
+        width={'100%'}
       />
+      {/* <Button
+        title="Go to Login"
+        onPress={() => navigation.navigate('Login')}
+      /> */}
     </View>
   );
 }
-
