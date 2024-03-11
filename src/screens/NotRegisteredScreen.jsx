@@ -9,10 +9,13 @@ export default function NotRegisteredScreen() {
     <View style={styles.container}>
       {/* <Text style={styles.text}>X</Text> */}
       <Text style={styles.text}>
-        Necesitas registrarte para ver este contenido
+        Necesitas registrarte para ver este contenido{"\n"}
       </Text>
-      <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-        <Text style={styles.text}>Iniciar sesión</Text>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate("Login")}
+      >
+        <Text style={styles.buttonText}>Iniciar sesión</Text>
       </TouchableOpacity>
     </View>
   );
@@ -26,5 +29,18 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 20,
+    textAlign: "center", // Add this line to align text to center
+  },
+  button: {
+    backgroundColor: "#E58080",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#ffffff",
+    fontWeight: "bold",
+    fontSize: 18,
   },
 });
