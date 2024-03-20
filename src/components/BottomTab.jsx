@@ -28,15 +28,6 @@ export default function BottomTab() {
           ),
         }}
       />
-        <Tab.Screen name="Matches" component={SettingsScreen} 
-        options={{
-          tabBarIcon: ({ focused, color, size }) => (
-            <Image
-              source={require('../img/CorazonTab.png')}
-              style={{ width: size, height: size, tintColor: color }}
-            />
-          ),
-        }}/>
         <Tab.Screen name="Mis salas" component={SettingsScreen} 
         options={{
           tabBarIcon: ({ focused, color, size }) => (
