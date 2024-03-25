@@ -1,12 +1,11 @@
 import React from "react";
 import {ScrollView, View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Platform, StatusBar } from "react-native";
 import AuthContext from '../components/AuthContext';
-import RegisterScreen from './RegisterScreen';
 
 export default function Login({ navigation}) {
   const {setIsRegistered} = React.useContext(AuthContext);
 
-  const handleLogin = () => {
+  const handleRegister = () => {
     setIsRegistered(true);
   };
 
@@ -20,6 +19,11 @@ export default function Login({ navigation}) {
       </View>
 
       <View style={styles.formContainer}>
+        <Text style={styles.label}>Nombre completo</Text>
+          <TextInput
+          style={styles.input}
+          placeholder="Introduzca su nombre completo"
+          />
         <Text style={styles.label}>Nombre de usuario</Text>
         <TextInput
           style={styles.input}
@@ -34,22 +38,10 @@ export default function Login({ navigation}) {
         />
 
         <TouchableOpacity style={styles.button} onPress={()=> {
-          handleLogin();navigation.navigate('Cuenta');}}>
-          <Text style={styles.buttonText}>Iniciar sesión</Text>
+          handleRegister();navigation.navigate('Cuenta');}}>
+          <Text style={styles.buttonText}>Registrarse</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity>
-          <Text style={styles.forgotPassword}>He olvidado mi contraseña</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.line}></View>
-
-      <View style={styles.registerContainer}>
-        <Text style={styles.registerText}>¿No tienes una cuenta?</Text>
-        <TouchableOpacity onPress={() => {navigation.navigate('Register');}}>
-          <Text style={styles.registerLink}>Regístrate</Text>
-        </TouchableOpacity>
       </View>
     </ScrollView>
   );
