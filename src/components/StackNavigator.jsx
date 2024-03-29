@@ -6,18 +6,22 @@ import { NavigationContainer } from '@react-navigation/native';
 import BottomTab from './BottomTab';
 import NotRegisteredScreen from '../screens/NotRegisteredScreen';
 import RegisterScreen from '../screens/RegisterScreen';
+import ChangePasswdScreen from '../screens/ChangePasswdScreen';
+import ChangePasswd2Screen from '../screens/ChangePasswd2Screen';
 
 const Stack = createStackNavigator();
 
 export default function StackNavigator() {
-    return (
-        <NavigationContainer>
-            <Stack.Navigator>
-                <Stack.Screen name="Account" component={BottomTab} options={{ headerShown: false }}/>
-                <Stack.Screen name="Login" component={LoginScreen} />
-                <Stack.Screen name="Register" component={RegisterScreen} />
-                <Stack.Screen name="NotRegistered" component={NotRegisteredScreen} />
-            </Stack.Navigator>
-        </NavigationContainer>
-      );
+  return (
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen name="Account" component={BottomTab} options={{ headerShown: false }} />
+        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="NotRegistered" component={NotRegisteredScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="ChangePassword" component={ChangePasswdScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="ChangePassword2" component={ChangePasswd2Screen} options={{ headerShown: false }} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
 }

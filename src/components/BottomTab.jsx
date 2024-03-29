@@ -13,22 +13,24 @@ const Tab = createBottomTabNavigator();
 
 export default function BottomTab() {
   return (
-      <Tab.Navigator initialRouteName="Home" screenOptions={{
-        "tabBarActiveTintColor": 'black', 
-      }}>
-        <Tab.Screen 
-        name="Inicio" 
-        component={HomeScreen} 
+    <Tab.Navigator
+      initialRouteName="Home"
+      screenOptions={{
+        tabBarActiveTintColor: 'black',
+      }}
+    >
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Image
-              source={require('../img/HomeTab.png')}
-              style={{ width: size, height: size, tintColor: color }}
-            />
+            <Image source={require('../img/HomeTab.png')} style={{ width: size, height: size, tintColor: color }} />
           ),
         }}
       />
-        <Tab.Screen name="Mis salas" component={SettingsScreen} 
+      <Tab.Screen
+        name="Mis salas"
+        component={SettingsScreen}
         options={{
           tabBarIcon: ({ focused, color, size }) => (
             <Image
@@ -36,19 +38,17 @@ export default function BottomTab() {
               style={{ width: size, height: size, tintColor: color }}
             />
           ),
-        }}/>
-        <Tab.Screen 
-          name="Cuenta" 
-          component={SettingsScreen} 
-          options={{
-            tabBarIcon: ({ focused, color, size }) => (
-              <Image
-                source={require('../img/MisSalasTab.png')}
-                style={{ width: 25, height: 18, tintColor: color }}
-              />
-            ),
-          }}
-        />
-      </Tab.Navigator>
+        }}
+      />
+      <Tab.Screen
+        name="Cuenta"
+        component={SettingsScreen}
+        options={{
+          tabBarIcon: ({ focused, color, size }) => (
+            <Image source={require('../img/MisSalasTab.png')} style={{ width: 25, height: 18, tintColor: color }} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
   );
 }

@@ -1,11 +1,9 @@
-import React, { useState } from "react";
-import { View, TextInput, FlatList, Text, Image } from "react-native";
-import YouTube from "react-native-youtube";
-import axios from "axios";
+import React, { useState } from 'react';
+import { View, TextInput, FlatList, Text, Image } from 'react-native';
+import YouTube from 'react-native-youtube';
+import axios from 'axios';
 
-const SearchBar = ({ onChangeText }) => (
-  <TextInput placeholder="Search Youtube" onChangeText={onChangeText} />
-);
+const SearchBar = ({ onChangeText }) => <TextInput placeholder="Search Youtube" onChangeText={onChangeText} />;
 
 const VideoItem = ({
   title,
@@ -20,9 +18,9 @@ const VideoItem = ({
 );
 
 const YoutubeSearch = () => {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
-  const [selectedVideoId, setSelectedVideoId] = useState("");
+  const [selectedVideoId, setSelectedVideoId] = useState('');
 
   // Implement search function using Youtube Data API v3
 
@@ -33,15 +31,15 @@ const YoutubeSearch = () => {
     try {
       const response = await axios.get(
         // Peticion con cliente http axios
-        "https://www.googleapis.com/youtube/v3/search",
+        'https://www.googleapis.com/youtube/v3/search',
         {
           params: {
-            part: "snippet",
+            part: 'snippet',
             maxResults: 5,
-            key: "AIzaSyBKqq-OFi0biVLa5BzILCQLf25OhMFnPQE",
+            key: 'AIzaSyBKqq-OFi0biVLa5BzILCQLf25OhMFnPQE',
             q: text,
           },
-        }
+        },
       );
 
       setSearchResults(response.data.items);
@@ -59,12 +57,7 @@ const YoutubeSearch = () => {
       <SearchBar onChangeText={handleSearch} />
       <FlatList
         data={searchResults}
-        renderItem={({ item }) => (
-          <VideoItem
-            {...item}
-            onPress={() => handleVideoPress(item.id.videoId)}
-          />
-        )}
+        renderItem={({ item }) => <VideoItem {...item} onPress={() => handleVideoPress(item.id.videoId)} />}
         keyExtractor={(item) => item.id.videoId}
       />
       {selectedVideoId && (
