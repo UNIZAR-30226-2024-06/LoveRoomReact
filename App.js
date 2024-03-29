@@ -11,11 +11,12 @@ export default function App() {
   const [isRegistered, setIsRegistered] = React.useState(false);
 
   return (
-    <AuthContext.Provider value ={{isRegistered, setIsRegistered}} >
+    <AuthContext.Provider value={{ isRegistered, setIsRegistered }}>
       <View
         style={{
-          flex: 1
-        }} >
+          flex: 1,
+        }}
+      >
         <StackNavigator />
         {/*<ScrollView >
           < Login />
@@ -25,4 +26,3 @@ export default function App() {
     </AuthContext.Provider>
   );
 }
-

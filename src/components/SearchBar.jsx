@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-import styles from "./SearchBar.module.css";
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import styles from './SearchBar.module.css';
 
 const SearchBar = () => {
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState('');
   const [suggestions, setSuggestions] = useState([]);
 
   useEffect(() => {

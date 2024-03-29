@@ -14,20 +14,20 @@ import AuthContext from '../components/AuthContext';
 
 export default function Login({ navigation }) {
   const { setIsRegistered } = React.useContext(AuthContext);
-  const [email, setEmail] = React.useState('');
-  const [isValidEmail, setIsValidEmail] = React.useState(false);
-
   const [password, setPassword] = React.useState('');
+  const [password2, setPassword2] = React.useState('');
   const [isValidPassword, setIsValidPassword] = React.useState(false);
+  const [isValidPassword2, setIsValidPassword2] = React.useState(false);
 
   const handlePasswordChange = (text) => {
     setPassword(text);
     setIsValidPassword(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,16}$/.test(text));
+    setIsValidPassword2(password2 === text);
   };
 
-  const handleEmailChange = (text) => {
-    setEmail(text);
-    setIsValidEmail(/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/.test(text));
+  const handleChangePassword = (text) => {
+    setPassword2(text);
+    setIsValidPassword2(password === text);
   };
 
   const handleRegister = () => {
@@ -41,21 +41,10 @@ export default function Login({ navigation }) {
       </View>
 
       <View style={styles.formContainer}>
-        <Text style={styles.label}>Nombre completo</Text>
-        <TextInput style={styles.input} placeholder="Introduzca su nombre completo" />
-        <Text style={styles.label}>Correo Electrónico</Text>
+        <Text style={styles.label}>Nueva contraseña</Text>
         <TextInput
           style={styles.input}
-          placeholder="Introduzca su correo electrónico"
-          onChangeText={handleEmailChange}
-        />
-        {!isValidEmail && <Text style={styles.errores}>* Por favor, introduzca un correo electrónico válido.</Text>}
-
-        <Text style={styles.label}>Contraseña</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Introduzca su contraseña"
-          secureTextEntry={true}
+          placeholder="Introduzca la nueva contraseña"
           onChangeText={handlePasswordChange}
         />
         {!isValidPassword && (
@@ -65,15 +54,22 @@ export default function Login({ navigation }) {
           </Text>
         )}
 
+        <Text style={styles.label}>Introduce de nuevo la contraseña</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Introduzca la nueva contraseña otra vez"
+          onChangeText={handleChangePassword}
+        />
+        {!isValidPassword2 && <Text style={styles.errores}>* Las contraseñas no coinciden.</Text>}
+
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
-            handleRegister();
-            navigation.navigate('Cuenta');
+            handleChangePassword();
+            navigation.navigate('Home');
           }}
-          disabled={!isValidEmail || !isValidPassword}
         >
-          <Text style={styles.buttonText}>Registrarse</Text>
+          <Text style={styles.buttonText}>Continuar</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -118,22 +114,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 10,
   },
+  errores: {
+    marginTop: -10,
+    color: 'red',
+    fontSize: 12,
+    marginBottom: 10,
+  },
   button: {
     backgroundColor: '#E58080',
     paddingVertical: 10,
-    marginVertical: 20,
     borderRadius: 5,
     alignItems: 'center',
   },
   buttonText: {
     color: '#ffffff',
     fontWeight: 'bold',
-  },
-  errores: {
-    marginTop: -10,
-    color: 'red',
-    fontSize: 12,
-    marginBottom: 10,
   },
   forgotPassword: {
     textAlign: 'right',
