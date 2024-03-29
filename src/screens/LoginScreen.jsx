@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   ScrollView,
   View,
@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import AuthContext from '../components/AuthContext';
 import RegisterScreen from './RegisterScreen';
+import { Ionicons } from '@expo/vector-icons'; // Asegúrate de instalar @expo/vector-icons si aún no lo has hecho
 
 export default function Login({ navigation }) {
   const { setIsRegistered } = React.useContext(AuthContext);
@@ -20,6 +21,8 @@ export default function Login({ navigation }) {
 
   const [password, setPassword] = React.useState('');
   const [isValidPassword, setIsValidPassword] = React.useState(false);
+
+  const [hidePassword, setHidePassword] = useState(true);
 
   const handlePasswordChange = (text) => {
     setPassword(text);
@@ -51,12 +54,26 @@ export default function Login({ navigation }) {
         {!isValidEmail && <Text style={styles.errores}>* Por favor, introduzca un correo electrónico válido.</Text>}
 
         <Text style={styles.label}>Contraseña</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Introduzca su contraseña"
-          secureTextEntry={true}
-          onChangeText={handlePasswordChange}
-        />
+        <View style={{ flexDirection: 'row', alignItems: 'center', position: 'relative' }}>
+          <TextInput
+            style={[styles.input, { paddingRight: 40 , flex: 1}]} // Añade paddingRight para evitar que el texto se superponga con el botón del ojo
+            placeholder="Introduzca la nueva contraseña otra vez"
+            onChangeText={handlePasswordChange}
+            secureTextEntry={hidePassword}
+          />
+          <TouchableOpacity 
+            onPress={() => setHidePassword(!hidePassword)} 
+            style={{ 
+              position: 'absolute', // Posiciona el botón del ojo en relación con el contenedor View
+              right: 20, // Coloca el botón del ojo a 10px del borde derecho del contenedor View
+              height: 40,
+              top: 0, // Asegúrate de que el botón del ojo tenga la misma altura que el TextInput
+              justifyContent: 'center' // Centra el icono verticalmente dentro del botón del ojo
+            }}
+          >
+            <Ionicons name={hidePassword ? 'eye-off' : 'eye'} size={24} color="black" />
+          </TouchableOpacity>
+        </View>
         {!isValidPassword && (
           <Text style={styles.errores}>
             * La contraseña debe tener entre 8 y 16 caracteres, incluyendo al menos una mayúscula, una minúscula y un
@@ -142,6 +159,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingHorizontal: 10,
     marginBottom: 10,
+    marginEnd: 5,
   },
   button: {
     backgroundColor: '#E58080',

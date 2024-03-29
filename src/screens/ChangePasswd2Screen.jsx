@@ -34,6 +34,7 @@ export default function Login({ navigation }) {
     setIsRegistered(true);
   };
 
+
   return (
     <ScrollView style={styles.container}>
       <View style={[styles.logoContainer, { marginBottom: -90 }]}>
@@ -46,6 +47,7 @@ export default function Login({ navigation }) {
           style={styles.input}
           placeholder="Introduzca la nueva contraseña"
           onChangeText={handlePasswordChange}
+          secureTextEntry={true}
         />
         {!isValidPassword && (
           <Text style={styles.errores}>
@@ -59,6 +61,7 @@ export default function Login({ navigation }) {
           style={styles.input}
           placeholder="Introduzca la nueva contraseña otra vez"
           onChangeText={handleChangePassword}
+          secureTextEntry={true}
         />
         {!isValidPassword2 && <Text style={styles.errores}>* Las contraseñas no coinciden.</Text>}
 
