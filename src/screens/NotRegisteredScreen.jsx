@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
     textAlign: 'center', // Add this line to align text to center
   },
   button: {
-    backgroundColor: '#E58080',
+    backgroundColor: '#F89F9F',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,

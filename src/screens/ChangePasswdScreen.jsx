@@ -12,15 +12,26 @@ import {
 } from 'react-native';
 import AuthContext from '../components/AuthContext';
 
-export default function Login({ navigation }) {
+export default function ChangePasswdScreen({ navigation }) {
   const { setIsRegistered } = React.useContext(AuthContext);
+  const [password, setPassword] = React.useState('');
+  const [password2, setPassword2] = React.useState('');
+  const [isValidPassword, setIsValidPassword] = React.useState(false);
+  const [isValidPassword2, setIsValidPassword2] = React.useState(false);
+
+  const handlePasswordChange = (text) => {
+    setPassword(text);
+    setIsValidPassword(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,16}$/.test(text));
+    setIsValidPassword2(password2 === text);
+  };
+
+  const handleChangePassword = (text) => {
+    setPassword2(text);
+    setIsValidPassword2(password === text);
+  };
 
   const handleRegister = () => {
     setIsRegistered(true);
-  };
-
-  handleChangePassword = () => {
-    // Implementar lógica para cambiar la contraseña
   };
 
   return (
@@ -30,14 +41,34 @@ export default function Login({ navigation }) {
       </View>
 
       <View style={styles.formContainer}>
-        <Text style={styles.label}>Código</Text>
-        <TextInput style={styles.input} placeholder="Introduzca el código enviado a su correo: " />
+        <Text style={styles.label}>Nueva contraseña</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Introduzca la nueva contraseña"
+          onChangeText={handlePasswordChange}
+          secureTextEntry={true}
+        />
+        {!isValidPassword && (
+          <Text style={styles.errores}>
+            * La contraseña debe tener entre 8 y 16 caracteres, incluyendo al menos una mayúscula, una minúscula y un
+            número.
+          </Text>
+        )}
+
+        <Text style={styles.label}>Introduce de nuevo la contraseña</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Introduzca la nueva contraseña otra vez"
+          onChangeText={handleChangePassword}
+          secureTextEntry={true}
+        />
+        {!isValidPassword2 && <Text style={styles.errores}>* Las contraseñas no coinciden.</Text>}
 
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
             handleChangePassword();
-            navigation.navigate('ChangePassword2');
+            navigation.navigate('Login');
           }}
         >
           <Text style={styles.buttonText}>Continuar</Text>
@@ -75,6 +106,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     marginBottom: 5,
+    marginTop: 10,
   },
   input: {
     height: 40,
@@ -84,8 +116,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 10,
   },
+  errores: {
+    marginTop: -10,
+    color: 'red',
+    fontSize: 12,
+    marginBottom: 10,
+  },
   button: {
-    backgroundColor: '#E58080',
+    backgroundColor: '#F89F9F',
     paddingVertical: 10,
     borderRadius: 5,
     alignItems: 'center',
@@ -97,7 +135,7 @@ const styles = StyleSheet.create({
   forgotPassword: {
     textAlign: 'right',
     marginTop: 10,
-    color: '#E58080',
+    color: '#F89F9F',
     textDecorationLine: 'underline',
   },
   registerContainer: {
@@ -112,7 +150,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginLeft: 5,
-    color: '#E58080',
+    color: '#F89F9F',
   },
   line: {
     borderBottomColor: '#ccc',

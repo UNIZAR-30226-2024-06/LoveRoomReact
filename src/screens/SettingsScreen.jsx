@@ -11,7 +11,7 @@ export default function SettingsScreen({ navigation }) {
   }
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Estamos en settings</Text>
+      <Text>Estamos en perfil</Text>
       <Button onPress={() => navigation.navigate('Login')} title="Abrir cuenta" />
     </View>
   );

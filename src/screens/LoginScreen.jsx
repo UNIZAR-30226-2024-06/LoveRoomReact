@@ -14,7 +14,7 @@ import AuthContext from '../components/AuthContext';
 import RegisterScreen from './RegisterScreen';
 import { Ionicons } from '@expo/vector-icons'; // Asegúrate de instalar @expo/vector-icons si aún no lo has hecho
 
-export default function Login({ navigation }) {
+export default function LoginScreen({ navigation }) {
   const { setIsRegistered } = React.useContext(AuthContext);
   const [email, setEmail] = React.useState('');
   const [isValidEmail, setIsValidEmail] = React.useState(false);
@@ -93,7 +93,7 @@ export default function Login({ navigation }) {
 
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate('ChangePassword');
+            navigation.navigate('GetEmail');
           }}
         >
           <Text style={styles.forgotPassword}>He olvidado mi contraseña</Text>
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
     marginEnd: 5,
   },
   button: {
-    backgroundColor: '#E58080',
+    backgroundColor: '#F89F9F',
     paddingVertical: 10,
     borderRadius: 5,
     alignItems: 'center',
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   forgotPassword: {
     textAlign: 'right',
     marginTop: 10,
-    color: '#E58080',
+    color: '#F89F9F',
     textDecorationLine: 'underline',
   },
   registerContainer: {
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginLeft: 5,
-    color: '#E58080',
+    color: '#F89F9F',
   },
   line: {
     borderBottomColor: '#ccc',

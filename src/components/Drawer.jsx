@@ -2,7 +2,7 @@ import { createDrawerNavigator } from "@react-navigation/drawer";
 import React from "react";
 import { Image } from "react-native";
 import HomeScreen from "../screens/HomeScreen";
-import SettingsScreen from "../screens/SettingsScreen";
+import ProfileScreen from "../screens/ProfileScreen";
 
 const Drawer = createDrawerNavigator();
 
@@ -19,7 +19,7 @@ export default function DrawerComp() {
             ),
         }}
         />
-        <Drawer.Screen name="Mis salas" component={SettingsScreen} 
+        <Drawer.Screen name="Mis salas" component={ProfileScreen} 
         options={{
           drawerIcon: ({ color, size }) => (
             <Image

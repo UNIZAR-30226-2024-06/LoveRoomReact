@@ -12,26 +12,15 @@ import {
 } from 'react-native';
 import AuthContext from '../components/AuthContext';
 
-export default function Login({ navigation }) {
+export default function GetEmailScreen({ navigation }) {
   const { setIsRegistered } = React.useContext(AuthContext);
-  const [email, setEmail] = React.useState('');
-  const [isValidEmail, setIsValidEmail] = React.useState(false);
-
-  const [password, setPassword] = React.useState('');
-  const [isValidPassword, setIsValidPassword] = React.useState(false);
-
-  const handlePasswordChange = (text) => {
-    setPassword(text);
-    setIsValidPassword(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,16}$/.test(text));
-  };
-
-  const handleEmailChange = (text) => {
-    setEmail(text);
-    setIsValidEmail(/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/.test(text));
-  };
 
   const handleRegister = () => {
     setIsRegistered(true);
+  };
+
+  handleChangePassword = () => {
+    // Implementar lógica para cambiar la contraseña
   };
 
   return (
@@ -41,39 +30,17 @@ export default function Login({ navigation }) {
       </View>
 
       <View style={styles.formContainer}>
-        <Text style={styles.label}>Nombre completo</Text>
-        <TextInput style={styles.input} placeholder="Introduzca su nombre completo" />
-        <Text style={styles.label}>Correo Electrónico</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Introduzca su correo electrónico"
-          onChangeText={handleEmailChange}
-        />
-        {!isValidEmail && <Text style={styles.errores}>* Por favor, introduzca un correo electrónico válido.</Text>}
-
-        <Text style={styles.label}>Contraseña</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Introduzca su contraseña"
-          secureTextEntry={true}
-          onChangeText={handlePasswordChange}
-        />
-        {!isValidPassword && (
-          <Text style={styles.errores}>
-            * La contraseña debe tener entre 8 y 16 caracteres, incluyendo al menos una mayúscula, una minúscula y un
-            número.
-          </Text>
-        )}
+        <Text style={styles.label}>Correo electrónico</Text>
+        <TextInput style={styles.input} placeholder="Introduzca su correo electrónico " />
 
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
-            handleRegister();
-            navigation.navigate('Cuenta');
+            handleChangePassword();
+            navigation.navigate('GetCode');
           }}
-          disabled={!isValidEmail || !isValidPassword}
         >
-          <Text style={styles.buttonText}>Registrarse</Text>
+          <Text style={styles.buttonText}>Continuar</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -108,7 +75,6 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     marginBottom: 5,
-    marginTop: 10,
   },
   input: {
     height: 40,
@@ -121,19 +87,12 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: '#F89F9F',
     paddingVertical: 10,
-    marginVertical: 20,
     borderRadius: 5,
     alignItems: 'center',
   },
   buttonText: {
     color: '#ffffff',
     fontWeight: 'bold',
-  },
-  errores: {
-    marginTop: -10,
-    color: 'red',
-    fontSize: 12,
-    marginBottom: 10,
   },
   forgotPassword: {
     textAlign: 'right',
