@@ -48,11 +48,7 @@ export default function LoginScreen({ navigation }) {
       .then((data) => {
         if (data.token != null) {
           setAuthState((prevState) => ({ ...prevState, isLoggedIn: true, token: data.token }));
-<<<<<<< Updated upstream
           AsyncStorage.setItem('token', data.token);
-=======
-          console.log(authState);
->>>>>>> Stashed changes
         } else {
           alert('Usuario o contraseña incorrectos', data);
           console.log(data);

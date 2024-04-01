@@ -48,15 +48,6 @@ export default function ProfileScreen() {
           <View style={styles.headlineRectangle}>
             <Text style={styles.headlineText}>Acerca de</Text>
           </View>
-<<<<<<< Updated upstream
-          <TouchableOpacity style={styles.faqButton}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Image source={require('../img/ayudar.png')} style={styles.faqIcon} />
-              <Text style={styles.faqText}>Preguntas frecuentes</Text>
-            </View>
-            <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage} />
-          </TouchableOpacity>
-=======
           <View>
             <TouchableOpacity style={styles.faqButton}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -97,7 +88,6 @@ export default function ProfileScreen() {
           <View style={styles.headlineCuentaRect}>
             <Text style={styles.headlineCuentaText}>Cuenta</Text>
           </View>
->>>>>>> Stashed changes
         </View>
       </View>
     </View>

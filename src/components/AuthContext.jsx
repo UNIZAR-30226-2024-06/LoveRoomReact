@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
-<<<<<<< Updated upstream
 import AsyncStorage from '@react-native-async-storage/async-storage';
-=======
->>>>>>> Stashed changes
 
 const AuthContext = React.createContext();
 
@@ -19,7 +16,6 @@ export const AuthProvider = ({ children }) => {
     profilePicture: null,
   });
 
-<<<<<<< Updated upstream
   React.useEffect(() => {
     const checkToken = async () => {
       const token = await AsyncStorage.getItem('token');
@@ -31,8 +27,6 @@ export const AuthProvider = ({ children }) => {
     checkToken();
   }, []);
 
-=======
->>>>>>> Stashed changes
   return <AuthContext.Provider value={{ authState, setAuthState }}>{children}</AuthContext.Provider>;
 };
 
