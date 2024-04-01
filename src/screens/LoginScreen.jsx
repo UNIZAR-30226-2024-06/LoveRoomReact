@@ -13,6 +13,7 @@ import {
 import AuthContext from '../components/AuthContext';
 import RegisterScreen from './RegisterScreen';
 import { Ionicons } from '@expo/vector-icons'; // Asegúrate de instalar @expo/vector-icons si aún no lo has hecho
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen({ navigation }) {
   const { authState, setAuthState } = React.useContext(AuthContext);
@@ -41,13 +42,13 @@ export default function LoginScreen({ navigation }) {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ "correo": email, "contrasena": password }),
+      body: JSON.stringify({ correo: email, contrasena: password }),
     })
       .then((response) => response.json())
       .then((data) => {
         if (data.token != null) {
-          setAuthState(prevState => ({...prevState, isLoggedIn: true, token: data.token }));
-          console.log(authState);
+          setAuthState((prevState) => ({ ...prevState, isLoggedIn: true, token: data.token }));
+          AsyncStorage.setItem('token', data.token);
         } else {
           alert('Usuario o contraseña incorrectos', data);
           console.log(data);
@@ -76,19 +77,19 @@ export default function LoginScreen({ navigation }) {
         <Text style={styles.label}>Contraseña</Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', position: 'relative' }}>
           <TextInput
-            style={[styles.input, { paddingRight: 40 , flex: 1}]} // Añade paddingRight para evitar que el texto se superponga con el botón del ojo
+            style={[styles.input, { paddingRight: 40, flex: 1 }]} // Añade paddingRight para evitar que el texto se superponga con el botón del ojo
             placeholder="Introduzca la nueva contraseña otra vez"
             onChangeText={handlePasswordChange}
             secureTextEntry={hidePassword}
           />
-          <TouchableOpacity 
-            onPress={() => setHidePassword(!hidePassword)} 
-            style={{ 
+          <TouchableOpacity
+            onPress={() => setHidePassword(!hidePassword)}
+            style={{
               position: 'absolute', // Posiciona el botón del ojo en relación con el contenedor View
               right: 20, // Coloca el botón del ojo a 10px del borde derecho del contenedor View
               height: 40,
               top: 0, // Asegúrate de que el botón del ojo tenga la misma altura que el TextInput
-              justifyContent: 'center' // Centra el icono verticalmente dentro del botón del ojo
+              justifyContent: 'center', // Centra el icono verticalmente dentro del botón del ojo
             }}
           >
             <Ionicons name={hidePassword ? 'eye-off' : 'eye'} size={24} color="black" />

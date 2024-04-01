@@ -27,10 +27,7 @@ export default function ProfileScreen() {
             />
           </View>
         </View>
-        <TouchableOpacity 
-          style={styles.editButton}
-          onPress={() => console.log(authState)}
-        >
+        <TouchableOpacity style={styles.editButton} onPress={() => console.log(authState)}>
           <Text style={styles.editButtonText}>Editar perfil</Text>
         </TouchableOpacity>
         <View style={styles.headlineContainer}>
@@ -38,15 +35,12 @@ export default function ProfileScreen() {
             <Text style={styles.headlineText}>Acerca de</Text>
           </View>
           <TouchableOpacity style={styles.faqButton}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Image
-                  source={require('../img/ayudar.png')}
-                  style={styles.faqIcon}
-                />
-                <Text style={styles.faqText}>Preguntas frecuentes</Text>
-              </View>
-              <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage}/>
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Image source={require('../img/ayudar.png')} style={styles.faqIcon} />
+              <Text style={styles.faqText}>Preguntas frecuentes</Text>
+            </View>
+            <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage} />
+          </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -59,13 +53,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   header: {
-    height: screenHeight * 0.18, 
-    backgroundColor: '#F89F9F', 
+    height: screenHeight * 0.18,
+    backgroundColor: '#F89F9F',
   },
   profileInfo: {
     flex: 1,
     alignItems: 'center',
-    marginTop: -screenHeight * 0.16, 
+    marginTop: -screenHeight * 0.16,
   },
   profileText: {
     color: 'white',
@@ -74,20 +68,20 @@ const styles = StyleSheet.create({
   },
   profileImageContainer: {
     marginTop: 6,
-    width: 150, 
-    height: 150, 
+    width: 150,
+    height: 150,
     borderRadius: 75,
     backgroundColor: 'white',
     justifyContent: 'center',
     alignItems: 'center',
   },
   profileImageBorder: {
-    width: 140, 
+    width: 140,
     height: 140,
     borderRadius: 70,
-    borderWidth: 1, 
-    borderColor: 'white', 
-    overflow: 'hidden', 
+    borderWidth: 1,
+    borderColor: 'white',
+    overflow: 'hidden',
   },
   profileImage: {
     width: '100%',
@@ -96,7 +90,7 @@ const styles = StyleSheet.create({
   },
   editButton: {
     marginTop: 14,
-    width: 140, 
+    width: 140,
     height: 40,
     backgroundColor: 'black',
     borderRadius: 10,
@@ -137,7 +131,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     paddingHorizontal: 20, // Añade esta línea para dar un poco de espacio a los lados
   },
-  
+
   faqIcon: {
     width: 25,
     height: 25,
@@ -152,5 +146,5 @@ const styles = StyleSheet.create({
   arrowImage: {
     width: 25,
     height: 25,
-  }
+  },
 });

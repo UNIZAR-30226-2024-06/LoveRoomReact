@@ -33,29 +33,29 @@ export default function Login({ navigation }) {
 
   const handleRegister = () => {
     fetch('http://192.168.1.29:3000/user/create', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      nombre: name,
-      correo: email,
-      contrasena: password,
-    }),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      console.log(data);
-      if (data.success) {
-        navigation.navigate('Login');
-      } else {
-        alert('Error al registrar el usuario');
-        console.log(data);
-      }
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        nombre: name,
+        correo: email,
+        contrasena: password,
+      }),
     })
-    .catch((error) => {
-      console.error('Error:', error);
-    });
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        if (data.success) {
+          navigation.navigate('Login');
+        } else {
+          alert('Error al registrar el usuario');
+          console.log(data);
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
   };
 
   return (
@@ -66,7 +66,11 @@ export default function Login({ navigation }) {
 
       <View style={styles.formContainer}>
         <Text style={styles.label}>Nombre completo</Text>
-        <TextInput style={styles.input} placeholder="Introduzca su nombre completo" onChangeText={(text) => setName(text)} />
+        <TextInput
+          style={styles.input}
+          placeholder="Introduzca su nombre completo"
+          onChangeText={(text) => setName(text)}
+        />
         <Text style={styles.label}>Correo Electrónico</Text>
         <TextInput
           style={styles.input}

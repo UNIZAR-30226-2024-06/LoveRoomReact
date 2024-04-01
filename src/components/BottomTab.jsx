@@ -8,18 +8,31 @@ import HomeScreen from '../screens/HomeScreen';
 // import AccountScreen from '../screens/AccountScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import { Image } from 'react-native';
-
+import AuthContext from './AuthContext';
 
 const Tab = createBottomTabNavigator();
 
-export default function BottomTab({ initialScreen}) {
+export default function BottomTab({ initialScreen }) {
+  const { authState, setAuthState } = React.useContext(AuthContext);
+
+  const ImageProfile = (size, color) => {
+    if (authState.isLoggedIn) {
+      return (
+        <Image source={require('../img/perfil-vacio.png')} style={{ width: size, height: size, tintColor: color }} />
+      );
+    } else {
+      return (
+        <Image source={require('../img/circulo-cruzado.png')} style={{ width: size, height: size, tintColor: color }} />
+      );
+    }
+  };
+
   return (
     <Tab.Navigator
       initialRouteName={initialScreen}
       screenOptions={{
         tabBarActiveTintColor: 'black',
       }}
-      
     >
       <Tab.Screen
         name="Home"
@@ -30,7 +43,7 @@ export default function BottomTab({ initialScreen}) {
           ),
           headerTitleAlign: 'center',
           headerTitle: () => (
-            <Image source={require('../img/logo.png')} style={{ width: 200, height: 32, backgroundColor: '#F89F9F' }} /> 
+            <Image source={require('../img/logo.png')} style={{ width: 200, height: 32, backgroundColor: '#F89F9F' }} />
           ),
           headerStyle: {
             backgroundColor: '#F89F9F',
@@ -50,7 +63,7 @@ export default function BottomTab({ initialScreen}) {
           ),
           headerTitleAlign: 'center',
           headerTitle: () => (
-            <Image source={require('../img/logo.png')} style={{ width: 200, height: 32, backgroundColor: '#F89F9F' }} /> 
+            <Image source={require('../img/logo.png')} style={{ width: 200, height: 32, backgroundColor: '#F89F9F' }} />
           ),
           headerStyle: {
             backgroundColor: '#F89F9F',
@@ -62,12 +75,11 @@ export default function BottomTab({ initialScreen}) {
         name="Cuenta"
         component={ProfileScreen}
         options={{
-          tabBarIcon: ({ focused, color, size }) => (
-            <Image source={require('../img/MisSalasTab.png')} style={{ width: 25, height: 18, tintColor: color }} />
+          tabBarIcon: ({ focused, color, size }) =>
+            ImageProfile(size, color),
             //PEDIR IMAGEN A BACKEND
-          ),
           headerTitle: () => (
-            <Image source={require('../img/logo.png')} style={{ width: 200, height: 32, backgroundColor: '#F89F9F' }} /> 
+            <Image source={require('../img/logo.png')} style={{ width: 200, height: 32, backgroundColor: '#F89F9F' }} />
           ),
           headerStyle: {
             backgroundColor: '#F89F9F',
@@ -75,7 +87,6 @@ export default function BottomTab({ initialScreen}) {
           headerTitleAlign: 'center',
           headerShadowVisible: false,
         }}
-        
       />
     </Tab.Navigator>
   );
