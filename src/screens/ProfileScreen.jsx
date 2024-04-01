@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity } from 'react-native';
+import React, { useRef } from 'react';
+import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import AuthContext from '../components/AuthContext';
 import NotRegisteredScreen from './NotRegisteredScreen';
@@ -8,6 +8,16 @@ const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
 
 export default function ProfileScreen() {
+  const scrollViewRef = useRef(null); // Referencia a ScrollView
+
+  const handleScroll = (event) => {
+    const { y } = event.nativeEvent.contentOffset;
+    if (y < 0) {
+      // Si el usuario intenta desplazarse hacia abajo, establecer el desplazamiento en 0
+      scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: false });
+    }
+  };
+  
   const { authState } = React.useContext(AuthContext);
 
   // if (!authState.isLoggedIn) {
@@ -15,7 +25,12 @@ export default function ProfileScreen() {
   // }
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+    style={styles.container}
+    ref={scrollViewRef}
+    scrollEventThrottle={16} // Controla con qué frecuencia se llamará al evento onScroll
+    onScroll={handleScroll} // Manejador para el evento de desplazamiento
+  >
       <View style={styles.header} />
       <View style={styles.profileInfo}>
         <Text style={styles.profileText}>Perfil</Text>
@@ -83,14 +98,29 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Nuevo headlineContainer para la sección "Cuenta" */}
         <View style={styles.headlineCuentaCont}>
           <View style={styles.headlineCuentaRect}>
             <Text style={styles.headlineCuentaText}>Cuenta</Text>
           </View>
+          <TouchableOpacity style={styles.faqButton}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Image source={require('../img/salida.png')} style={styles.faqIcon} />
+                <Text style={styles.faqText}>Cerrar sesión</Text>
+              </View>
+              <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage} />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.faqButton}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Image source={require('../img/borrar.png')} style={styles.faqIcon} />
+                <Text style={styles.faqText}>Borrar cuenta</Text>
+              </View>
+              <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage} />
+            </TouchableOpacity>
+
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -100,13 +130,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   header: {
-    height: screenHeight * 0.18,
+    height: screenHeight * 0.17,
     backgroundColor: '#F89F9F',
   },
   profileInfo: {
     flex: 1,
     alignItems: 'center',
-    marginTop: -screenHeight * 0.16,
+    marginTop: -screenHeight * 0.17,
   },
   profileText: {
     color: 'white',
