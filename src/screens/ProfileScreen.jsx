@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity } from 'react-native';
+import Icon from 'react-native-vector-icons/Feather';
 
 const screenHeight = Dimensions.get('window').height;
 
@@ -22,8 +23,16 @@ export default function ProfileScreen() {
         </TouchableOpacity>
         <View style={styles.headlineContainer}>
           <View style={styles.headlineRectangle}>
-            <Text style={styles.headlineText}>Mini Headline</Text>
+            <Text style={styles.headlineText}>Acerca de</Text>
           </View>
+          <TouchableOpacity style={styles.faqButton}>
+              <Image
+                source={require('../img/ayudar.png')}
+                style={styles.faqIcon}
+              />
+              <Text style={styles.faqText}>Preguntas frecuentes</Text>
+              <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage}/>
+            </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -96,13 +105,38 @@ const styles = StyleSheet.create({
   headlineRectangle: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
+    justifyContent: 'space-between', // Para distribuir los elementos horizontalmente
     paddingHorizontal: 20,
   },
 
   headlineText: {
+    paddingTop: 8,
     color: 'black',
     fontSize: 16,
     fontWeight: 'bold',
   },
+
+  faqButton: {
+    marginLeft: 20,
+    paddingTop: 25,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  faqIcon: {
+    width: 25,
+    height: 25,
+    marginRight: 5,
+  },
+
+  faqText: {
+    fontSize: 18,
+    marginLeft: 5,
+  },
+
+  arrowImage: {
+    width: 25,
+    height: 25,
+    marginLeft: 150,
+  }
 });
