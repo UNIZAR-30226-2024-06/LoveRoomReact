@@ -7,7 +7,7 @@ import NotRegisteredScreen from './NotRegisteredScreen';
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
 
-export default function ProfileScreen() {
+export default function ProfileScreenn({ navigation }) {
   const scrollViewRef = useRef(null); // Referencia a ScrollView
 
   const handleScroll = (event) => {
@@ -42,7 +42,8 @@ export default function ProfileScreen() {
             />
           </View>
         </View>
-        <TouchableOpacity style={styles.editButton} onPress={() => console.log(authState)}>
+        {/* <TouchableOpacity style={styles.editButton} onPress={() => console.log(authState)}> */}
+        <TouchableOpacity style={styles.editButton} onPress={() => { navigation.navigate('EditProfile');}}>
           <Text style={styles.editButtonText}>Editar perfil</Text>
         </TouchableOpacity>
 

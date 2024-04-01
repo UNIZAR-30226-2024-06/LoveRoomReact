@@ -11,6 +11,7 @@ import Drawer from './Drawer';
 import { useWindowDimensions } from 'react-native';
 import GetEmailScreen from '../screens/GetEmailScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import EditProfileScreen from '../screens/editProfile';
 
 const Stack = createStackNavigator();
 
@@ -35,6 +36,7 @@ export default function StackNavigator() {
         <Stack.Screen name="GetCode" component={GetCodeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="GetEmail" component={GetEmailScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="EditProfile" component={EditProfileScreen} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
