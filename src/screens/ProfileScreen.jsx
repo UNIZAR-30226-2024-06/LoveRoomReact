@@ -1,10 +1,18 @@
 import React from 'react';
 import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
+import AuthContext from '../components/AuthContext';
+import NotRegisteedScreen from './NotRegisteredScreen';
 
 const screenHeight = Dimensions.get('window').height;
 
 export default function ProfileScreen() {
+  const { authState } = React.useContext(AuthContext);
+
+  if (!authState.isLoggedIn) {
+    return <NotRegisteredScreen />;
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.header} />
@@ -18,7 +26,10 @@ export default function ProfileScreen() {
             />
           </View>
         </View>
-        <TouchableOpacity style={styles.editButton}>
+        <TouchableOpacity 
+          style={styles.editButton}
+          onPress={() => console.log(authState)}
+        >
           <Text style={styles.editButtonText}>Editar perfil</Text>
         </TouchableOpacity>
         <View style={styles.headlineContainer}>

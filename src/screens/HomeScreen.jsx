@@ -6,9 +6,9 @@ import YouTubeIframe from 'react-native-youtube-iframe';
 import YoutubeSearch from '../components/YoutubeSearch';
 
 export default function HomeScreen({ navigation }) {
-  const { isRegistered } = React.useContext(AuthContext);
+  const { authState } = React.useContext(AuthContext);
 
-  if (!isRegistered) {
+  if (!authState.isLoggedIn) {
     return <NotRegisteredScreen />;
   }
   return (

@@ -27,7 +27,13 @@ export default function BottomTab() {
           tabBarIcon: ({ color, size }) => (
             <Image source={require('../img/HomeTab.png')} style={{ width: size, height: size, tintColor: color }} />
           ),
-          headerShown: false,
+          headerTitleAlign: 'center',
+          headerTitle: () => (
+            <Image source={require('../img/logo.png')} style={{ width: 200, height: 32, backgroundColor: '#F89F9F' }} /> 
+          ),
+          headerStyle: {
+            backgroundColor: '#F89F9F',
+          },
         }}
       />
       <Tab.Screen
@@ -40,7 +46,13 @@ export default function BottomTab() {
               style={{ width: size, height: size, tintColor: color }}
             />
           ),
-          headerShown: false,
+          headerTitleAlign: 'center',
+          headerTitle: () => (
+            <Image source={require('../img/logo.png')} style={{ width: 200, height: 32, backgroundColor: '#F89F9F' }} /> 
+          ),
+          headerStyle: {
+            backgroundColor: '#F89F9F',
+          },
         }}
       />
       <Tab.Screen
@@ -57,6 +69,7 @@ export default function BottomTab() {
           headerStyle: {
             backgroundColor: '#F89F9F',
           },
+          headerTitleAlign: 'center',
         }}
       />
     </Tab.Navigator>

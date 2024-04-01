@@ -15,7 +15,7 @@ import RegisterScreen from './RegisterScreen';
 import { Ionicons } from '@expo/vector-icons'; // Asegúrate de instalar @expo/vector-icons si aún no lo has hecho
 
 export default function LoginScreen({ navigation }) {
-  const { setIsRegistered } = React.useContext(AuthContext);
+  const { authState, setAuthState } = React.useContext(AuthContext);
   const [email, setEmail] = React.useState('');
   const [isValidEmail, setIsValidEmail] = React.useState(false);
 
@@ -25,6 +25,7 @@ export default function LoginScreen({ navigation }) {
   const [hidePassword, setHidePassword] = useState(true);
 
   const handlePasswordChange = (text) => {
+    console.log(authState);
     setPassword(text);
     setIsValidPassword(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,16}$/.test(text));
   };
@@ -35,7 +36,26 @@ export default function LoginScreen({ navigation }) {
   };
 
   const handleLogin = () => {
-    setIsRegistered(true);
+    fetch('http://192.168.1.29:3000/user/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ "correo": email, "contrasena": password }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.token != null) {
+          setAuthState(prevState => ({...prevState, isLoggedIn: true, token: data.token }));
+          console.log(authState);
+        } else {
+          alert('Usuario o contraseña incorrectos', data);
+          console.log(data);
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
   };
 
   return (

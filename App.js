@@ -5,13 +5,12 @@ import { ScrollView } from 'react-native';
 import Login from './src/screens/LoginScreen';
 import { View } from 'react-native';
 import StackNavigator from './src/components/StackNavigator';
-import AuthContext from './src/components/AuthContext';
+import {AuthProvider} from './src/components/AuthContext';
 
 export default function App() {
-  const [isRegistered, setIsRegistered] = React.useState(false);
 
   return (
-    <AuthContext.Provider value={{ isRegistered, setIsRegistered }}>
+    <AuthProvider >
       <View
         style={{
           flex: 1,
@@ -23,6 +22,6 @@ export default function App() {
           <SafeArea />
       </ScrollView>*/}
       </View>
-    </AuthContext.Provider>
+    </AuthProvider>
   );
 }
