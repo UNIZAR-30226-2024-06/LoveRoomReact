@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState, useContext } from 'react';
 import {
   ScrollView,
   View,
@@ -9,20 +9,56 @@ import {
   StyleSheet,
   Platform,
   StatusBar,
+  Dimensions,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
+import * as ImagePicker from 'expo-image-picker';
 import AuthContext from '../components/AuthContext';
+import * as FileSystem from 'expo-file-system';
 
-export default function Login({ navigation }) {
-  const { setIsRegistered } = React.useContext(AuthContext);
-  const [date, setDate] = React.useState(new Date());
-  const [show, setShow] = React.useState(false);
-  const [gender, setGender] = React.useState('Seleccione su género');
-  const [sexualPreference, setSexualPreference] = React.useState('');
-  const [agePreferenceStart, setAgePreferenceStart] = React.useState(18);
-  const [agePreferenceEnd, setAgePreferenceEnd] = React.useState(30);
-  const [description, setDescription] = React.useState('');
+const screenHeight = Dimensions.get('window').height;
+const screenWidth = Dimensions.get('window').width;
+
+export default function RegisterPreferencesScreen({ navigation }) {
+  const { setIsRegistered } = useContext(AuthContext);
+  const [date, setDate] = useState(new Date());
+  const [show, setShow] = useState(false);
+  const [gender, setGender] = useState('Seleccione su género');
+  const [sexualPreference, setSexualPreference] = useState('');
+  const [agePreferenceStart, setAgePreferenceStart] = useState(18);
+  const [agePreferenceEnd, setAgePreferenceEnd] = useState(30);
+  const [description, setDescription] = useState('');
+  const [profileImage, setProfileImage] = useState('');
+  const [isProfileImageSelected, setIsProfileImageSelected] = useState(false);
+
+  const pickImage = async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    // console.log(result);
+
+    if (!result.cancelled) {
+      setProfileImage(result.assets[0].uri);
+      setIsProfileImageSelected(true);
+      //   TODO: Guardar imagen en el servidor y/o en local con expo-file-system
+      //   console.log('\n\n\n imagen prof', result.assets[0].uri, profileImage);
+      // Guarda la imagen en el almacenamiento local
+      const fileName = FileSystem.documentDirectory + 'img/userProfileImage.jpg';
+      console.log('\n\nfileName', fileName);
+      await FileSystem.moveAsync({
+        from: result.assets[0].uri,
+        to: fileName,
+      });
+
+      //   setImage(fileName);
+    }
+  };
 
   const showDatepicker = () => {
     setShow(true);
@@ -36,13 +72,29 @@ export default function Login({ navigation }) {
 
   return (
     <ScrollView style={styles.container}>
-      <View style={[styles.logoContainer, { marginBottom: -90 }]}>
-        <Image style={styles.logo} source={require('../img/logoTexto.png')} />
+      <View style={styles.header} />
+      <View style={styles.profileInfo}>
+        <Text style={styles.profileText}>Completar perfil</Text>
+        <View style={styles.profileImageContainer}>
+          <View style={styles.profileImageBorder}>
+            <Image
+              //   source={require('../img/profileImage.jpg')} // Ruta de la imagen de perfil
+              style={styles.profileImage}
+              source={isProfileImageSelected ? { uri: profileImage } : require('../img/profileImage.jpg')}
+            />
+          </View>
+        </View>
       </View>
 
       <View style={styles.formContainer}>
+        <View style={styles.container}>
+          <TouchableOpacity onPress={pickImage} style={styles.button}>
+            <Text style={styles.buttonText}>Cambiar imagen de perfil</Text>
+          </TouchableOpacity>
+        </View>
+
         <Text style={styles.label}>Fecha de nacimiento</Text>
-        <TouchableOpacity onPress={showDatepicker} style={styles.input}>
+        <TouchableOpacity onPress={showDatepicker} style={styles.dateInput}>
           <Text>{date.toDateString()}</Text>
         </TouchableOpacity>
         {show && (
@@ -51,7 +103,7 @@ export default function Login({ navigation }) {
             value={date}
             mode={'date'}
             is24Hour={true}
-            display="default"
+            display="DD/MM/YYYY"
             onChange={onChange}
           />
         )}
@@ -74,12 +126,16 @@ export default function Login({ navigation }) {
           onValueChange={(itemValue, itemIndex) => setSexualPreference(itemValue)}
         >
           <Picker.Item label="Seleccione su preferencia sexual" value="" />
-          <Picker.Item label="Heterosexual" value="heterosexual" />
+          <Picker.Item label="Hombres" value="men" />
+          <Picker.Item label="Mujeres" value="women" />
+          <Picker.Item label="Ambos" value="both" />
+          <Picker.Item label="Todos" value="all" />
+          <Picker.Item label="Otros" value="others" />
+          {/* <Picker.Item label="Heterosexual" value="heterosexual" />
           <Picker.Item label="Homosexual" value="homosexual" />
           <Picker.Item label="Bisexual" value="bisexual" />
-          <Picker.Item label="Asexual" value="asexual" />
           <Picker.Item label="Pansexual" value="pansexual" />
-          <Picker.Item label="Otro" value="other" />
+          <Picker.Item label="Otro" value="other" /> */}
         </Picker>
 
         <Text style={styles.label}>Preferencia de edad</Text>
@@ -107,7 +163,7 @@ export default function Login({ navigation }) {
 
         <Text style={styles.label}>Descripción</Text>
         <TextInput
-          style={styles.input}
+          style={styles.description}
           placeholder="Introduce tu descripción aquí"
           multiline={true}
           numberOfLines={4}
@@ -117,7 +173,7 @@ export default function Login({ navigation }) {
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
-            handleRegister();
+            // TODO: handleRegister();
             navigation.navigate('Cuenta');
           }}
         >
@@ -133,19 +189,42 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  logoContainer: {
+
+  header: {
+    height: screenHeight * 0.273,
+    backgroundColor: '#F89F9F',
+  },
+  profileInfo: {
+    flex: 1,
     alignItems: 'center',
-    paddingTop: 130,
+    marginTop: -screenHeight * 0.2,
   },
-  logo: {
-    width: 200,
-    height: 200,
-    resizeMode: 'contain',
-  },
-  logoText: {
-    fontSize: 24,
+  profileText: {
+    color: 'white',
+    fontSize: 20,
     fontWeight: 'bold',
-    marginTop: 10,
+  },
+  profileImageContainer: {
+    marginTop: 6,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  profileImageBorder: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    borderWidth: 1,
+    borderColor: 'white',
+    overflow: 'hidden',
+  },
+  profileImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 70,
   },
   formContainer: {
     backgroundColor: '#ffffff',
@@ -168,6 +247,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 10,
   },
+  dateInput: {
+    height: 40,
+    borderColor: '#cccccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+    alignContent: 'center',
+  },
   ageInput: {
     height: 40,
     borderColor: '#cccccc',
@@ -176,6 +264,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 10,
     width: '45%',
+  },
+  description: {
+    height: 240,
+    borderColor: '#cccccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+    textAlignVertical: 'top',
+    padding: 10,
   },
   button: {
     backgroundColor: '#F89F9F',
@@ -187,6 +285,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#ffffff',
     fontWeight: 'bold',
+    fontSize: 16,
   },
   errores: {
     marginTop: -10,
