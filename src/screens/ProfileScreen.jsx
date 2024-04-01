@@ -2,7 +2,6 @@ import React, { useRef } from 'react';
 import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import AuthContext from '../components/AuthContext';
-import NotRegisteredScreen from './NotRegisteredScreen';
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
@@ -17,20 +16,21 @@ export default function ProfileScreenn({ navigation }) {
       scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: false });
     }
   };
-  
+
   const { authState } = React.useContext(AuthContext);
 
-  // if (!authState.isLoggedIn) {
-  //   return <NotRegisteredScreen />;
-  // }
+  if (!authState.isLoggedIn) {
+    // return <NotRegisteredScreen />;
+    navigation.navigate('RegisterPreferences');
+  }
 
   return (
     <ScrollView
-    style={styles.container}
-    ref={scrollViewRef}
-    scrollEventThrottle={16} // Controla con qué frecuencia se llamará al evento onScroll
-    onScroll={handleScroll} // Manejador para el evento de desplazamiento
-  >
+      style={styles.container}
+      ref={scrollViewRef}
+      scrollEventThrottle={16} // Controla con qué frecuencia se llamará al evento onScroll
+      onScroll={handleScroll} // Manejador para el evento de desplazamiento
+    >
       <View style={styles.header} />
       <View style={styles.profileInfo}>
         <Text style={styles.profileText}>Perfil</Text>
@@ -43,7 +43,12 @@ export default function ProfileScreenn({ navigation }) {
           </View>
         </View>
         {/* <TouchableOpacity style={styles.editButton} onPress={() => console.log(authState)}> */}
-        <TouchableOpacity style={styles.editButton} onPress={() => { navigation.navigate('EditProfile');}}>
+        <TouchableOpacity
+          style={styles.editButton}
+          onPress={() => {
+            navigation.navigate('EditProfile');
+          }}
+        >
           <Text style={styles.editButtonText}>Editar perfil</Text>
         </TouchableOpacity>
 
@@ -104,21 +109,20 @@ export default function ProfileScreenn({ navigation }) {
             <Text style={styles.headlineCuentaText}>Cuenta</Text>
           </View>
           <TouchableOpacity style={styles.faqButton}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Image source={require('../img/salida.png')} style={styles.faqIcon} />
-                <Text style={styles.faqText}>Cerrar sesión</Text>
-              </View>
-              <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage} />
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Image source={require('../img/salida.png')} style={styles.faqIcon} />
+              <Text style={styles.faqText}>Cerrar sesión</Text>
+            </View>
+            <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage} />
+          </TouchableOpacity>
 
-            <TouchableOpacity style={styles.faqButton}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Image source={require('../img/borrar.png')} style={styles.faqIcon} />
-                <Text style={styles.faqText}>Borrar cuenta</Text>
-              </View>
-              <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage} />
-            </TouchableOpacity>
-
+          <TouchableOpacity style={styles.faqButton}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Image source={require('../img/borrar.png')} style={styles.faqIcon} />
+              <Text style={styles.faqText}>Borrar cuenta</Text>
+            </View>
+            <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage} />
+          </TouchableOpacity>
         </View>
       </View>
     </ScrollView>
