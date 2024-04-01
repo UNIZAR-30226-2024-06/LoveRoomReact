@@ -8,9 +8,9 @@ import YoutubeSearch from '../components/YoutubeSearch';
 export default function HomeScreen({ navigation }) {
   const { authState } = React.useContext(AuthContext);
 
-  if (!authState.isLoggedIn) {
-    return <NotRegisteredScreen />;
-  }
+  // if (!authState.isLoggedIn) {
+  //   return <NotRegisteredScreen />;
+  // }
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
       <YouTubeIframe videoId={'TQtT9QgWjIY'} height={220} width={'100%'} />

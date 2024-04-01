@@ -8,11 +8,15 @@ import HomeScreen from '../screens/HomeScreen';
 // import AccountScreen from '../screens/AccountScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import { Image } from 'react-native';
+<<<<<<< Updated upstream
 import AuthContext from './AuthContext';
+=======
+>>>>>>> Stashed changes
 
 const Tab = createBottomTabNavigator();
 
 export default function BottomTab({ initialScreen }) {
+<<<<<<< Updated upstream
   const { authState, setAuthState } = React.useContext(AuthContext);
 
   const ImageProfile = (size, color) => {
@@ -27,6 +31,8 @@ export default function BottomTab({ initialScreen }) {
     }
   };
 
+=======
+>>>>>>> Stashed changes
   return (
     <Tab.Navigator
       initialRouteName={initialScreen}
