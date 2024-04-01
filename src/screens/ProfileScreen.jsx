@@ -2,9 +2,10 @@ import React from 'react';
 import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import AuthContext from '../components/AuthContext';
-import NotRegisteedScreen from './NotRegisteredScreen';
+import NotRegisteredScreen from './NotRegisteredScreen';
 
 const screenHeight = Dimensions.get('window').height;
+const screenWidth = Dimensions.get('window').width;
 
 export default function ProfileScreen() {
   const { authState } = React.useContext(AuthContext);
@@ -37,11 +38,13 @@ export default function ProfileScreen() {
             <Text style={styles.headlineText}>Acerca de</Text>
           </View>
           <TouchableOpacity style={styles.faqButton}>
-              <Image
-                source={require('../img/ayudar.png')}
-                style={styles.faqIcon}
-              />
-              <Text style={styles.faqText}>Preguntas frecuentes</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Image
+                  source={require('../img/ayudar.png')}
+                  style={styles.faqIcon}
+                />
+                <Text style={styles.faqText}>Preguntas frecuentes</Text>
+              </View>
               <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage}/>
             </TouchableOpacity>
         </View>
@@ -128,12 +131,13 @@ const styles = StyleSheet.create({
   },
 
   faqButton: {
-    marginLeft: 20,
-    paddingTop: 25,
     flexDirection: 'row',
+    justifyContent: 'space-between', // Añade esta línea
     alignItems: 'center',
+    paddingVertical: 20,
+    paddingHorizontal: 20, // Añade esta línea para dar un poco de espacio a los lados
   },
-
+  
   faqIcon: {
     width: 25,
     height: 25,
@@ -148,6 +152,5 @@ const styles = StyleSheet.create({
   arrowImage: {
     width: 25,
     height: 25,
-    marginLeft: 150,
   }
 });

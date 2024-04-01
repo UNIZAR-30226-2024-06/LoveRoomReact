@@ -12,13 +12,14 @@ import { Image } from 'react-native';
 
 const Tab = createBottomTabNavigator();
 
-export default function BottomTab() {
+export default function BottomTab({ initialScreen}) {
   return (
     <Tab.Navigator
-      initialRouteName="Home"
+      initialRouteName={initialScreen}
       screenOptions={{
         tabBarActiveTintColor: 'black',
       }}
+      
     >
       <Tab.Screen
         name="Home"
@@ -34,6 +35,7 @@ export default function BottomTab() {
           headerStyle: {
             backgroundColor: '#F89F9F',
           },
+          headerShadowVisible: false,
         }}
       />
       <Tab.Screen
@@ -53,6 +55,7 @@ export default function BottomTab() {
           headerStyle: {
             backgroundColor: '#F89F9F',
           },
+          headerShadowVisible: false,
         }}
       />
       <Tab.Screen
@@ -70,7 +73,9 @@ export default function BottomTab() {
             backgroundColor: '#F89F9F',
           },
           headerTitleAlign: 'center',
+          headerShadowVisible: false,
         }}
+        
       />
     </Tab.Navigator>
   );

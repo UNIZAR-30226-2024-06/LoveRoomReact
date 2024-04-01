@@ -6,8 +6,30 @@ import Login from './src/screens/LoginScreen';
 import { View } from 'react-native';
 import StackNavigator from './src/components/StackNavigator';
 import {AuthProvider} from './src/components/AuthContext';
+import { check } from 'prettier';
 
 export default function App() {
+  const [authState, setAuthState] = React.useState({
+    isLoggedIn: false,
+    userName: null,
+    token: null,
+    email: null,
+    birthDate: null,
+    gender: null,
+    agePreference: null,
+    genderPreference: null,
+    profilePicture: null,
+  });
+
+  React.useEffect(() => {
+    const checkToken = async() => {
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        setAuthState(prevState => ({ ...prevState, isLoggedIn: true, token: token }));
+      }
+    };
+    checkToken();
+  }, []);
 
   return (
     <AuthProvider >

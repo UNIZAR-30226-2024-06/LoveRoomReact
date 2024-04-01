@@ -6,9 +6,9 @@ import ProfileScreen from "../screens/ProfileScreen";
 
 const Drawer = createDrawerNavigator();
 
-export default function DrawerComp() {
+export default function DrawerComp({initialScreen}) {
     return (
-        <Drawer.Navigator>
+        <Drawer.Navigator initialRouteName={initialScreen}>
         <Drawer.Screen name="Home" component={HomeScreen}
         options={{
             drawerIcon: ({color, size}) => (
@@ -28,7 +28,7 @@ export default function DrawerComp() {
             />
           ),
         }}/>
-        <Drawer.Screen name="Cuenta" component={SettingsScreen} 
+        <Drawer.Screen name="Cuenta" component={ProfileScreen} 
         options={{
           drawerIcon: ({ color, size }) => (
             <Image

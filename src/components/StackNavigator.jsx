@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect }  from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from '../screens/LoginScreen';
 import { NavigationContainer } from '@react-navigation/native';
@@ -12,6 +12,7 @@ import { useWindowDimensions } from 'react-native';
 import GetEmailScreen from '../screens/GetEmailScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 
+
 const Stack = createStackNavigator();
 
 export default function StackNavigator() {
@@ -21,7 +22,7 @@ export default function StackNavigator() {
     return (
         <NavigationContainer>
             <Stack.Navigator>
-                <Stack.Screen name="Account" component={isLandscape ? Drawer : BottomTab} options={{ headerShown: false }}/>
+                <Stack.Screen name="Account" component={isLandscape ? () => <Drawer initialScreen={"Cuenta"} /> : () => <BottomTab initialScreen={"Cuenta"} />} options={{ headerShown: false }}/>
                 <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }}/>
                 <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }}/>
                 <Stack.Screen name="NotRegistered" component={NotRegisteredScreen} options={{ headerShown: false }}/>
