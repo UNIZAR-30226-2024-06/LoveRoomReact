@@ -15,6 +15,7 @@ import AuthContext from '../components/AuthContext';
 export default function Login({ navigation }) {
   const { setIsRegistered } = React.useContext(AuthContext);
   const [email, setEmail] = React.useState('');
+  const [name, setName] = React.useState('');
   const [isValidEmail, setIsValidEmail] = React.useState(false);
 
   const [password, setPassword] = React.useState('');
@@ -31,7 +32,30 @@ export default function Login({ navigation }) {
   };
 
   const handleRegister = () => {
-    setIsRegistered(true);
+    fetch('http://192.168.1.29:3000/user/create', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      nombre: name,
+      correo: email,
+      contrasena: password,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log(data);
+      if (data.success) {
+        navigation.navigate('Login');
+      } else {
+        alert('Error al registrar el usuario');
+        console.log(data);
+      }
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+    });
   };
 
   return (
@@ -42,7 +66,7 @@ export default function Login({ navigation }) {
 
       <View style={styles.formContainer}>
         <Text style={styles.label}>Nombre completo</Text>
-        <TextInput style={styles.input} placeholder="Introduzca su nombre completo" />
+        <TextInput style={styles.input} placeholder="Introduzca su nombre completo" onChangeText={(text) => setName(text)} />
         <Text style={styles.label}>Correo Electrónico</Text>
         <TextInput
           style={styles.input}
