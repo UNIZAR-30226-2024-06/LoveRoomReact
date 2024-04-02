@@ -20,14 +20,15 @@ export default function ProfileScreen({ navigation }) {
     }
   };
 
-  const userProfileImage = FileSystem.documentDirectory + 'img/userProfileImage.jpg';
+  const userProfileImage = FileSystem.documentDirectory + 'userProfileImage.jpeg';
   // isProfileImageSelected = FileSystem.getInfoAsync(userProfileImage);
   // console.log('isProfileImageSelected', isProfileImageSelected);
   const checkProfileImage = async () => {
+    // console.log('userProfileImage', userProfileImage);
     const fileInfo = await FileSystem.getInfoAsync(userProfileImage);
-    console.log('fileInfo', fileInfo);
+    // console.log('fileInfo', fileInfo);
     setIsProfileImageSelected(fileInfo.exists);
-    console.log('isProfileImageSelected', fileInfo.exists);
+    // console.log('isProfileImageSelected', fileInfo.exists);
   };
 
   useEffect(() => {

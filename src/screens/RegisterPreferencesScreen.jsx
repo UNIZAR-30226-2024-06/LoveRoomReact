@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import {
   ScrollView,
   View,
@@ -30,7 +30,19 @@ export default function RegisterPreferencesScreen({ navigation }) {
   const [agePreferenceEnd, setAgePreferenceEnd] = useState(30);
   const [description, setDescription] = useState('');
   const [profileImage, setProfileImage] = useState('');
-  const [isProfileImageSelected, setIsProfileImageSelected] = useState(false);
+  const [isProfileImageSelected, setIsProfileImageSelected] = useState();
+  const { StorageAccessFramework } = FileSystem;
+
+  const fileName = FileSystem.documentDirectory + 'userProfileImage.jpeg';
+  const checkProfileImage = async () => {
+    fileInfo = await FileSystem.getInfoAsync(fileName);
+    console.log('fileInfo', fileInfo);
+    setProfileImage(fileName);
+    setIsProfileImageSelected(fileInfo.exists);
+  };
+  useEffect(() => {
+    checkProfileImage();
+  }, []);
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
@@ -44,19 +56,21 @@ export default function RegisterPreferencesScreen({ navigation }) {
     // console.log(result);
 
     if (!result.cancelled) {
-      setProfileImage(result.assets[0].uri);
-      setIsProfileImageSelected(true);
-      //   TODO: Guardar imagen en el servidor y/o en local con expo-file-system
-      //   console.log('\n\n\n imagen prof', result.assets[0].uri, profileImage);
-      // Guarda la imagen en el almacenamiento local
-      const fileName = FileSystem.documentDirectory + 'img/userProfileImage.jpg';
-      console.log('\n\nfileName', fileName);
+      // TODO: Guardar imagen en el servidor
+      // Guarda la imagen en el almacenamiento local con expo-file-system
+      // TODO: conversión de tipos
+
+      //   console.log('\n\nfileName', fileName);
+      //   console.log('result.assets[0].uri', result.assets[0].uri);
+
       await FileSystem.moveAsync({
         from: result.assets[0].uri,
         to: fileName,
       });
-
-      //   setImage(fileName);
+      //   fileInfo = await FileSystem.getInfoAsync(fileName);
+      //   console.log('fileInfo dentro', fileInfo);
+      setProfileImage(fileName);
+      setIsProfileImageSelected(true);
     }
   };
 
