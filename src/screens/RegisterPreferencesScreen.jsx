@@ -188,7 +188,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
           style={styles.button}
           onPress={() => {
             // TODO: handleRegister();
-            navigation.navigate('Cuenta');
+            navigation.navigate('UserGuidelines');
           }}
         >
           <Text style={styles.buttonText}>Registrarse</Text>
