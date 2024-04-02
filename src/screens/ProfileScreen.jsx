@@ -39,7 +39,7 @@ export default function ProfileScreen({ navigation }) {
 
   if (!authState.isLoggedIn) {
     // return <NotRegisteredScreen />;
-    navigation.navigate('RegisterPreferences');
+    // navigation.navigate('RegisterPreferences');
   }
 
   return (
