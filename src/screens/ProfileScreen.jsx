@@ -19,12 +19,28 @@ export default function ProfileScreen({ navigation }) {
       scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: false });
     }
   };
-  
+
+  const userProfileImage = FileSystem.documentDirectory + 'userProfileImage.jpeg';
+  // isProfileImageSelected = FileSystem.getInfoAsync(userProfileImage);
+  // console.log('isProfileImageSelected', isProfileImageSelected);
+  const checkProfileImage = async () => {
+    // console.log('userProfileImage', userProfileImage);
+    const fileInfo = await FileSystem.getInfoAsync(userProfileImage);
+    // console.log('fileInfo', fileInfo);
+    setIsProfileImageSelected(fileInfo.exists);
+    // console.log('isProfileImageSelected', fileInfo.exists);
+  };
+
+  useEffect(() => {
+    checkProfileImage();
+  }, []);
+
   const { authState } = React.useContext(AuthContext);
 
-  // if (!authState.isLoggedIn) {
-  //   return <NotRegisteredScreen />;
-  // }
+  if (!authState.isLoggedIn) {
+    // return <NotRegisteredScreen />;
+    // navigation.navigate('RegisterPreferences');
+  }
 
   return (
     <ScrollView
