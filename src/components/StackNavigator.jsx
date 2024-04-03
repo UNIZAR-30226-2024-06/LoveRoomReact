@@ -11,7 +11,9 @@ import Drawer from './Drawer';
 import { useWindowDimensions } from 'react-native';
 import GetEmailScreen from '../screens/GetEmailScreen';
 import ProfileScreen from '../screens/ProfileScreen';
-import EditProfileScreen from '../screens/editProfile';
+import EditProfileScreen from '../screens/EditProfileScreen';
+import RegisterPreferencesScreen from '../screens/RegisterPreferencesScreen';
+import UserGuidelinesScreen from '../screens/UserGuidelinesScreen';
 
 const Stack = createStackNavigator();
 
@@ -31,6 +33,12 @@ export default function StackNavigator() {
         />
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
+        <Stack.Screen
+          name="RegisterPreferences"
+          component={RegisterPreferencesScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen name="UserGuidelines" component={UserGuidelinesScreen} options={{ headerShown: false }} />
         <Stack.Screen name="NotRegistered" component={NotRegisteredScreen} options={{ headerShown: false }} />
         <Stack.Screen name="ChangePassword" component={ChangePasswdScreen} options={{ headerShown: false }} />
         <Stack.Screen name="GetCode" component={GetCodeScreen} options={{ headerShown: false }} />

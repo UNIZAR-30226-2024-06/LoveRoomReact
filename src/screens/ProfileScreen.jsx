@@ -1,14 +1,16 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import AuthContext from '../components/AuthContext';
-import NotRegisteredScreen from './NotRegisteredScreen';
+import * as FileSystem from 'expo-file-system';
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
 
-export default function ProfileScreenn({ navigation }) {
+export default function ProfileScreen({ navigation }) {
   const scrollViewRef = useRef(null); // Referencia a ScrollView
+
+  const [isProfileImageSelected, setIsProfileImageSelected] = useState(false);
 
   const handleScroll = (event) => {
     const { y } = event.nativeEvent.contentOffset;
@@ -17,12 +19,12 @@ export default function ProfileScreenn({ navigation }) {
       scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: false });
     }
   };
-
+  
   const { authState } = React.useContext(AuthContext);
 
-  if (!authState.isLoggedIn) {
-    return <NotRegisteredScreen />;
-  }
+  // if (!authState.isLoggedIn) {
+  //   return <NotRegisteredScreen />;
+  // }
 
   return (
     <ScrollView
@@ -37,7 +39,7 @@ export default function ProfileScreenn({ navigation }) {
         <View style={styles.profileImageContainer}>
           <View style={styles.profileImageBorder}>
             <Image
-              source={require('../img/profileImage.jpg')} // Ruta de la imagen de perfil
+              source={isProfileImageSelected ? { uri: userProfileImage } : require('../img/profileImage.jpg')} // Ruta de la imagen de perfil
               style={styles.profileImage}
             />
           </View>
