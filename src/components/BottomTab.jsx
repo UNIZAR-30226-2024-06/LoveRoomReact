@@ -75,9 +75,8 @@ export default function BottomTab({ initialScreen }) {
         name="Cuenta"
         component={ProfileScreen}
         options={{
-          tabBarIcon: ({ focused, color, size }) =>
-            ImageProfile(size, color),
-            //PEDIR IMAGEN A BACKEND
+          tabBarIcon: ({ focused, color, size }) => ImageProfile(size, color),
+          //PEDIR IMAGEN A BACKEND
           headerTitle: () => (
             <Image source={require('../img/logo.png')} style={{ width: 200, height: 32, backgroundColor: '#F89F9F' }} />
           ),
