@@ -37,7 +37,7 @@ export default function LoginScreen({ navigation }) {
   };
 
   const handleLogin = () => {
-    fetch('http://192.168.1.29:3000/user/login', {
+    fetch('http://192.168.1.29:5000/user/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -47,8 +47,27 @@ export default function LoginScreen({ navigation }) {
       .then((response) => response.json())
       .then((data) => {
         if (data.token != null) {
-          setAuthState((prevState) => ({ ...prevState, isLoggedIn: true, token: data.token }));
+          setAuthState({
+            isLoggedIn: true,
+            token: data.token,
+            baneado: data.usuario.baneado,
+            id: data.usuario.id,
+            correo: data.usuario.correo,
+            nombre: data.usuario.nombre,
+            sexo: data.usuario.sexo,
+            edad: data.usuario.edad,
+            idLocalidad: data.usuario.idLocalidad,
+            buscaedadmin: data.usuario.buscaedadmin,
+            buscaedadmax: data.usuario.buscaedadmax,
+            buscasexo: data.usuario.buscasexo,
+            fotoperfil: data.usuario.fotoperfil,
+            descripcion: data.usuario.descripcion,
+            tipousuario: data.usuario.tipousuario,
+            contrasena: data.usuario.contrasena,
+          });
           AsyncStorage.setItem('token', data.token);
+          console.log(data);
+          console.log(authState);
         } else {
           alert('Usuario o contraseña incorrectos', data);
           console.log(data);

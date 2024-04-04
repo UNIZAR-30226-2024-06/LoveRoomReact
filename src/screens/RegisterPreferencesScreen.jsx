@@ -69,7 +69,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
       });
       //   fileInfo = await FileSystem.getInfoAsync(fileName);
       //   console.log('fileInfo dentro', fileInfo);
-      setProfileImage(fileName);
+      setProfileImage(fileName + '?' + new Date().getTime());
       setIsProfileImageSelected(true);
     }
   };
@@ -94,7 +94,9 @@ export default function RegisterPreferencesScreen({ navigation }) {
             <Image
               //   source={require('../img/profileImage.jpg')} // Ruta de la imagen de perfil
               style={styles.profileImage}
-              source={isProfileImageSelected ? { uri: profileImage } : require('../img/profileImage.jpg')}
+              source={
+                isProfileImageSelected ? { uri: profileImage + '?' + new Date() } : require('../img/profileImage.jpg')
+              }
             />
           </View>
         </View>
@@ -109,7 +111,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
 
         <Text style={styles.label}>Fecha de nacimiento</Text>
         <TouchableOpacity onPress={showDatepicker} style={styles.dateInput}>
-          <Text>{date.toDateString()}</Text>
+          <Text>{date.toLocaleDateString()}</Text>
         </TouchableOpacity>
         {show && (
           <DateTimePicker

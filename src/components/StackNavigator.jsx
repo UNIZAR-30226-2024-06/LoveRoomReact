@@ -7,7 +7,6 @@ import NotRegisteredScreen from '../screens/NotRegisteredScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import ChangePasswdScreen from '../screens/ChangePasswdScreen';
 import GetCodeScreen from '../screens/GetCodeScreen';
-import Drawer from './Drawer';
 import { useWindowDimensions } from 'react-native';
 import GetEmailScreen from '../screens/GetEmailScreen';
 import ProfileScreen from '../screens/ProfileScreen';
@@ -24,13 +23,7 @@ export default function StackNavigator() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen
-          name="Account"
-          component={
-            isLandscape ? () => <Drawer initialScreen={'Cuenta'} /> : () => <BottomTab initialScreen={'Cuenta'} />
-          }
-          options={{ headerShown: false }}
-        />
+        <Stack.Screen name="Account" component={BottomTab} options={{ headerShown: false }} />
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
         <Stack.Screen

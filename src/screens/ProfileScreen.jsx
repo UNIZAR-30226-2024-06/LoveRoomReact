@@ -2,12 +2,20 @@ import React, { useRef, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import AuthContext from '../components/AuthContext';
+import NotRegisteredScreen from './NotRegisteredScreen';
 import * as FileSystem from 'expo-file-system';
+import { useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
 
 export default function ProfileScreen({ navigation }) {
+  const { authState, setAuthState } = React.useContext(AuthContext);
+  if (!authState.isLoggedIn) {
+    return <NotRegisteredScreen />;
+    // navigation.navigate('RegisterPreferences');
+  }
   const scrollViewRef = useRef(null); // Referencia a ScrollView
 
   const [isProfileImageSelected, setIsProfileImageSelected] = useState(false);
@@ -19,8 +27,6 @@ export default function ProfileScreen({ navigation }) {
       scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: false });
     }
   };
-
-  const userProfileImage = FileSystem.documentDirectory + 'userProfileImage.jpeg';
   // isProfileImageSelected = FileSystem.getInfoAsync(userProfileImage);
   // console.log('isProfileImageSelected', isProfileImageSelected);
   const checkProfileImage = async () => {
@@ -28,19 +34,30 @@ export default function ProfileScreen({ navigation }) {
     const fileInfo = await FileSystem.getInfoAsync(userProfileImage);
     // console.log('fileInfo', fileInfo);
     setIsProfileImageSelected(fileInfo.exists);
+    if (fileInfo.exists) {
+      updateProfileImage(FileSystem.documentDirectory + 'userProfileImage.jpeg');
+      console.log('Profile image updated');
+    }
     // console.log('isProfileImageSelected', fileInfo.exists);
+  };
+
+  const [userProfileImage, setUserProfileImage] = useState(FileSystem.documentDirectory + 'userProfileImage.jpeg');
+
+  // Update userProfileImage when the profile image is changed
+  const updateProfileImage = async (newImageUri) => {
+    setUserProfileImage(newImageUri);
   };
 
   useEffect(() => {
     checkProfileImage();
-  }, []);
+  }, [userProfileImage]);
 
-  const { authState } = React.useContext(AuthContext);
-
-  if (!authState.isLoggedIn) {
-    // return <NotRegisteredScreen />;
-    // navigation.navigate('RegisterPreferences');
-  }
+  useFocusEffect(
+    React.useCallback(() => {
+      checkProfileImage();
+      return () => {}; // Esto es necesario para evitar un warning, pero puedes ignorarlo si no necesitas hacer nada al perder el foco
+    }, [userProfileImage]),
+  );
 
   return (
     <ScrollView
@@ -55,7 +72,11 @@ export default function ProfileScreen({ navigation }) {
         <View style={styles.profileImageContainer}>
           <View style={styles.profileImageBorder}>
             <Image
-              source={isProfileImageSelected ? { uri: userProfileImage } : require('../img/profileImage.jpg')} // Ruta de la imagen de perfil
+              source={
+                isProfileImageSelected
+                  ? { uri: userProfileImage + '?' + new Date() }
+                  : require('../img/profileImage.jpg')
+              } // Ruta de la imagen de perfil
               style={styles.profileImage}
             />
           </View>
@@ -64,6 +85,7 @@ export default function ProfileScreen({ navigation }) {
         <TouchableOpacity
           style={styles.editButton}
           onPress={() => {
+            console.log(authState);
             navigation.navigate('EditProfile');
           }}
         >
@@ -126,7 +148,30 @@ export default function ProfileScreen({ navigation }) {
           <View style={styles.headlineCuentaRect}>
             <Text style={styles.headlineCuentaText}>Cuenta</Text>
           </View>
-          <TouchableOpacity style={styles.faqButton}>
+          <TouchableOpacity
+            style={styles.faqButton}
+            onPress={() => {
+              setAuthState({
+                isLoggedIn: false,
+                id: null,
+                token: null,
+                correo: null,
+                contrasena: null,
+                nombre: null,
+                sexo: null,
+                edad: null,
+                idLocalidad: null,
+                buscaedadmin: null,
+                buscaedadmax: null,
+                buscasexo: null,
+                fotoperfil: null,
+                descripcion: null,
+                tipousuario: null,
+                baneado: false,
+              });
+              AsyncStorage.removeItem('token');
+            }}
+          >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Image source={require('../img/salida.png')} style={styles.faqIcon} />
               <Text style={styles.faqText}>Cerrar sesión</Text>
@@ -227,8 +272,7 @@ const styles = StyleSheet.create({
   headlineCuentaCont: {
     marginTop: 185,
     width: '100%',
-    height: 35,
-    backgroundColor: '#E8DEDE',
+    height: 130,
   },
 
   headlineCuentaRect: {
@@ -236,6 +280,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between', // Para distribuir los elementos horizontalmente
     paddingHorizontal: 20,
+    paddingBottom: 5,
+    backgroundColor: '#E8DEDE',
+    height: 35,
   },
 
   headlineCuentaText: {
