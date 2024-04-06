@@ -6,6 +6,7 @@ import NotRegisteredScreen from './NotRegisteredScreen';
 import * as FileSystem from 'expo-file-system';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Alert } from 'react-native';
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
@@ -96,7 +97,12 @@ export default function ProfileScreen({ navigation }) {
           <View style={styles.headlineRectangle}>
             <Text style={styles.headlineText}>Mi plan</Text>
           </View>
-          <TouchableOpacity style={styles.faqButton}>
+          <TouchableOpacity
+            style={styles.faqButton}
+            onPress={() => {
+              console.log(authState);
+            }}
+          >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Image source={require('../img/premium.png')} style={styles.faqIcon} />
               <Text style={styles.faqText}>¡Hazte premium!</Text>
@@ -151,25 +157,41 @@ export default function ProfileScreen({ navigation }) {
           <TouchableOpacity
             style={styles.faqButton}
             onPress={() => {
-              setAuthState({
-                isLoggedIn: false,
-                id: null,
-                token: null,
-                correo: null,
-                contrasena: null,
-                nombre: null,
-                sexo: null,
-                edad: null,
-                idLocalidad: null,
-                buscaedadmin: null,
-                buscaedadmax: null,
-                buscasexo: null,
-                fotoperfil: null,
-                descripcion: null,
-                tipousuario: null,
-                baneado: false,
-              });
-              AsyncStorage.removeItem('token');
+              Alert.alert(
+                'Cerrar sesión',
+                '¿Estás seguro de que quieres cerrar sesión?',
+                [
+                  {
+                    text: 'Cancelar',
+                    style: 'cancel',
+                  },
+                  {
+                    text: 'OK',
+                    onPress: () => {
+                      setAuthState({
+                        isLoggedIn: false,
+                        id: null,
+                        token: null,
+                        correo: null,
+                        contrasena: null,
+                        nombre: null,
+                        sexo: null,
+                        edad: null,
+                        idLocalidad: null,
+                        buscaedadmin: null,
+                        buscaedadmax: null,
+                        buscasexo: null,
+                        fotoperfil: null,
+                        descripcion: null,
+                        tipousuario: null,
+                        baneado: false,
+                      });
+                      AsyncStorage.removeItem('token');
+                    },
+                  },
+                ],
+                { cancelable: false },
+              );
             }}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>

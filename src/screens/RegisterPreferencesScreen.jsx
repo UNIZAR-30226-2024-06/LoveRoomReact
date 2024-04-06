@@ -21,7 +21,7 @@ const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
 
 export default function RegisterPreferencesScreen({ navigation }) {
-  const { setIsRegistered } = useContext(AuthContext);
+  const { authState, setAuthState } = useContext(AuthContext);
   const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(false);
   const [gender, setGender] = useState('Seleccione su género');
@@ -69,7 +69,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
       });
       //   fileInfo = await FileSystem.getInfoAsync(fileName);
       //   console.log('fileInfo dentro', fileInfo);
-      setProfileImage(fileName + '?' + new Date().getTime());
+      setProfileImage(fileName + '?' + new Date());
       setIsProfileImageSelected(true);
     }
   };
@@ -130,9 +130,9 @@ export default function RegisterPreferencesScreen({ navigation }) {
           style={styles.input}
           onValueChange={(itemValue, itemIndex) => setGender(itemValue)}
         >
-          <Picker.Item label="Masculino" value="male" />
-          <Picker.Item label="Femenino" value="female" />
-          <Picker.Item label="Otro" value="other" />
+          <Picker.Item label="Masculino" value="H" />
+          <Picker.Item label="Femenino" value="M" />
+          <Picker.Item label="Otro" value="O" />
         </Picker>
 
         <Text style={styles.label}>Preferencia Sexual</Text>
@@ -142,11 +142,9 @@ export default function RegisterPreferencesScreen({ navigation }) {
           onValueChange={(itemValue, itemIndex) => setSexualPreference(itemValue)}
         >
           <Picker.Item label="Seleccione su preferencia sexual" value="" />
-          <Picker.Item label="Hombres" value="men" />
-          <Picker.Item label="Mujeres" value="women" />
-          <Picker.Item label="Ambos" value="both" />
-          <Picker.Item label="Todos" value="all" />
-          <Picker.Item label="Otros" value="others" />
+          <Picker.Item label="Hombres" value="H" />
+          <Picker.Item label="Mujeres" value="M" />
+          <Picker.Item label="Ambos" value="T" />
           {/* <Picker.Item label="Heterosexual" value="heterosexual" />
           <Picker.Item label="Homosexual" value="homosexual" />
           <Picker.Item label="Bisexual" value="bisexual" />
@@ -190,6 +188,15 @@ export default function RegisterPreferencesScreen({ navigation }) {
           style={styles.button}
           onPress={() => {
             // TODO: handleRegister();
+            setAuthState((prevState) => ({
+              ...prevState,
+              sexo: gender,
+              buscaedadmin: agePreferenceStart,
+              buscaedadmax: agePreferenceEnd,
+              buscasexo: sexualPreference,
+              fotoperfil: fileName,
+              descripcion: description,
+            }));
             navigation.navigate('UserGuidelines');
           }}
         >

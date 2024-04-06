@@ -22,17 +22,17 @@ const screenWidth = Dimensions.get('window').width;
 
 export default function RegisterPreferencesScreen({ navigation }) {
   const { authState } = useContext(AuthContext);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [date, setDate] = useState(new Date());
+  const [name, setName] = useState(authState.nombre);
+  const [email, setEmail] = useState(authState.correo);
+  const [password, setPassword] = useState(authState.contrasena);
+  const [age, setAge] = useState(authState.edad);
   const [show, setShow] = useState(false);
-  const [gender, setGender] = useState('Seleccione su género');
-  const [sexualPreference, setSexualPreference] = useState('');
-  const [agePreferenceStart, setAgePreferenceStart] = useState(18);
-  const [agePreferenceEnd, setAgePreferenceEnd] = useState(30);
-  const [description, setDescription] = useState('');
-  const [profileImage, setProfileImage] = useState('');
+  const [gender, setGender] = useState(authState.sexo);
+  const [sexualPreference, setSexualPreference] = useState(authState.buscasexo);
+  const [agePreferenceStart, setAgePreferenceStart] = useState(authState.buscaedadmin);
+  const [agePreferenceEnd, setAgePreferenceEnd] = useState(authState.buscaedadmax);
+  const [description, setDescription] = useState(authState.descripcion);
+  const [profileImage, setProfileImage] = useState(authState.fotoperfil);
   const [isProfileImageSelected, setIsProfileImageSelected] = useState();
   const { StorageAccessFramework } = FileSystem;
 
@@ -113,63 +113,61 @@ export default function RegisterPreferencesScreen({ navigation }) {
         </View>
 
         <Text style={styles.label}>Nombre completo</Text>
-        <TextInput style={styles.textContainer} defaultValue={name} onChangeText={(text) => setName(text)} />
+        <TextInput
+          style={styles.textContainer}
+          defaultValue={authState.nombre}
+          onChangeText={(text) => setName(text)}
+        />
 
         <Text style={styles.label}>Correo Electrónico</Text>
-        <TextInput style={styles.textContainer} defaultValue={email} onChangeText={(text) => setEmail(text)} />
+        <TextInput
+          style={styles.textContainer}
+          defaultValue={authState.correo}
+          onChangeText={(text) => setEmail(text)}
+        />
 
         <Text style={styles.label}>Contraseña</Text>
         <TextInput
           style={styles.textContainer}
-          defaultValue={password}
+          defaultValue={authState.contrasena}
           secureTextEntry={true}
           onChangeText={(text) => setPassword(text)}
         />
 
-        <Text style={styles.label}>Fecha de nacimiento</Text>
-        <TouchableOpacity onPress={showDatepicker} style={styles.dateInput}>
-          <Text>{date.toLocaleDateString()}</Text>
-        </TouchableOpacity>
-        {show && (
-          <DateTimePicker
-            testID="dateTimePicker"
-            value={date}
-            mode={'date'}
-            is24Hour={true}
-            display="DD/MM/YYYY"
-            onChange={onChange}
-          />
-        )}
+        <Text style={styles.label}>Edad</Text>
+        <View style={{ ...styles.input, justifyContent: 'center' }}>
+          <Picker selectedValue={age} onValueChange={(itemValue) => setAge(itemValue)}>
+            {[...Array(83)].map((_, i) => (
+              <Picker.Item key={i} label={(i + 18).toString()} value={i + 18} />
+            ))}
+          </Picker>
+        </View>
 
         <Text style={styles.label}>Sexo</Text>
-        <Picker
-          selectedValue={gender}
-          style={styles.input}
-          onValueChange={(itemValue, itemIndex) => setGender(itemValue)}
-        >
-          <Picker.Item label="Masculino" value="male" />
-          <Picker.Item label="Femenino" value="female" />
-          <Picker.Item label="Otro" value="other" />
-        </Picker>
+        <View style={{ ...styles.input, justifyContent: 'center' }}>
+          <Picker
+            selectedValue={gender}
+            onValueChange={(itemValue) => setGender(itemValue)}
+            defaultValue={authState.sexo == 'H' ? 'Masculino' : authState.sexo == 'M' ? 'Femenino' : 'Otro'}
+          >
+            <Picker.Item label="Masculino" value="H" />
+            <Picker.Item label="Femenino" value="M" />
+            <Picker.Item label="Otro" value="O" />
+          </Picker>
+        </View>
 
         <Text style={styles.label}>Preferencia Sexual</Text>
-        <Picker
-          selectedValue={sexualPreference}
-          style={styles.input}
-          onValueChange={(itemValue, itemIndex) => setSexualPreference(itemValue)}
-        >
-          <Picker.Item label="Seleccione su preferencia sexual" value="" />
-          <Picker.Item label="Hombres" value="men" />
-          <Picker.Item label="Mujeres" value="women" />
-          <Picker.Item label="Ambos" value="both" />
-          <Picker.Item label="Todos" value="all" />
-          <Picker.Item label="Otros" value="others" />
-          {/* <Picker.Item label="Heterosexual" value="heterosexual" />
-          <Picker.Item label="Homosexual" value="homosexual" />
-          <Picker.Item label="Bisexual" value="bisexual" />
-          <Picker.Item label="Pansexual" value="pansexual" />
-          <Picker.Item label="Otro" value="other" /> */}
-        </Picker>
+        <View style={{ ...styles.input, justifyContent: 'center' }}>
+          <Picker
+            selectedValue={sexualPreference}
+            onValueChange={(itemValue, itemIndex) => setSexualPreference(itemValue)}
+            defaultValue={authState.buscasexo == 'H' ? 'Hombres' : authState.buscasexo == 'M' ? 'Mujeres' : 'Todos'}
+          >
+            <Picker.Item label="Hombres" value="H" />
+            <Picker.Item label="Mujeres" value="M" />
+            <Picker.Item label="Todos" value="T" />
+          </Picker>
+        </View>
 
         <Text style={styles.label}>Preferencia de edad</Text>
         <View style={{ ...styles.agePreferenceContainer, flexDirection: 'row' }}>
@@ -178,18 +176,18 @@ export default function RegisterPreferencesScreen({ navigation }) {
             style={styles.ageInput}
             onValueChange={(itemValue, itemIndex) => setAgePreferenceStart(itemValue)}
           >
-            {[...Array(100).keys()].map((value, index) => (
-              <Picker.Item key={index} label={value.toString()} value={value} />
+            {[...Array(83).keys()].map((value, index) => (
+              <Picker.Item key={index} label={(value + 18).toString()} value={value + 18} />
             ))}
           </Picker>
-          <Text> _ </Text>
+          <Text style={styles.rayaEdad}> - </Text>
           <Picker
             selectedValue={agePreferenceEnd}
             style={styles.ageInput}
             onValueChange={(itemValue, itemIndex) => setAgePreferenceEnd(itemValue)}
           >
-            {[...Array(100).keys()].map((value, index) => (
-              <Picker.Item key={index} label={value.toString()} value={value} />
+            {[...Array(83).keys()].map((value, index) => (
+              <Picker.Item key={index} label={(value + 18).toString()} value={value + 18} />
             ))}
           </Picker>
         </View>
@@ -277,9 +275,7 @@ const styles = StyleSheet.create({
     height: 40,
     borderColor: '#cccccc',
     borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 10,
+    borderRadius: 10,
   },
   dateInput: {
     height: 40,
@@ -315,8 +311,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingHorizontal: 10,
     marginBottom: 10,
-    textAlignVertical: 'top',
-    padding: 10,
+    textAlignVertical: 'center',
   },
   button: {
     backgroundColor: '#F89F9F',
@@ -361,5 +356,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     paddingBottom: '45%',
     alignSelf: 'stretch', // Ajuste para que la línea ocupe todo el ancho
+  },
+  rayaEdad: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    padding: 14,
   },
 });

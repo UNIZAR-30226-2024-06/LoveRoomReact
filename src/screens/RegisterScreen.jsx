@@ -11,9 +11,10 @@ import {
   StatusBar,
 } from 'react-native';
 import AuthContext from '../components/AuthContext';
+import { AsyncStorage } from '@react-native-async-storage/async-storage';
 
 export default function Login({ navigation }) {
-  const { setIsRegistered } = React.useContext(AuthContext);
+  const { authState, setAuthState } = React.useContext(AuthContext);
   const [email, setEmail] = React.useState('');
   const [name, setName] = React.useState('');
   const [isValidEmail, setIsValidEmail] = React.useState(false);
@@ -32,7 +33,7 @@ export default function Login({ navigation }) {
   };
 
   const handleRegister = () => {
-    fetch('http://192.168.1.29:3000/user/create', {
+    fetch('http://192.168.1.29:5000/user/create', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -46,8 +47,27 @@ export default function Login({ navigation }) {
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
-        if (data.success) {
-          navigation.navigate('Login');
+        if (data.token != null) {
+          setAuthState({
+            isLoggedIn: true,
+            token: data.token,
+            baneado: data.usuario.baneado,
+            id: data.usuario.id,
+            correo: data.usuario.correo,
+            nombre: data.usuario.nombre,
+            sexo: data.usuario.sexo,
+            edad: data.usuario.edad,
+            idLocalidad: data.usuario.idLocalidad,
+            buscaedadmin: data.usuario.buscaedadmin,
+            buscaedadmax: data.usuario.buscaedadmax,
+            buscasexo: data.usuario.buscasexo,
+            fotoperfil: data.usuario.fotoperfil,
+            descripcion: data.usuario.descripcion,
+            tipousuario: data.usuario.tipousuario,
+            contrasena: data.usuario.contrasena,
+          });
+          AsyncStorage.setItem('token', data.token);
+          navigation.navigate('RegisterPreferences');
         } else {
           alert('Error al registrar el usuario');
           console.log(data);
