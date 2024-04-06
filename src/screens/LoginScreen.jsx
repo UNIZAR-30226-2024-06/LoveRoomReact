@@ -18,26 +18,26 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function LoginScreen({ navigation }) {
   const { authState, setAuthState } = React.useContext(AuthContext);
   const [email, setEmail] = React.useState('');
-  const [isValidEmail, setIsValidEmail] = React.useState(false);
+  const [isValidEmail, setIsValidEmail] = React.useState(true);
 
   const [password, setPassword] = React.useState('');
-  const [isValidPassword, setIsValidPassword] = React.useState(false);
+  const [isValidPassword, setIsValidPassword] = React.useState(true);
 
   const [hidePassword, setHidePassword] = useState(true);
 
-  const handlePasswordChange = (text) => {
-    console.log(authState);
-    setPassword(text);
-    setIsValidPassword(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,16}$/.test(text));
-  };
+  // const handlePasswordChange = (text) => {
+  //   console.log(authState);
+  //   setPassword(text);
+  //   setIsValidPassword(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,16}$/.test(text));
+  // };
 
-  const handleEmailChange = (text) => {
-    setEmail(text);
-    setIsValidEmail(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(text));
-  };
+  // const handleEmailChange = (text) => {
+  //   setEmail(text);
+  //   setIsValidEmail(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(text));
+  // };
 
   const handleLogin = () => {
-    fetch('http://192.168.1.29:5000/user/login', {
+    fetch('http://192.168.1.29:3000/user/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -47,27 +47,9 @@ export default function LoginScreen({ navigation }) {
       .then((response) => response.json())
       .then((data) => {
         if (data.token != null) {
-          setAuthState({
-            isLoggedIn: true,
-            token: data.token,
-            baneado: data.usuario.baneado,
-            id: data.usuario.id,
-            correo: data.usuario.correo,
-            nombre: data.usuario.nombre,
-            sexo: data.usuario.sexo,
-            edad: data.usuario.edad,
-            idLocalidad: data.usuario.idLocalidad,
-            buscaedadmin: data.usuario.buscaedadmin,
-            buscaedadmax: data.usuario.buscaedadmax,
-            buscasexo: data.usuario.buscasexo,
-            fotoperfil: data.usuario.fotoperfil,
-            descripcion: data.usuario.descripcion,
-            tipousuario: data.usuario.tipousuario,
-            contrasena: data.usuario.contrasena,
-          });
+          setAuthState((prevState) => ({ ...prevState, isLoggedIn: true, token: data.token }));
           AsyncStorage.setItem('token', data.token);
-          console.log(data);
-          console.log(authState);
+          navigation.navigate('Cuenta');
         } else {
           alert('Usuario o contraseña incorrectos', data);
           console.log(data);
@@ -89,16 +71,13 @@ export default function LoginScreen({ navigation }) {
         <TextInput
           style={styles.input}
           placeholder="Introduzca su correo electrónico"
-          onChangeText={handleEmailChange}
         />
-        {!isValidEmail && <Text style={styles.errores}>* Por favor, introduzca un correo electrónico válido.</Text>}
 
         <Text style={styles.label}>Contraseña</Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', position: 'relative' }}>
           <TextInput
             style={[styles.input, { paddingRight: 40, flex: 1 }]} // Añade paddingRight para evitar que el texto se superponga con el botón del ojo
             placeholder="Introduzca la nueva contraseña otra vez"
-            onChangeText={handlePasswordChange}
             secureTextEntry={hidePassword}
           />
           <TouchableOpacity
@@ -114,18 +93,15 @@ export default function LoginScreen({ navigation }) {
             <Ionicons name={hidePassword ? 'eye-off' : 'eye'} size={24} color="black" />
           </TouchableOpacity>
         </View>
-        {!isValidPassword && (
-          <Text style={styles.errores}>
-            * La contraseña debe tener entre 8 y 16 caracteres, incluyendo al menos una mayúscula, una minúscula y un
-            número.
-          </Text>
-        )}
 
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
-            handleLogin();
-            navigation.navigate('Cuenta');
+            if (isValidEmail && isValidPassword) {
+              handleLogin();
+            } else {
+              alert('Por favor, introduzca un correo electrónico y una contraseña válidos.');
+            }
           }}
         >
           <Text style={styles.buttonText}>Iniciar sesión</Text>
@@ -236,5 +212,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     paddingBottom: '45%',
     alignSelf: 'stretch', // Ajuste para que la línea ocupe todo el ancho
+    marginBottom: 10,
   },
 });

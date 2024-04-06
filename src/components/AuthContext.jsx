@@ -4,6 +4,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const AuthContext = React.createContext();
 
 export const AuthProvider = ({ children }) => {
+  // useState se utiliza para definir y gestionar el estado local en componentes de función. 
+  // Recibe un valor inicial como argumento y devuelve un array con dos elementos: el estado actual y una función para actualizar ese estado.
+  // Cuando se llama a seAuthState,react re-renderiza el componente AuthProvider y actualiza el valor de authState
   const [authState, setAuthState] = useState({
     isLoggedIn: false,
     id: null,
@@ -22,23 +25,26 @@ export const AuthProvider = ({ children }) => {
     tipousuario: null,
     baneado: false,
   });
+
+  // Función asincrónica que se encarga de verificar si hay un token de autenticación almacenado en AsyncStorage y si es válido.
+  // Luego, actualiza el estado de autenticación en consecuencia.
   const checkToken = async () => {
-    const token = await AsyncStorage.getItem('token');
+    const token = await AsyncStorage.getItem('token'); // Obtiene el token de autenticación almacenado en AsyncStorage
     console.log(token);
-    fetch('http://192.168.1.29:5000/user/check/token', {
+    fetch('http://192.168.1.29:5000/user/check/token', { // Realiza una petición al servidor para verificar si el token es válido
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${token}`, 
       },
     })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
+      .then((response) => response.json()) // Convierte la respuesta del servidor en un objeto JSON
+      .then((data) => { 
+        console.log(data); 
         if (data.valido) {
           console.log('Token válido');
-          setAuthState((prevState) => ({
-            ...prevState,
+          setAuthState((prevState) => ({ // Actualiza el estado de autenticación con el token y otros datos del usuario
+            ...prevState, 
             isLoggedIn: true,
             token: data.token,
           }));
@@ -49,6 +55,8 @@ export const AuthProvider = ({ children }) => {
         }
       });
   };
+
+  //  useEffect se utiliza para llamar a la función checkToken después de que el componente se haya renderizado por primera vez.
   React.useEffect(() => {
     checkToken();
   }, []);
