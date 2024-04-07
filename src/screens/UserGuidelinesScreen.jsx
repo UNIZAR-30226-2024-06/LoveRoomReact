@@ -1,5 +1,13 @@
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  Image,
+  TouchableOpacity,
+  ScrollView
+} from 'react-native';
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
@@ -48,7 +56,9 @@ export default function UserGuidelinesScreen({ navigation }) {
         <Text style={styles.listItem}>3. No se permite el uso de contenido violento.</Text>
         <Text style={styles.listItem}>4. No se permite el uso de contenido sexual.</Text>
         <Text style={styles.listItem}>5. No se permite el uso de contenido discriminatorio.</Text>
-        <Text style={styles.listItem}>6. No se permite el uso de contenido que incite al odio.</Text>
+        <Text style={styles.listItem}>
+          6. No se permite el uso de contenido que incite al odio.
+        </Text>
       </View>
       <TouchableOpacity
         style={styles.button}
@@ -66,13 +76,13 @@ export default function UserGuidelinesScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#fff'
   },
   header: {
     height: screenHeight * 0.17,
     backgroundColor: '#F89F9F',
     flex: 1,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   //   logo: {
   //     flex: 1,
@@ -82,11 +92,11 @@ const styles = StyleSheet.create({
   profileText: {
     color: 'black',
     fontSize: 25,
-    fontWeight: 'bold',
+    fontWeight: 'bold'
   },
   logoImage: {
     width: screenWidth * 0.8,
-    resizeMode: 'contain',
+    resizeMode: 'contain'
   },
 
   headlineContainer: {
@@ -95,21 +105,21 @@ const styles = StyleSheet.create({
     height: 50,
     backgroundColor: '#E8DEDE',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
 
   headlineRectangle: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between', // Para distribuir los elementos horizontalmente
-    paddingHorizontal: 20,
+    paddingHorizontal: 20
   },
 
   headlineText: {
     paddingTop: 8,
     color: 'black',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: 'bold'
   },
 
   infoText: {
@@ -117,32 +127,32 @@ const styles = StyleSheet.create({
     color: 'black', // Set the text color
     fontSize: 18, // Set the font size
     lineHeight: 20, // Set the line height for better readability
-    paddingHorizontal: 15, // Add some padding on the sides
+    paddingHorizontal: 15 // Add some padding on the sides
   },
   infoContainer: {
     padding: 20, // Add some padding around the container
     backgroundColor: '#f5f5f5', // Set a background color
     borderRadius: 10, // Add some border radius
     marginVertical: 10, // Add some vertical margin
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   listItem: {
     marginTop: 10, // Add some margin at the top
     marginLeft: 10, // Add some margin at the left
     color: 'black', // Set the text color
     fontSize: 16, // Set the font size
-    lineHeight: 20, // Set the line height for better readability
+    lineHeight: 20 // Set the line height for better readability
   },
   button: {
     backgroundColor: '#F89F9F',
     paddingVertical: 10,
     marginVertical: 20,
     borderRadius: 5,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   buttonText: {
     color: '#ffffff',
     fontWeight: 'bold',
-    fontSize: 16,
-  },
+    fontSize: 16
+  }
 });

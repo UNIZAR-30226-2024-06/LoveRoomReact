@@ -15,7 +15,7 @@ export default function App() {
     <AuthProvider>
       <View
         style={{
-          flex: 1,
+          flex: 1
         }}
       >
         <StackNavigator />

@@ -1,5 +1,13 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  Image,
+  TouchableOpacity,
+  ScrollView
+} from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import AuthContext from '../components/AuthContext';
 import NotRegisteredScreen from './NotRegisteredScreen';
@@ -42,7 +50,9 @@ export default function ProfileScreen({ navigation }) {
     // console.log('isProfileImageSelected', fileInfo.exists);
   };
 
-  const [userProfileImage, setUserProfileImage] = useState(FileSystem.documentDirectory + 'userProfileImage.jpeg');
+  const [userProfileImage, setUserProfileImage] = useState(
+    FileSystem.documentDirectory + 'userProfileImage.jpeg'
+  );
 
   // Update userProfileImage when the profile image is changed
   const updateProfileImage = async (newImageUri) => {
@@ -57,7 +67,7 @@ export default function ProfileScreen({ navigation }) {
     React.useCallback(() => {
       checkProfileImage();
       return () => {}; // Esto es necesario para evitar un warning, pero puedes ignorarlo si no necesitas hacer nada al perder el foco
-    }, [userProfileImage]),
+    }, [userProfileImage])
   );
 
   return (
@@ -163,7 +173,7 @@ export default function ProfileScreen({ navigation }) {
                 [
                   {
                     text: 'Cancelar',
-                    style: 'cancel',
+                    style: 'cancel'
                   },
                   {
                     text: 'OK',
@@ -184,13 +194,13 @@ export default function ProfileScreen({ navigation }) {
                         fotoperfil: null,
                         descripcion: null,
                         tipousuario: null,
-                        baneado: false,
+                        baneado: false
                       });
                       AsyncStorage.removeItem('token');
-                    },
-                  },
+                    }
+                  }
                 ],
-                { cancelable: false },
+                { cancelable: false }
               );
             }}
           >
@@ -217,21 +227,21 @@ export default function ProfileScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#fff'
   },
   header: {
     height: screenHeight * 0.17,
-    backgroundColor: '#F89F9F',
+    backgroundColor: '#F89F9F'
   },
   profileInfo: {
     flex: 1,
     alignItems: 'center',
-    marginTop: -screenHeight * 0.17,
+    marginTop: -screenHeight * 0.17
   },
   profileText: {
     color: 'white',
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: 'bold'
   },
   profileImageContainer: {
     marginTop: 6,
@@ -240,7 +250,7 @@ const styles = StyleSheet.create({
     borderRadius: 75,
     backgroundColor: 'white',
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   profileImageBorder: {
     width: 140,
@@ -248,12 +258,12 @@ const styles = StyleSheet.create({
     borderRadius: 70,
     borderWidth: 1,
     borderColor: 'white',
-    overflow: 'hidden',
+    overflow: 'hidden'
   },
   profileImage: {
     width: '100%',
     height: '100%',
-    borderRadius: 70,
+    borderRadius: 70
   },
   editButton: {
     marginTop: 14,
@@ -262,39 +272,39 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
     borderRadius: 10,
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   editButtonText: {
     color: 'white',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: 'bold'
   },
 
   headlineContainer: {
     marginTop: 50,
     width: '100%',
     height: 35,
-    backgroundColor: '#E8DEDE',
+    backgroundColor: '#E8DEDE'
   },
 
   headlineRectangle: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between', // Para distribuir los elementos horizontalmente
-    paddingHorizontal: 20,
+    paddingHorizontal: 20
   },
 
   headlineText: {
     paddingTop: 8,
     color: 'black',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: 'bold'
   },
 
   headlineCuentaCont: {
     marginTop: 185,
     width: '100%',
-    height: 130,
+    height: 130
   },
 
   headlineCuentaRect: {
@@ -304,14 +314,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 5,
     backgroundColor: '#E8DEDE',
-    height: 35,
+    height: 35
   },
 
   headlineCuentaText: {
     paddingTop: 8,
     color: 'black',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: 'bold'
   },
 
   faqButton: {
@@ -319,28 +329,28 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between', // Añade esta línea
     alignItems: 'center',
-    paddingHorizontal: 15, // Añade esta línea para dar un poco de espacio a los lados
+    paddingHorizontal: 15 // Añade esta línea para dar un poco de espacio a los lados
   },
 
   faqIcon: {
     width: 20,
     height: 20,
-    marginRight: 5,
+    marginRight: 5
   },
 
   contactIcon: {
     width: 30,
     height: 30,
-    marginRight: 0,
+    marginRight: 0
   },
 
   faqText: {
     fontSize: 18,
-    marginLeft: 5,
+    marginLeft: 5
   },
 
   arrowImage: {
     width: 25,
-    height: 25,
-  },
+    height: 25
+  }
 });

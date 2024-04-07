@@ -3,13 +3,15 @@ import { View, TextInput, FlatList, Text, Image } from 'react-native';
 import YouTube from 'react-native-youtube';
 import axios from 'axios';
 
-const SearchBar = ({ onChangeText }) => <TextInput placeholder="Search Youtube" onChangeText={onChangeText} />;
+const SearchBar = ({ onChangeText }) => (
+  <TextInput placeholder="Search Youtube" onChangeText={onChangeText} />
+);
 
 const VideoItem = ({
   title,
   thumbnails: {
-    medium: { url },
-  },
+    medium: { url }
+  }
 }) => (
   <View>
     <Image source={{ uri: url }} style={{ width: 100, height: 50 }} />
@@ -37,9 +39,9 @@ const YoutubeSearch = () => {
             part: 'snippet',
             maxResults: 5,
             key: 'AIzaSyBKqq-OFi0biVLa5BzILCQLf25OhMFnPQE',
-            q: text,
-          },
-        },
+            q: text
+          }
+        }
       );
 
       setSearchResults(response.data.items);
@@ -57,7 +59,9 @@ const YoutubeSearch = () => {
       <SearchBar onChangeText={handleSearch} />
       <FlatList
         data={searchResults}
-        renderItem={({ item }) => <VideoItem {...item} onPress={() => handleVideoPress(item.id.videoId)} />}
+        renderItem={({ item }) => (
+          <VideoItem {...item} onPress={() => handleVideoPress(item.id.videoId)} />
+        )}
         keyExtractor={(item) => item.id.videoId}
       />
       {selectedVideoId && (

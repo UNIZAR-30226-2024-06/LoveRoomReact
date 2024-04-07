@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
   TextBienvenida: {
     fontSize: 20,
     fontWeight: 'bold',
-    padding: 20,
+    padding: 20
   },
   Video: {
     marginVertical: 20,
@@ -39,6 +39,6 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '90%',
     justifyContent: 'center',
-    alignItems: 'center',
-  },
+    alignItems: 'center'
+  }
 });

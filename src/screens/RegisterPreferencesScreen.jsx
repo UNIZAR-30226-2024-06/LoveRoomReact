@@ -9,7 +9,7 @@ import {
   StyleSheet,
   Platform,
   StatusBar,
-  Dimensions,
+  Dimensions
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
@@ -50,7 +50,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 1,
+      quality: 1
     });
 
     // console.log(result);
@@ -65,7 +65,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
 
       await FileSystem.moveAsync({
         from: result.assets[0].uri,
-        to: fileName,
+        to: fileName
       });
       //   fileInfo = await FileSystem.getInfoAsync(fileName);
       //   console.log('fileInfo dentro', fileInfo);
@@ -95,7 +95,9 @@ export default function RegisterPreferencesScreen({ navigation }) {
               //   source={require('../img/profileImage.jpg')} // Ruta de la imagen de perfil
               style={styles.profileImage}
               source={
-                isProfileImageSelected ? { uri: profileImage + '?' + new Date() } : require('../img/profileImage.jpg')
+                isProfileImageSelected
+                  ? { uri: profileImage + '?' + new Date() }
+                  : require('../img/profileImage.jpg')
               }
             />
           </View>
@@ -195,7 +197,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
               buscaedadmax: agePreferenceEnd,
               buscasexo: sexualPreference,
               fotoperfil: fileName,
-              descripcion: description,
+              descripcion: description
             }));
             navigation.navigate('UserGuidelines');
           }}
@@ -210,22 +212,22 @@ export default function RegisterPreferencesScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#fff'
   },
 
   header: {
     height: screenHeight * 0.273,
-    backgroundColor: '#F89F9F',
+    backgroundColor: '#F89F9F'
   },
   profileInfo: {
     flex: 1,
     alignItems: 'center',
-    marginTop: -screenHeight * 0.2,
+    marginTop: -screenHeight * 0.2
   },
   profileText: {
     color: 'white',
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: 'bold'
   },
   profileImageContainer: {
     marginTop: 6,
@@ -234,7 +236,7 @@ const styles = StyleSheet.create({
     borderRadius: 75,
     backgroundColor: 'white',
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   profileImageBorder: {
     width: 140,
@@ -242,25 +244,25 @@ const styles = StyleSheet.create({
     borderRadius: 70,
     borderWidth: 1,
     borderColor: 'white',
-    overflow: 'hidden',
+    overflow: 'hidden'
   },
   profileImage: {
     width: '100%',
     height: '100%',
-    borderRadius: 70,
+    borderRadius: 70
   },
   formContainer: {
     backgroundColor: '#ffffff',
     marginTop: 20,
     padding: 20,
-    borderRadius: 10,
+    borderRadius: 10
   },
   label: {
     fontSize: 16,
     marginBottom: 5,
     marginTop: 10,
     fontWeight: 'bold',
-    textAlign: 'center',
+    textAlign: 'center'
   },
   input: {
     height: 40,
@@ -268,7 +270,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 10,
-    marginBottom: 10,
+    marginBottom: 10
   },
   dateInput: {
     height: 40,
@@ -277,7 +279,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     marginBottom: 10,
-    alignContent: 'center',
+    alignContent: 'center'
   },
   ageInput: {
     height: 40,
@@ -286,7 +288,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingHorizontal: 10,
     marginBottom: 10,
-    width: '45%',
+    width: '45%'
   },
   description: {
     height: 240,
@@ -296,50 +298,50 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 10,
     textAlignVertical: 'top',
-    padding: 10,
+    padding: 10
   },
   button: {
     backgroundColor: '#F89F9F',
     paddingVertical: 10,
     marginVertical: 20,
     borderRadius: 5,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   buttonText: {
     color: '#ffffff',
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 16
   },
   errores: {
     marginTop: -10,
     color: 'red',
     fontSize: 12,
-    marginBottom: 10,
+    marginBottom: 10
   },
   forgotPassword: {
     textAlign: 'right',
     marginTop: 10,
     color: '#F89F9F',
-    textDecorationLine: 'underline',
+    textDecorationLine: 'underline'
   },
   registerContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    paddingBottom: '10%',
+    paddingBottom: '10%'
   },
   registerText: {
-    fontSize: 16,
+    fontSize: 16
   },
   registerLink: {
     fontSize: 16,
     fontWeight: 'bold',
     marginLeft: 5,
-    color: '#F89F9F',
+    color: '#F89F9F'
   },
   line: {
     borderBottomColor: '#ccc',
     borderBottomWidth: 1,
     paddingBottom: '45%',
-    alignSelf: 'stretch', // Ajuste para que la línea ocupe todo el ancho
-  },
+    alignSelf: 'stretch' // Ajuste para que la línea ocupe todo el ancho
+  }
 });

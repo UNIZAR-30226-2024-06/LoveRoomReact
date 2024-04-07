@@ -18,11 +18,17 @@ export default function BottomTab({ initialScreen }) {
   const ImageProfile = (size, color) => {
     if (authState.isLoggedIn) {
       return (
-        <Image source={require('../img/perfil-vacio.png')} style={{ width: size, height: size, tintColor: color }} />
+        <Image
+          source={require('../img/perfil-vacio.png')}
+          style={{ width: size, height: size, tintColor: color }}
+        />
       );
     } else {
       return (
-        <Image source={require('../img/circulo-cruzado.png')} style={{ width: size, height: size, tintColor: color }} />
+        <Image
+          source={require('../img/circulo-cruzado.png')}
+          style={{ width: size, height: size, tintColor: color }}
+        />
       );
     }
   };
@@ -31,7 +37,7 @@ export default function BottomTab({ initialScreen }) {
     <Tab.Navigator
       initialRouteName={initialScreen}
       screenOptions={{
-        tabBarActiveTintColor: 'black',
+        tabBarActiveTintColor: 'black'
       }}
     >
       <Tab.Screen
@@ -39,16 +45,22 @@ export default function BottomTab({ initialScreen }) {
         component={HomeScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Image source={require('../img/HomeTab.png')} style={{ width: size, height: size, tintColor: color }} />
+            <Image
+              source={require('../img/HomeTab.png')}
+              style={{ width: size, height: size, tintColor: color }}
+            />
           ),
           headerTitleAlign: 'center',
           headerTitle: () => (
-            <Image source={require('../img/logo.png')} style={{ width: 200, height: 32, backgroundColor: '#F89F9F' }} />
+            <Image
+              source={require('../img/logo.png')}
+              style={{ width: 200, height: 32, backgroundColor: '#F89F9F' }}
+            />
           ),
           headerStyle: {
-            backgroundColor: '#F89F9F',
+            backgroundColor: '#F89F9F'
           },
-          headerShadowVisible: false,
+          headerShadowVisible: false
         }}
       />
       <Tab.Screen
@@ -63,12 +75,15 @@ export default function BottomTab({ initialScreen }) {
           ),
           headerTitleAlign: 'center',
           headerTitle: () => (
-            <Image source={require('../img/logo.png')} style={{ width: 200, height: 32, backgroundColor: '#F89F9F' }} />
+            <Image
+              source={require('../img/logo.png')}
+              style={{ width: 200, height: 32, backgroundColor: '#F89F9F' }}
+            />
           ),
           headerStyle: {
-            backgroundColor: '#F89F9F',
+            backgroundColor: '#F89F9F'
           },
-          headerShadowVisible: false,
+          headerShadowVisible: false
         }}
       />
       <Tab.Screen
@@ -78,13 +93,16 @@ export default function BottomTab({ initialScreen }) {
           tabBarIcon: ({ focused, color, size }) => ImageProfile(size, color),
           //PEDIR IMAGEN A BACKEND
           headerTitle: () => (
-            <Image source={require('../img/logo.png')} style={{ width: 200, height: 32, backgroundColor: '#F89F9F' }} />
+            <Image
+              source={require('../img/logo.png')}
+              style={{ width: 200, height: 32, backgroundColor: '#F89F9F' }}
+            />
           ),
           headerStyle: {
-            backgroundColor: '#F89F9F',
+            backgroundColor: '#F89F9F'
           },
           headerTitleAlign: 'center',
-          headerShadowVisible: false,
+          headerShadowVisible: false
         }}
       />
     </Tab.Navigator>

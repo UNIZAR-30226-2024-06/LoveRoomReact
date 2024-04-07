@@ -8,7 +8,7 @@ import {
   Image,
   StyleSheet,
   Platform,
-  StatusBar,
+  StatusBar
 } from 'react-native';
 import AuthContext from '../components/AuthContext';
 
@@ -50,8 +50,8 @@ export default function ChangePasswdScreen({ navigation }) {
         />
         {!isValidPassword && (
           <Text style={styles.errores}>
-            * La contraseña debe tener entre 8 y 16 caracteres, incluyendo al menos una mayúscula, una minúscula y un
-            número.
+            * La contraseña debe tener entre 8 y 16 caracteres, incluyendo al menos una mayúscula,
+            una minúscula y un número.
           </Text>
         )}
 
@@ -81,32 +81,32 @@ export default function ChangePasswdScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#fff'
   },
   logoContainer: {
     alignItems: 'center',
-    paddingTop: 130,
+    paddingTop: 130
   },
   logo: {
     width: 200,
     height: 200,
-    resizeMode: 'contain',
+    resizeMode: 'contain'
   },
   logoText: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginTop: 10,
+    marginTop: 10
   },
   formContainer: {
     backgroundColor: '#ffffff',
     marginTop: 20,
     padding: 20,
-    borderRadius: 10,
+    borderRadius: 10
   },
   label: {
     fontSize: 16,
     marginBottom: 5,
-    marginTop: 10,
+    marginTop: 10
   },
   input: {
     height: 40,
@@ -114,48 +114,48 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 10,
-    marginBottom: 10,
+    marginBottom: 10
   },
   errores: {
     marginTop: -10,
     color: 'red',
     fontSize: 12,
-    marginBottom: 10,
+    marginBottom: 10
   },
   button: {
     backgroundColor: '#F89F9F',
     paddingVertical: 10,
     borderRadius: 5,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   buttonText: {
     color: '#ffffff',
-    fontWeight: 'bold',
+    fontWeight: 'bold'
   },
   forgotPassword: {
     textAlign: 'right',
     marginTop: 10,
     color: '#F89F9F',
-    textDecorationLine: 'underline',
+    textDecorationLine: 'underline'
   },
   registerContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    paddingBottom: '10%',
+    paddingBottom: '10%'
   },
   registerText: {
-    fontSize: 16,
+    fontSize: 16
   },
   registerLink: {
     fontSize: 16,
     fontWeight: 'bold',
     marginLeft: 5,
-    color: '#F89F9F',
+    color: '#F89F9F'
   },
   line: {
     borderBottomColor: '#ccc',
     borderBottomWidth: 1,
     paddingBottom: '45%',
-    alignSelf: 'stretch', // Ajuste para que la línea ocupe todo el ancho
-  },
+    alignSelf: 'stretch' // Ajuste para que la línea ocupe todo el ancho
+  }
 });

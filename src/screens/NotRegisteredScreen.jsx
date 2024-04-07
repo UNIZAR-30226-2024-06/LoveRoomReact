@@ -20,22 +20,22 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   text: {
     fontSize: 20,
-    textAlign: 'center', // Add this line to align text to center
+    textAlign: 'center' // Add this line to align text to center
   },
   button: {
     backgroundColor: '#F89F9F',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   buttonText: {
     color: '#ffffff',
     fontWeight: 'bold',
-    fontSize: 18,
-  },
+    fontSize: 18
+  }
 });

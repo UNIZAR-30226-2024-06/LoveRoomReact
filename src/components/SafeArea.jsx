@@ -17,7 +17,7 @@ export default function SafeArea() {
           backgroundColor: 'dodgerblue',
           width: '100%',
           // height: landscape ? '100%' : '30%',
-          height: '200%',
+          height: '200%'
         }}
       ></View>
     </SafeAreaView>
@@ -28,6 +28,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1, //Vista flexible, se adapta horiontal y verticalmente para rellenar el espacio disponible
     backgroundColor: 'dodgerblue',
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0, //En Android el SafeAreaView no funciona, con esto lo ajustamos el tope
-  },
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 //En Android el SafeAreaView no funciona, con esto lo ajustamos el tope
+  }
 });

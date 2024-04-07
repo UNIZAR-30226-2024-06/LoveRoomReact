@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const AuthContext = React.createContext();
 
 export const AuthProvider = ({ children }) => {
-  // useState se utiliza para definir y gestionar el estado local en componentes de función. 
+  // useState se utiliza para definir y gestionar el estado local en componentes de función.
   // Recibe un valor inicial como argumento y devuelve un array con dos elementos: el estado actual y una función para actualizar ese estado.
   // Cuando se llama a seAuthState,react re-renderiza el componente AuthProvider y actualiza el valor de authState
   const [authState, setAuthState] = useState({
@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }) => {
     fotoperfil: null,
     descripcion: null,
     tipousuario: null,
-    baneado: false,
+    baneado: false
   });
 
   // Función asincrónica que se encarga de verificar si hay un token de autenticación almacenado en AsyncStorage y si es válido.
@@ -31,22 +31,24 @@ export const AuthProvider = ({ children }) => {
   const checkToken = async () => {
     const token = await AsyncStorage.getItem('token'); // Obtiene el token de autenticación almacenado en AsyncStorage
     console.log(token);
-    fetch('http://192.168.1.29:5000/user/check/token', { // Realiza una petición al servidor para verificar si el token es válido
+    fetch('http://192.168.1.29:5000/user/check/token', {
+      // Realiza una petición al servidor para verificar si el token es válido
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`, 
-      },
+        Authorization: `Bearer ${token}`
+      }
     })
       .then((response) => response.json()) // Convierte la respuesta del servidor en un objeto JSON
-      .then((data) => { 
-        console.log(data); 
+      .then((data) => {
+        console.log(data);
         if (data.valido) {
           console.log('Token válido');
-          setAuthState((prevState) => ({ // Actualiza el estado de autenticación con el token y otros datos del usuario
-            ...prevState, 
+          setAuthState((prevState) => ({
+            // Actualiza el estado de autenticación con el token y otros datos del usuario
+            ...prevState,
             isLoggedIn: true,
-            token: data.token,
+            token: data.token
           }));
         } else {
           console.log('Token inválido');
@@ -61,7 +63,9 @@ export const AuthProvider = ({ children }) => {
     checkToken();
   }, []);
 
-  return <AuthContext.Provider value={{ authState, setAuthState }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ authState, setAuthState }}>{children}</AuthContext.Provider>
+  );
 };
 
 export default AuthContext;

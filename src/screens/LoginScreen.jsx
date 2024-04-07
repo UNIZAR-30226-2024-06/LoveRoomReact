@@ -8,7 +8,7 @@ import {
   Image,
   StyleSheet,
   Platform,
-  StatusBar,
+  StatusBar
 } from 'react-native';
 import AuthContext from '../components/AuthContext';
 import RegisterScreen from './RegisterScreen';
@@ -40,9 +40,9 @@ export default function LoginScreen({ navigation }) {
     fetch('http://192.168.1.29:3000/user/login', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ correo: email, contrasena: password }),
+      body: JSON.stringify({ correo: email, contrasena: password })
     })
       .then((response) => response.json())
       .then((data) => {
@@ -61,17 +61,17 @@ export default function LoginScreen({ navigation }) {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }}
+    >
       <View style={[styles.logoContainer, { marginBottom: -90 }]}>
         <Image style={styles.logo} source={require('../img/logoTexto.png')} />
       </View>
 
       <View style={styles.formContainer}>
         <Text style={styles.label}>Correo Electrónico</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Introduzca su correo electrónico"
-        />
+        <TextInput style={styles.input} placeholder="Introduzca su correo electrónico" />
 
         <Text style={styles.label}>Contraseña</Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', position: 'relative' }}>
@@ -87,7 +87,7 @@ export default function LoginScreen({ navigation }) {
               right: 20, // Coloca el botón del ojo a 10px del borde derecho del contenedor View
               height: 40,
               top: 0, // Asegúrate de que el botón del ojo tenga la misma altura que el TextInput
-              justifyContent: 'center', // Centra el icono verticalmente dentro del botón del ojo
+              justifyContent: 'center' // Centra el icono verticalmente dentro del botón del ojo
             }}
           >
             <Ionicons name={hidePassword ? 'eye-off' : 'eye'} size={24} color="black" />
@@ -135,38 +135,38 @@ export default function LoginScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#fff'
   },
   logoContainer: {
     alignItems: 'center',
-    paddingTop: 130,
+    paddingTop: 130
   },
   logo: {
     width: 200,
     height: 200,
-    resizeMode: 'contain',
+    resizeMode: 'contain'
   },
   errores: {
     marginTop: -10,
     marginBottom: 10,
     color: 'red',
-    fontSize: 12,
+    fontSize: 12
   },
   logoText: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginTop: 10,
+    marginTop: 10
   },
   formContainer: {
     backgroundColor: '#ffffff',
     marginTop: 20,
     padding: 20,
-    borderRadius: 10,
+    borderRadius: 10
   },
   label: {
     fontSize: 16,
     marginBottom: 5,
-    marginTop: 10,
+    marginTop: 10
   },
   input: {
     height: 40,
@@ -175,43 +175,43 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingHorizontal: 10,
     marginBottom: 10,
-    marginEnd: 5,
+    marginEnd: 5
   },
   button: {
     backgroundColor: '#F89F9F',
     paddingVertical: 10,
     borderRadius: 5,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   buttonText: {
     color: '#ffffff',
-    fontWeight: 'bold',
+    fontWeight: 'bold'
   },
   forgotPassword: {
     textAlign: 'right',
     marginTop: 10,
     color: '#F89F9F',
-    textDecorationLine: 'underline',
+    textDecorationLine: 'underline'
   },
   registerContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    paddingBottom: '10%',
+    paddingBottom: '10%'
   },
   registerText: {
-    fontSize: 16,
+    fontSize: 16
   },
   registerLink: {
     fontSize: 16,
     fontWeight: 'bold',
     marginLeft: 5,
-    color: '#F89F9F',
+    color: '#F89F9F'
   },
   line: {
     borderBottomColor: '#ccc',
     borderBottomWidth: 1,
     paddingBottom: '45%',
     alignSelf: 'stretch', // Ajuste para que la línea ocupe todo el ancho
-    marginBottom: 10,
-  },
+    marginBottom: 10
+  }
 });

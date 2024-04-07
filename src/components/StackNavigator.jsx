@@ -31,13 +31,29 @@ export default function StackNavigator() {
           component={RegisterPreferencesScreen}
           options={{ headerShown: false }}
         />
-        <Stack.Screen name="UserGuidelines" component={UserGuidelinesScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="NotRegistered" component={NotRegisteredScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="ChangePassword" component={ChangePasswdScreen} options={{ headerShown: false }} />
+        <Stack.Screen
+          name="UserGuidelines"
+          component={UserGuidelinesScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="NotRegistered"
+          component={NotRegisteredScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ChangePassword"
+          component={ChangePasswdScreen}
+          options={{ headerShown: false }}
+        />
         <Stack.Screen name="GetCode" component={GetCodeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="GetEmail" component={GetEmailScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="EditProfile" component={EditProfileScreen} options={{ headerShown: false }} />
+        <Stack.Screen
+          name="EditProfile"
+          component={EditProfileScreen}
+          options={{ headerShown: false }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
