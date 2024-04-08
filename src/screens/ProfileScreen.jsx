@@ -21,10 +21,10 @@ const screenWidth = Dimensions.get('window').width;
 
 export default function ProfileScreen({ navigation }) {
   const { authState, setAuthState } = React.useContext(AuthContext);
-  // if (!authState.isLoggedIn) {
-  //   return <NotRegisteredScreen />;
-  //   // navigation.navigate('RegisterPreferences');
-  // }
+  if (!authState.isLoggedIn) {
+    return <NotRegisteredScreen />;
+    // navigation.navigate('RegisterPreferences');
+  }
   const scrollViewRef = useRef(null); // Referencia a ScrollView
 
   const [isProfileImageSelected, setIsProfileImageSelected] = useState(false);

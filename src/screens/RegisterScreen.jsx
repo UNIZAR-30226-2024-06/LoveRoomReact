@@ -11,7 +11,7 @@ import {
   StatusBar
 } from 'react-native';
 import AuthContext from '../components/AuthContext';
-import { AsyncStorage } from '@react-native-async-storage/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Login({ navigation }) {
   const { authState, setAuthState } = React.useContext(AuthContext);

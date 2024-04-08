@@ -16,6 +16,8 @@ import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import AuthContext from '../components/AuthContext';
 import * as FileSystem from 'expo-file-system';
+import Slider from '@react-native-community/slider';
+import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import { Feather } from '@expo/vector-icons'; // Importa el ícono de Feather
 
 
@@ -31,12 +33,13 @@ export default function RegisterPreferencesScreen({ navigation }) {
   const [show, setShow] = useState(false);
   const [gender, setGender] = useState(authState.sexo);
   const [sexualPreference, setSexualPreference] = useState(authState.buscasexo);
-  const [agePreferenceStart, setAgePreferenceStart] = useState(authState.buscaedadmin);
-  const [agePreferenceEnd, setAgePreferenceEnd] = useState(authState.buscaedadmax);
+  const [agePreference, setAgePreference] = useState([authState.buscaedadmin, authState.buscaedadmax]);
   const [description, setDescription] = useState(authState.descripcion);
   const [profileImage, setProfileImage] = useState(authState.fotoperfil);
   const [isProfileImageSelected, setIsProfileImageSelected] = useState();
   const { StorageAccessFramework } = FileSystem;
+
+  
 
   const fileName = FileSystem.documentDirectory + 'userProfileImage.jpeg';
   const checkProfileImage = async () => {
@@ -179,29 +182,36 @@ export default function RegisterPreferencesScreen({ navigation }) {
             <Picker.Item label="Todos" value="T" />
           </Picker>
         </View>
-
-        <Text style={styles.label}>Preferencia de edad</Text>
-        <View style={{ ...styles.agePreferenceContainer, flexDirection: 'row' }}>
-          <Picker
-            selectedValue={agePreferenceStart}
-            style={styles.ageInput}
-            onValueChange={(itemValue, itemIndex) => setAgePreferenceStart(itemValue)}
-          >
-            {[...Array(83).keys()].map((value, index) => (
-              <Picker.Item key={index} label={(value + 18).toString()} value={value + 18} />
-            ))}
-          </Picker>
-          <Text style={styles.rayaEdad}> - </Text>
-          <Picker
-            selectedValue={agePreferenceEnd}
-            style={styles.ageInput}
-            onValueChange={(itemValue, itemIndex) => setAgePreferenceEnd(itemValue)}
-          >
-            {[...Array(83).keys()].map((value, index) => (
-              <Picker.Item key={index} label={(value + 18).toString()} value={value + 18} />
-            ))}
-          </Picker>
+        <View style={styles.labelContainer}>
+          <Text style={styles.label}>Preferencia de edad</Text>
+          <Text style={styles.sliderLabel}>{agePreference[0]}-{agePreference[1]}</Text>
         </View>
+        <View style={styles.sliderLabelsContainer}>
+        </View>
+        <View style={styles.sliderContainer}>
+        <MultiSlider
+          values={agePreference}
+          sliderLength={screenWidth - 40} // Utiliza el ancho total de la pantalla menos los márgenes
+          min={18}
+          max={100}
+          step={1}
+          onValuesChange={(values) => setAgePreference(values)}
+          allowOverlap={false}
+          snapped={true}
+          minMarkerOverlapDistance={20}
+          selectedStyle={{
+            backgroundColor: '#F89F9F'
+          }}
+          markerStyle={{
+            backgroundColor: '#F89F9F'
+          }}
+          customMarker={(e) => {
+            return (
+              <View style={styles.customMarker} />
+            );
+          }}
+        />
+      </View>
 
         <Text style={styles.label}>Descripción</Text>
         <TextInput
@@ -296,6 +306,42 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'left'
   },
+
+  labelContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 10
+  },
+  
+  sliderContainer: {
+    marginBottom: 20
+  },
+  sliderText: {
+    fontSize: 16,
+    marginBottom: 10
+  },
+  slider: {
+    width: '100%'
+  },
+
+  sliderContainer: {
+    marginBottom: 20
+  },
+  customMarker: {
+    height: 20,
+    width: 20,
+    borderRadius: 10,
+    backgroundColor: '#F89F9F'
+  },
+  sliderLabelsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+  },
+  sliderLabel: {
+    fontSize: 16
+  },
+
   input: {
     height: 40,
     borderColor: '#cccccc',
