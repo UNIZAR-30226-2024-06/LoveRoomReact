@@ -16,6 +16,8 @@ import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import AuthContext from '../components/AuthContext';
 import * as FileSystem from 'expo-file-system';
+import { Feather } from '@expo/vector-icons'; // Importa el ícono de Feather
+
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
@@ -91,28 +93,27 @@ export default function RegisterPreferencesScreen({ navigation }) {
     <ScrollView style={styles.container}>
       <View style={styles.header} />
       <View style={styles.profileInfo}>
+        
         <Text style={styles.profileText}>Editar perfil</Text>
         <View style={styles.profileImageContainer}>
+        <TouchableOpacity style={styles.editIconContainer} onPress={pickImage}>
+          <Feather name="edit" size={25} color="black" />
+        </TouchableOpacity>
           <View style={styles.profileImageBorder}>
+            
             <Image
-              //   source={require('../img/profileImage.jpg')} // Ruta de la imagen de perfil
               style={styles.profileImage}
               source={
                 isProfileImageSelected
                   ? { uri: profileImage + '?' + new Date() }
                   : require('../img/profileImage.jpg')
-              }
-            />
+      }
+    />
           </View>
         </View>
       </View>
 
       <View style={styles.formContainer}>
-        <View style={styles.container}>
-          <TouchableOpacity onPress={pickImage} style={styles.button}>
-            <Text style={styles.buttonText}>Cambiar imagen de perfil</Text>
-          </TouchableOpacity>
-        </View>
 
         <Text style={styles.label}>Nombre completo</Text>
         <TextInput
@@ -231,6 +232,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff'
   },
 
+  editIconContainer: {
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    borderRadius: 15,
+    padding: 5,
+    borderColor: 'black', // Agrega el borde de color F89F9F
+    borderWidth: 1,
+    zIndex: 1 // Asegura que el ícono esté por encima de la imagen
+  },  
+
   header: {
     height: screenHeight * 0.27,
     backgroundColor: '#F89F9F'
@@ -242,8 +255,8 @@ const styles = StyleSheet.create({
   },
   profileText: {
     color: 'white',
-    fontSize: 30,
-    padding: 20,
+    fontSize: 20,
+    padding: 10,
     fontWeight: 'bold'
   },
   profileImageContainer: {
@@ -264,13 +277,15 @@ const styles = StyleSheet.create({
     overflow: 'hidden'
   },
   profileImage: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 70
-  },
+    width: '100%', // Reduzca ligeramente el tamaño de la imagen
+    height: '100%', // Reduzca ligeramente el tamaño de la imagen
+    borderRadius: 70,
+    marginBottom: 0,
+    marginRight: 0 // Añade este estilo para evitar que el ícono de edición cubra la imagen
+  },  
   formContainer: {
     backgroundColor: '#ffffff',
-    marginTop: 20,
+    marginTop: 0,
     padding: 20,
     borderRadius: 10
   },
@@ -279,7 +294,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     marginTop: 10,
     fontWeight: 'bold',
-    textAlign: 'center'
+    textAlign: 'left'
   },
   input: {
     height: 40,

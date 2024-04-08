@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
   const checkToken = async () => {
     const token = await AsyncStorage.getItem('token'); // Obtiene el token de autenticación almacenado en AsyncStorage
     console.log(token);
-    fetch('http://192.168.1.29:5000/user/check/token', {
+    fetch('http://192.168.1.44:5000/user/check/token', {
       // Realiza una petición al servidor para verificar si el token es válido
       method: 'GET',
       headers: {

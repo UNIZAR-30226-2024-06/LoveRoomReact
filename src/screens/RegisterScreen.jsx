@@ -33,7 +33,7 @@ export default function Login({ navigation }) {
   };
 
   const handleRegister = () => {
-    fetch('http://192.168.1.29:5000/user/create', {
+    fetch('http://192.168.1.44:5000/user/create', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
