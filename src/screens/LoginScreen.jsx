@@ -25,19 +25,19 @@ export default function LoginScreen({ navigation }) {
 
   const [hidePassword, setHidePassword] = useState(true);
 
-  // const handlePasswordChange = (text) => {
-  //   console.log(authState);
-  //   setPassword(text);
-  //   setIsValidPassword(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,16}$/.test(text));
-  // };
+  const handlePasswordChange = (text) => {
+    console.log(authState);
+    setPassword(text);
+    setIsValidPassword(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,16}$/.test(text));
+  };
 
-  // const handleEmailChange = (text) => {
-  //   setEmail(text);
-  //   setIsValidEmail(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(text));
-  // };
+  const handleEmailChange = (text) => {
+    setEmail(text);
+    setIsValidEmail(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(text));
+  };
 
   const handleLogin = () => {
-    fetch('http://192.168.1.29:3000/user/login', {
+    fetch('http://192.168.1.29:5000/user/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -47,7 +47,24 @@ export default function LoginScreen({ navigation }) {
       .then((response) => response.json())
       .then((data) => {
         if (data.token != null) {
-          setAuthState((prevState) => ({ ...prevState, isLoggedIn: true, token: data.token }));
+          setAuthState({
+            isLoggedIn: true,
+            token: data.token,
+            baneado: data.usuario.baneado,
+            id: data.usuario.id,
+            correo: data.usuario.correo,
+            nombre: data.usuario.nombre,
+            sexo: data.usuario.sexo,
+            edad: data.usuario.edad,
+            idLocalidad: data.usuario.idLocalidad,
+            buscaedadmin: data.usuario.buscaedadmin,
+            buscaedadmax: data.usuario.buscaedadmax,
+            buscasexo: data.usuario.buscasexo,
+            fotoperfil: data.usuario.fotoperfil,
+            descripcion: data.usuario.descripcion,
+            tipousuario: data.usuario.tipousuario,
+            contrasena: data.usuario.contrasena,
+          });
           AsyncStorage.setItem('token', data.token);
           navigation.navigate('Cuenta');
         } else {
@@ -71,14 +88,16 @@ export default function LoginScreen({ navigation }) {
 
       <View style={styles.formContainer}>
         <Text style={styles.label}>Correo Electrónico</Text>
-        <TextInput style={styles.input} placeholder="Introduzca su correo electrónico" />
+        <TextInput style={styles.input} placeholder="Introduzca su correo electrónico"
+          onChangeText={handleEmailChange} />
 
         <Text style={styles.label}>Contraseña</Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', position: 'relative' }}>
           <TextInput
             style={[styles.input, { paddingRight: 40, flex: 1 }]} // Añade paddingRight para evitar que el texto se superponga con el botón del ojo
-            placeholder="Introduzca la nueva contraseña otra vez"
+            placeholder="Introduzca la contraseña"
             secureTextEntry={hidePassword}
+            onChangeText={handlePasswordChange}
           />
           <TouchableOpacity
             onPress={() => setHidePassword(!hidePassword)}

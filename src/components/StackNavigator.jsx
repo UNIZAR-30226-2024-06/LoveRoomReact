@@ -13,6 +13,7 @@ import ProfileScreen from '../screens/ProfileScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
 import RegisterPreferencesScreen from '../screens/RegisterPreferencesScreen';
 import UserGuidelinesScreen from '../screens/UserGuidelinesScreen';
+import VideoScreen from '../screens/VideoScreen';
 
 const Stack = createStackNavigator();
 
@@ -54,6 +55,7 @@ export default function StackNavigator() {
           component={EditProfileScreen}
           options={{ headerShown: false }}
         />
+        <Stack.Screen name="Video" component={VideoScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -48,7 +48,22 @@ export const AuthProvider = ({ children }) => {
             // Actualiza el estado de autenticación con el token y otros datos del usuario
             ...prevState,
             isLoggedIn: true,
-            token: data.token
+            token: data.token,
+            baneado: data.usuario.baneado,
+            id: data.usuario.id,
+            correo: data.usuario.correo,
+            nombre: data.usuario.nombre,
+            sexo: data.usuario.sexo,
+            edad: data.usuario.edad,
+            idLocalidad: data.usuario.idLocalidad,
+            buscaedadmin: data.usuario.buscaedadmin,
+            buscaedadmax: data.usuario.buscaedadmax,
+            buscasexo: data.usuario.buscasexo,
+            fotoperfil: data.usuario.fotoperfil,
+            descripcion: data.usuario.descripcion,
+            tipousuario: data.usuario.tipousuario,
+            contrasena: data.usuario.contrasena,
+
           }));
         } else {
           console.log('Token inválido');
