@@ -7,21 +7,72 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
-  Platform,
-  StatusBar
+  Alert
 } from 'react-native';
 import AuthContext from '../components/AuthContext';
 
 export default function GetEmailScreen({ navigation }) {
-  const { setIsRegistered } = React.useContext(AuthContext);
+  // const { isRegistered, setIsRegistered } = React.useContext(AuthContext);
+  const [email, setEmail] = React.useState('');
+  const [isValidEmail, setIsValidEmail] = React.useState(true);
+  const [formSubmitted, setFormSubmitted] = React.useState(false);
+  const [errorText, setErrorText] = React.useState('');
 
-  const handleRegister = () => {
-    setIsRegistered(true);
+
+  // const handleRegister = () => {
+  //   setIsRegistered(true);
+  // };
+
+  const handleEmailChange = (text) => {
+    setEmail(text);
+    setIsValidEmail(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(text));
+    setFormSubmitted(false);
+    if (errorText === 'Usuario no existente') {
+      setErrorText(''); // Limpiar el mensaje de error cuando el usuario comienza a escribir nuevamente
+    }
+  };
+  
+
+
+  const handleChangePassword = () => {
+    setFormSubmitted(true);
+    if (isValidEmail) {
+      isRegistered2();
+    }
   };
 
-  handleChangePassword = () => {
-    // Implementar lógica para cambiar la contraseña
-  };
+const isRegistered2 = () => {
+  fetch(`http://192.168.1.44:5000/user/${email}`, {
+    method: 'GET',
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('Error al obtener el usuario');
+      }
+      return response.json();
+    })
+    .then((data) => {
+      if (data.error) {
+        if (data.error === 'Usuario no encontrado') {
+          // Si el usuario no se encuentra, actualiza el estado para mostrar el mensaje de error
+          setIsValidEmail(false);
+          setFormSubmitted(true);
+        } else {
+          Alert.alert('Error', 'Error al obtener el usuario');
+        }
+      } else {
+        // Enviar peticion a backend de generar código y enviarlo al usuario
+        navigation.navigate('GetCode');
+      }
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+      Alert.alert('Error', 'Error al conectar con la base de datos');
+      setIsValidEmail(false);
+      setFormSubmitted(true);
+      setErrorText('Usuario no existente');
+    });
+};
 
   return (
     <ScrollView style={styles.container}>
@@ -31,14 +82,25 @@ export default function GetEmailScreen({ navigation }) {
 
       <View style={styles.formContainer}>
         <Text style={styles.label}>Correo electrónico</Text>
-        <TextInput style={styles.input} placeholder="Introduzca su correo electrónico " />
+        <TextInput
+          style={[
+            styles.input,
+            (!isValidEmail && formSubmitted) && styles.inputError,
+            (errorText === 'Usuario no existente') && styles.inputError 
+          ]} 
+          placeholder="Introduzca su correo electrónico "
+          onChangeText={handleEmailChange}
+        />
+        {!isValidEmail && formSubmitted && errorText !== 'Usuario no existente' && (
+          <Text style={styles.errorText}>* Por favor, introduzca un correo electrónico válido.</Text>
+        )}
+        {errorText === 'Usuario no existente' && (
+          <Text style={styles.errorText}>* No existe ninguna cuenta de usuario asociada a este correo electrónico.</Text>
+        )}
 
         <TouchableOpacity
           style={styles.button}
-          onPress={() => {
-            handleChangePassword();
-            navigation.navigate('GetCode');
-          }}
+          onPress={handleChangePassword}
         >
           <Text style={styles.buttonText}>Continuar</Text>
         </TouchableOpacity>
@@ -82,7 +144,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 10,
-    marginBottom: 10
+    marginBottom: 5
+  },
+  inputError: {
+    borderColor: 'red', 
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginBottom: 5
   },
   button: {
     backgroundColor: '#F89F9F',
@@ -93,31 +163,5 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#ffffff',
     fontWeight: 'bold'
-  },
-  forgotPassword: {
-    textAlign: 'right',
-    marginTop: 10,
-    color: '#F89F9F',
-    textDecorationLine: 'underline'
-  },
-  registerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    paddingBottom: '10%'
-  },
-  registerText: {
-    fontSize: 16
-  },
-  registerLink: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginLeft: 5,
-    color: '#F89F9F'
-  },
-  line: {
-    borderBottomColor: '#ccc',
-    borderBottomWidth: 1,
-    paddingBottom: '45%',
-    alignSelf: 'stretch' // Ajuste para que la línea ocupe todo el ancho
   }
 });
