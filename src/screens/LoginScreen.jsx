@@ -19,23 +19,29 @@ export default function LoginScreen({ navigation }) {
   const { authState, setAuthState } = React.useContext(AuthContext);
   const [email, setEmail] = React.useState('');
   const [isValidEmail, setIsValidEmail] = React.useState(true);
+  const [emailError, setEmailError] = React.useState(false);
 
   const [password, setPassword] = React.useState('');
   const [isValidPassword, setIsValidPassword] = React.useState(true);
+  const [passwordError, setPasswordError] = React.useState(false);
 
   const [hidePassword, setHidePassword] = useState(true);
-
-  const handlePasswordChange = (text) => {
-    console.log(authState);
-    setPassword(text);
-    setIsValidPassword(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,16}$/.test(text));
-  };
 
   const handleEmailChange = (text) => {
     setEmail(text);
     setIsValidEmail(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(text));
+    setEmailError(false); // Reinicia el estado de error del correo electrónico
+  };
+  
+  const handlePasswordChange = (text) => {
+    setPassword(text);
+    setIsValidPassword(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,16}$/.test(text));
+    setPasswordError(false); // Reinicia el estado de error de la contraseña
   };
 
+
+  //FALTA: MODIFICAR ESTO PARA QUE PRIMERO SE VERIFIQUE QUE EL CORREO EXISTA Y LUEGO SE HAGA EL LOGIN, ASI PODEMOS DAR
+  // A SABER AL USUARIO SI FALLA EL CORREO O LA CONTRASEÑA
   const handleLogin = () => {
     fetch('http://192.168.1.44:5000/user/login', {
       method: 'POST',
@@ -88,13 +94,26 @@ export default function LoginScreen({ navigation }) {
 
       <View style={styles.formContainer}>
         <Text style={styles.label}>Correo Electrónico</Text>
-        <TextInput style={styles.input} placeholder="Introduzca su correo electrónico"
-          onChangeText={handleEmailChange} />
+        <TextInput
+          style={[
+            styles.input,
+            emailError && styles.inputError 
+          ]}
+          placeholder="Introduzca su correo electrónico"
+          onChangeText={handleEmailChange}
+        />
+        {emailError && (
+          <Text style={styles.errorText}>* Por favor, introduzca un correo electrónico válido.</Text>
+        )}
 
         <Text style={styles.label}>Contraseña</Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', position: 'relative' }}>
+        <View>
           <TextInput
-            style={[styles.input, { paddingRight: 40, flex: 1 }]} // Añade paddingRight para evitar que el texto se superponga con el botón del ojo
+            style={[
+              styles.input,
+              { paddingRight: 40, flex: 1 }, // Estilos para ocupar todo el espacio horizontal disponible
+              passwordError && styles.inputError // Estilo de error si hay un error en la contraseña
+            ]}
             placeholder="Introduzca la contraseña"
             secureTextEntry={hidePassword}
             onChangeText={handlePasswordChange}
@@ -111,15 +130,21 @@ export default function LoginScreen({ navigation }) {
           >
             <Ionicons name={hidePassword ? 'eye-off' : 'eye'} size={24} color="black" />
           </TouchableOpacity>
+          {passwordError && (
+          <Text style={[styles.errorText]}>* Por favor, introduzca una contraseña válida.</Text>
+        )}
         </View>
 
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
-            if (isValidEmail && isValidPassword) {
-              handleLogin();
+            if (!isValidEmail) {
+              setEmailError(true); // Establecer el estado de error del correo electrónico
+            }
+            if (!isValidPassword) {
+              setPasswordError(true); // Establecer el estado de error de la contraseña
             } else {
-              alert('Por favor, introduzca un correo electrónico y una contraseña válidos.');
+              handleLogin(); // Se ejecuta cuando tanto el correo electrónico como la contraseña son válidos
             }
           }}
         >
@@ -165,17 +190,6 @@ const styles = StyleSheet.create({
     height: 200,
     resizeMode: 'contain'
   },
-  errores: {
-    marginTop: -10,
-    marginBottom: 10,
-    color: 'red',
-    fontSize: 12
-  },
-  logoText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginTop: 10
-  },
   formContainer: {
     backgroundColor: '#ffffff',
     marginTop: 20,
@@ -193,8 +207,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 10,
-    marginBottom: 10,
+    marginBottom: 5,
     marginEnd: 5
+  },
+  inputError: {
+    borderColor: 'red', // Cambia el borde a rojo si hay un error
   },
   button: {
     backgroundColor: '#F89F9F',
@@ -232,5 +249,10 @@ const styles = StyleSheet.create({
     paddingBottom: '45%',
     alignSelf: 'stretch', // Ajuste para que la línea ocupe todo el ancho
     marginBottom: 10
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginBottom: 5
   }
 });
