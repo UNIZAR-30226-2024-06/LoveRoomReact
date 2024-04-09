@@ -126,7 +126,7 @@ export default function ProfileScreen({ navigation }) {
             <Text style={styles.headlineText}>Acerca de</Text>
           </View>
           <View>
-            <TouchableOpacity style={styles.faqButton}>
+            <TouchableOpacity style={styles.faqButton} onPress={() => {navigation.navigate('FAQ');}}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Image source={require('../img/ayudar.png')} style={styles.faqIcon} />
                 <Text style={styles.faqText}>Preguntas frecuentes</Text>
