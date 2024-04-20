@@ -8,7 +8,9 @@ import {
   Image,
   StyleSheet,
   Platform,
-  StatusBar
+  StatusBar,
+  ActivityIndicator,
+  Modal
 } from 'react-native';
 import AuthContext from '../components/AuthContext';
 import RegisterScreen from './RegisterScreen';
@@ -27,6 +29,8 @@ export default function LoginScreen({ navigation }) {
 
   const [hidePassword, setHidePassword] = useState(true);
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleEmailChange = (text) => {
     setEmail(text);
     setIsValidEmail(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(text));
@@ -39,11 +43,12 @@ export default function LoginScreen({ navigation }) {
     setPasswordError(false); // Reinicia el estado de error de la contraseña
   };
 
-
   //FALTA: MODIFICAR ESTO PARA QUE PRIMERO SE VERIFIQUE QUE EL CORREO EXISTA Y LUEGO SE HAGA EL LOGIN, ASI PODEMOS DAR
   // A SABER AL USUARIO SI FALLA EL CORREO O LA CONTRASEÑA
   const handleLogin = () => {
-    fetch('http://192.168.1.44:5000/user/login', {
+    setIsLoading(true);
+    console.log(`${process.env.EXPO_PUBLIC_API_URL}/user/login`);
+    fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -52,6 +57,7 @@ export default function LoginScreen({ navigation }) {
     })
       .then((response) => response.json())
       .then((data) => {
+        setIsLoading(false);
         if (data.token != null) {
           setAuthState({
             isLoggedIn: true,
@@ -79,6 +85,7 @@ export default function LoginScreen({ navigation }) {
         }
       })
       .catch((error) => {
+        setIsLoading(false);
         console.error('Error:', error);
       });
   };
@@ -88,9 +95,23 @@ export default function LoginScreen({ navigation }) {
       style={styles.container}
       contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }}
     >
+
       <View style={[styles.logoContainer, { marginBottom: -90 }]}>
         <Image style={styles.logo} source={require('../img/logoTexto.png')} />
       </View>
+      <Modal
+        transparent={true}
+        animationType={'none'}
+        visible={isLoading}
+        onRequestClose={() => {console.log('close modal')}}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.activityIndicatorWrapper}>
+            <ActivityIndicator animating={isLoading} size="large" color="#0000ff" />
+            <Text style={styles.loadingText}>Iniciando sesión...</Text>
+          </View>
+        </View>
+      </Modal>
 
       <View style={styles.formContainer}>
         <Text style={styles.label}>Correo Electrónico</Text>
@@ -254,5 +275,25 @@ const styles = StyleSheet.create({
     color: 'red',
     fontSize: 12,
     marginBottom: 5
+  },
+  modalBackground: {
+    flex: 1,
+    alignItems: 'center',
+    flexDirection: 'column',
+    justifyContent: 'space-around',
+    backgroundColor: '#00000040'
+  },
+  activityIndicatorWrapper: {
+    backgroundColor: '#FFFFFF',
+    height: 120,
+    width: 200,
+    borderRadius: 10,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-around'
+  },
+  loadingText: {
+    textAlign: 'center', // Centra el texto
+    flexWrap: 'wrap', // Permite que el texto se ajuste
   }
 });

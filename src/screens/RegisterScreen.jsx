@@ -33,7 +33,7 @@ export default function Login({ navigation }) {
   };
 
   const handleRegister = () => {
-    fetch('http://192.168.1.44:5000/user/create', {
+    fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/create`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

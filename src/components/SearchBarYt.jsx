@@ -17,8 +17,9 @@ const SearchBar = () => {
 
     const handlePeticion =() => {
         setNextPageToken("");
+        setListVideos([]);
         const params = new URLSearchParams({
-            "key": "AIzaSyA12wmEob4dgLjW35ykIc76lrJsaJHx2JA",
+            "key": "AIzaSyBr5DjVR2-rcywoSZ2Df2pmqDmS32_HVz4",
             "part": "id, snippet",
             "q": search,
             "type": "video",

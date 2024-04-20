@@ -1,16 +1,88 @@
-import React from 'react'
-import { FlatList, StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native'
+import React, { useEffect, useState, useContext } from 'react'
+import { FlatList, StyleSheet, Text, View, Image, TouchableOpacity, Modal, ActivityIndicator } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
-
-
-
+import { socketEvents } from './Socket';
+import Socket from './Socket';
+import AuthContext from './AuthContext';
 
 const SearchFilter = ({data, search, setListVideos, nextPageToken, setNextPageToken}) => {
     const navigation = useNavigation();
+    const [counter, setCounter] = useState(5);
+    const [showModal, setShowModal] = useState(false);
+    const [videoId, setVideoId] = useState('');
+    const { authState } = useContext(AuthContext);
+    const [mensaje, setMensaje] = useState('');
+
+    useEffect(() => {
+        let intervalId;
+        let count = 1;
+        if (showModal && counter > 0) {
+            intervalId = setInterval(() => {
+                setCounter(counter => counter - 1);
+            }, 1000);
+        } else if (counter === 0) {
+            clearInterval(intervalId);
+            setShowModal(false);
+            
+            if(count && mensaje!="Error al buscar match, inténtalo de nuevo"){
+                count = 0;
+                navigation.navigate('Video', {videoId: videoId});
+                alert(mensaje);
+            } else if( count && mensaje=="Error al buscar match, inténtalo de nuevo"){
+                alert(mensaje);
+            }
+        }
+
+        return () => clearInterval(intervalId);
+    }, [showModal, counter]);
+
+    useEffect(() => {
+        if (mensaje) {
+            setShowModal(true);
+        }
+    }, [mensaje]);
+        
+
+    const buscarMatch = (videoId) => {
+        setShowModal(true);
+        setCounter(5);   
+        fetchMatch(videoId);  
+    }
+
+    const fetchMatch = (videoId) => {
+        console.log(authState.token)
+        fetch(`${process.env.EXPO_PUBLIC_API_URL}/videos/watch/${videoId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application',
+                Authorization: `Bearer ${authState.token}`
+            }
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            console.log(data);
+            if(data.esSalaUnitaria==true){
+                setMensaje("No hay nadie en la sala, ¡espera a que alguien entre!");
+                setVideoId(videoId);
+            }
+            else if(data.esSalaUnitaria==false){
+                // console.log("Sala con persona, ¡he hecho match!");
+                setMensaje("Has hecho match con alguien, ¡disfruta la sala!");
+                setVideoId(videoId);
+            }
+            else{
+                setMensaje("Error al buscar match, inténtalo de nuevo");
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    }
+
 
     const handlePeticionAux =() => {
         const params = new URLSearchParams({
-            "key": "AIzaSyA12wmEob4dgLjW35ykIc76lrJsaJHx2JA",
+            "key": "AIzaSyBr5DjVR2-rcywoSZ2Df2pmqDmS32_HVz4",
             "part": "id, snippet",
             "q": search,
             "type": "video",
@@ -58,12 +130,28 @@ const SearchFilter = ({data, search, setListVideos, nextPageToken, setNextPageTo
         <View style={{
             marginTop: 10,
         }}>
+            <Modal
+                transparent={true}
+                animationType={'none'}
+                visible={showModal}
+            >
+                <View style={styles.modalBackground}>
+                    <View style={styles.activityIndicatorWrapper}>
+                        <ActivityIndicator animating={showModal} size="large" color="#0000ff" />
+                        <Text>Buscando match... {counter}</Text>
+                    </View>
+                </View>
+            </Modal>
             <FlatList data={data} 
                     keyExtractor={(item, index) => item.id.videoId + index}
                     renderItem={({item}) => {
                 // if(item.snippet.title.toLowerCase().includes(search.toLowerCase())){
                     return (
-                        <TouchableOpacity onPress={() => { navigation.navigate('Video', {videoId: item.id.videoId})}}>
+                        <TouchableOpacity onPress={() => { 
+                            // navigation.navigate('Video', {videoId: item.id.videoId})
+                                buscarMatch(item.id.videoId);
+
+                            }}>
                             <View style={{
                                 marginVertical: 10,
                             }}>
@@ -120,6 +208,23 @@ const SearchFilter = ({data, search, setListVideos, nextPageToken, setNextPageTo
     );
 };
 
-export default SearchFilter;
+const styles = StyleSheet.create({
+    modalBackground: {
+        flex: 1,
+        alignItems: 'center',
+        flexDirection: 'column',
+        justifyContent: 'space-around',
+        backgroundColor: '#00000040'
+    },
+    activityIndicatorWrapper: {
+        backgroundColor: '#FFFFFF',
+        height: 100,
+        width: 200,
+        borderRadius: 10,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-around'
+    }
+});
 
-const styles = StyleSheet.create({})
+export default SearchFilter;

@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
   const checkToken = async () => {
     const token = await AsyncStorage.getItem('token'); // Obtiene el token de autenticación almacenado en AsyncStorage
     console.log(token);
-    fetch('http://192.168.1.44:5000/user/check/token', {
+    fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/check/token`, {
       // Realiza una petición al servidor para verificar si el token es válido
       method: 'GET',
       headers: {
@@ -48,23 +48,15 @@ export const AuthProvider = ({ children }) => {
             // Actualiza el estado de autenticación con el token y otros datos del usuario
             ...prevState,
             isLoggedIn: true,
-            token: data.token,
-            baneado: data.usuario.baneado,
-            id: data.usuario.id,
-            correo: data.usuario.correo,
-            nombre: data.usuario.nombre,
-            sexo: data.usuario.sexo,
-            edad: data.usuario.edad,
-            idLocalidad: data.usuario.idLocalidad,
-            buscaedadmin: data.usuario.buscaedadmin,
-            buscaedadmax: data.usuario.buscaedadmax,
-            buscasexo: data.usuario.buscasexo,
-            fotoperfil: data.usuario.fotoperfil,
-            descripcion: data.usuario.descripcion,
-            tipousuario: data.usuario.tipousuario,
-            contrasena: data.usuario.contrasena,
-
+            token: token,
           }));
+          // fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/check/token`,{
+          //   method: 'GET',
+          //   headers: {
+          //     'Content-Type': 'application/json',
+          //     Authorization: `Bearer ${token}`
+          //   }
+          // });
         } else {
           console.log('Token inválido');
           setAuthState((prevState) => ({ ...prevState, isLoggedIn: false, token: null }));
