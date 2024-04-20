@@ -18,7 +18,7 @@ import AuthContext from '../components/AuthContext';
 import * as FileSystem from 'expo-file-system';
 import Slider from '@react-native-community/slider';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
-import { Feather } from '@expo/vector-icons'; // Importa el ícono de Feather
+import { Feather } from '@expo/vector-icons';
 
 
 const screenHeight = Dimensions.get('window').height;
@@ -191,7 +191,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
         <View style={styles.sliderContainer}>
         <MultiSlider
           values={agePreference}
-          sliderLength={screenWidth - 40} // Utiliza el ancho total de la pantalla menos los márgenes
+          sliderLength={screenWidth - 40} 
           min={18}
           max={100}
           step={1}

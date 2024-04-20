@@ -36,18 +36,14 @@ export default function ProfileScreen({ navigation }) {
       scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: false });
     }
   };
-  // isProfileImageSelected = FileSystem.getInfoAsync(userProfileImage);
-  // console.log('isProfileImageSelected', isProfileImageSelected);
+
   const checkProfileImage = async () => {
-    // console.log('userProfileImage', userProfileImage);
     const fileInfo = await FileSystem.getInfoAsync(userProfileImage);
-    // console.log('fileInfo', fileInfo);
     setIsProfileImageSelected(fileInfo.exists);
     if (fileInfo.exists) {
       updateProfileImage(FileSystem.documentDirectory + 'userProfileImage.jpeg');
       console.log('Profile image updated');
     }
-    // console.log('isProfileImageSelected', fileInfo.exists);
   };
 
   const [userProfileImage, setUserProfileImage] = useState(
@@ -92,7 +88,7 @@ export default function ProfileScreen({ navigation }) {
             />
           </View>
         </View>
-        {/* <TouchableOpacity style={styles.editButton} onPress={() => console.log(authState)}> */}
+        
         <TouchableOpacity
           style={styles.editButton}
           onPress={() => {
