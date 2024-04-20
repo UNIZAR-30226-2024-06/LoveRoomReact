@@ -24,11 +24,65 @@ import { Feather } from '@expo/vector-icons'; // Importa el ícono de Feather
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
 
+const provinciasDeEspana = [
+  'Álava',
+  'Albacete',
+  'Alicante',
+  'Almería',
+  'Asturias',
+  'Ávila',
+  'Badajoz',
+  'Baleares',
+  'Barcelona',
+  'Burgos',
+  'Cáceres',
+  'Cádiz',
+  'Cantabria',
+  'Castellón',
+  'Ceuta',
+  'Ciudad Real',
+  'Córdoba',
+  'Cuenca',
+  'Gerona',
+  'Granada',
+  'Guadalajara',
+  'Guipúzcoa',
+  'Huelva',
+  'Huesca',
+  'Jaén',
+  'La Coruña',
+  'La Rioja',
+  'Las Palmas',
+  'León',
+  'Lérida',
+  'Lugo',
+  'Madrid',
+  'Málaga',
+  'Melilla',
+  'Murcia',
+  'Navarra',
+  'Orense',
+  'Palencia',
+  'Pontevedra',
+  'Salamanca',
+  'Santa Cruz de Tenerife',
+  'Segovia',
+  'Sevilla',
+  'Soria',
+  'Tarragona',
+  'Teruel',
+  'Toledo',
+  'Valencia',
+  'Valladolid',
+  'Vizcaya',
+  'Zamora',
+  'Zaragoza'
+];
+
 export default function RegisterPreferencesScreen({ navigation }) {
+  //Solo se hace estado cuando se quiere mostrar algo 
   const { authState } = useContext(AuthContext);
   const [name, setName] = useState(authState.nombre);
-  const [email, setEmail] = useState(authState.correo);
-  const [password, setPassword] = useState(authState.contrasena);
   const [age, setAge] = useState(authState.edad);
   const [show, setShow] = useState(false);
   const [gender, setGender] = useState(authState.sexo);
@@ -36,9 +90,50 @@ export default function RegisterPreferencesScreen({ navigation }) {
   const [agePreference, setAgePreference] = useState([authState.buscaedadmin, authState.buscaedadmax]);
   const [description, setDescription] = useState(authState.descripcion);
   const [profileImage, setProfileImage] = useState(authState.fotoperfil);
+  const [idLocalidad, setIdLocalidad] = useState(authState.idLocalidad);
   const [isProfileImageSelected, setIsProfileImageSelected] = useState();
   const { StorageAccessFramework } = FileSystem;
+  const [selectedProvincia, setSelectedProvincia] = useState(authState.idLocalidad || '');
 
+  const handleSave = () => {
+    fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/update`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authState.token}`
+      },
+      body: JSON.stringify({
+        nombre: name,
+        correo: authState.email,
+        contrasena: authState.password,
+        edad: age,
+        sexo: gender,
+        buscaedadmin: agePreference[0],
+        buscaedadmax: agePreference[1],
+        buscasexo: sexualPreference,
+        descripcion: description,
+        fotoperfil: profileImage,
+        idLocalidad: idLocalidad,
+        tipousuario: authState.tipousuario,
+        baneado: authState.baneado
+      })
+    })
+      .then(response => {
+        if (response.ok) {
+          navigation.navigate('Cuenta');
+        } else {
+          // Si la respuesta no es exitosa, obtener el mensaje de error del JSON
+          return response.json().then(data => {
+            const errorMessage = data.error || 'Error al actualizar el usuario';
+            // Mostrar un warning en pantalla (puedes usar un componente de alerta o similar)
+            alert(`Error: ${errorMessage}`);
+          });
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+  };
   
 
   const fileName = FileSystem.documentDirectory + 'userProfileImage.jpeg';
@@ -110,8 +205,8 @@ export default function RegisterPreferencesScreen({ navigation }) {
                 isProfileImageSelected
                   ? { uri: profileImage + '?' + new Date() }
                   : require('../img/profileImage.jpg')
-      }
-    />
+              }
+            />
           </View>
         </View>
       </View>
@@ -125,26 +220,27 @@ export default function RegisterPreferencesScreen({ navigation }) {
           onChangeText={(text) => setName(text)}
         />
 
-        <Text style={styles.label}>Correo Electrónico</Text>
-        <TextInput
-          style={styles.textContainer}
-          defaultValue={authState.correo}
-          onChangeText={(text) => setEmail(text)}
-        />
-
-        <Text style={styles.label}>Contraseña</Text>
-        <TextInput
-          style={styles.textContainer}
-          defaultValue={authState.contrasena}
-          secureTextEntry={true}
-          onChangeText={(text) => setPassword(text)}
-        />
-
         <Text style={styles.label}>Edad</Text>
         <View style={{ ...styles.input, justifyContent: 'center' }}>
           <Picker selectedValue={age} onValueChange={(itemValue) => setAge(itemValue)}>
             {[...Array(83)].map((_, i) => (
               <Picker.Item key={i} label={(i + 18).toString()} value={i + 18} />
+            ))}
+          </Picker>
+        </View>
+
+        <Text style={styles.label}>Localidad</Text>
+        <View style={{ ...styles.input, justifyContent: 'center' }}>
+          <Picker
+            selectedValue={selectedProvincia}
+            onValueChange={(value) => {
+              setSelectedProvincia(value);
+              setIdLocalidad(value);
+            }}
+            defaultValue={authState.idLocalidad}
+          >
+            {provinciasDeEspana.map((provincia, index) => (
+              <Picker.Item key={index} label={provincia} value={provincia} />
             ))}
           </Picker>
         </View>
@@ -179,19 +275,18 @@ export default function RegisterPreferencesScreen({ navigation }) {
           >
             <Picker.Item label="Hombres" value="H" />
             <Picker.Item label="Mujeres" value="M" />
-            <Picker.Item label="Todos" value="T" />
+            <Picker.Item label="Ambos" value="T" />
           </Picker>
         </View>
+        
         <View style={styles.labelContainer}>
           <Text style={styles.label}>Preferencia de edad</Text>
           <Text style={styles.sliderLabel}>{agePreference[0]}-{agePreference[1]}</Text>
         </View>
-        <View style={styles.sliderLabelsContainer}>
-        </View>
         <View style={styles.sliderContainer}>
         <MultiSlider
           values={agePreference}
-          sliderLength={screenWidth - 40} // Utiliza el ancho total de la pantalla menos los márgenes
+          sliderLength={screenWidth - 40}
           min={18}
           max={100}
           step={1}
@@ -216,7 +311,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
         <Text style={styles.label}>Descripción</Text>
         <TextInput
           style={styles.description}
-          placeholder="Introduce tu descripción aquí"
+          placeholder="Cuéntanos un poco sobre ti..."
           multiline={true}
           numberOfLines={4}
           onChangeText={(text) => setDescription(text)}
@@ -225,11 +320,10 @@ export default function RegisterPreferencesScreen({ navigation }) {
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
-            // TODO: handleRegister();
-            navigation.navigate('Cuenta');
+            handleSave();
           }}
         >
-          <Text style={styles.buttonText}>Guardar</Text>
+          <Text style={styles.buttonText}> Guardar</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -314,9 +408,6 @@ const styles = StyleSheet.create({
     marginTop: 10
   },
   
-  sliderContainer: {
-    marginBottom: 20
-  },
   sliderText: {
     fontSize: 16,
     marginBottom: 10
@@ -326,8 +417,9 @@ const styles = StyleSheet.create({
   },
 
   sliderContainer: {
-    marginBottom: 20
+    marginBottom: 0
   },
+
   customMarker: {
     height: 20,
     width: 20,
