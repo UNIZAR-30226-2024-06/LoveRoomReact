@@ -25,14 +25,18 @@ const VideoScreen = ({ route }) => {
 
     // Llamar a la función para conectar al socket
     connectToSocket();
-
-    // Devolver una función de limpieza para desconectar el socket cuando el componente se desmonte
-    return () => {
-      Socket.disconnect();
-    };
   }, []);
   
-  const handleStateChange = (event) => {
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('blur', () => {
+      Socket.disconnect();
+    });
+
+    // Devuelve una función de limpieza para ejecutar al desmontar el componente
+    return unsubscribe;
+  }, [navigation]);
+
+  const handleStateChange = (event) => { 
     if (event === 'playing') {
       console.log('playing');
       setIsPlaying(true);
@@ -46,20 +50,22 @@ const VideoScreen = ({ route }) => {
       console.log('Pause event emitted');
     }
   };
-  if(Socket.socket !== null){
-    console.log('Socket not null');
-    Socket.socket.on(socketEvents.PAUSE, () => {
-      console.log('Pause event received');
-      setIsPlaying(false);
-    });
-  }
-  if(Socket.socket != null){
-    console.log('Socket not null');
-    Socket.socket.on(socketEvents.PLAY, () => {
-      console.log('Play event received');
-      setIsPlaying(true);
-    });
-  }
+
+
+  // if(Socket.socket !== null){
+  //   console.log('Socket not null');
+  //   Socket.socket.on(socketEvents.PAUSE, (receiverId) => {
+  //     console.log('Pause event received: ', receiverId);
+  //     setIsPlaying(false);
+  //   });
+  // }
+  // if(Socket.socket != null){
+  //   console.log('Socket not null');
+  //   Socket.socket.on(socketEvents.PLAY, (receiverId) => {
+  //     console.log('Play event received: ', receiverId);
+  //     setIsPlaying(true);
+  //   });
+  // }
   
 
   return (

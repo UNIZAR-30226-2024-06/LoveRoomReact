@@ -24,18 +24,14 @@ class Socket {
 
   async waitForMatch(setSenderId, setReceiverId, setIdVideo, setIsPlaying) {
     console.log('Waiting for match');
-      this.socket.on(socketEvents.MATCH, (data) => {
-        console.log('Match found', data);
-        setSenderId(data.senderId);
-        setReceiverId(data.receiverId);
-        setIdVideo(data.idVideo);
+      this.socket.on(socketEvents.MATCH, (senderId, receiverId, idVideo) => {
+        console.log('Match found', senderId, receiverId, idVideo);
+        setSenderId(senderId);
+        setReceiverId(receiverId);
+        setIdVideo(idVideo);
         setIsPlaying(false);
       });
   }
-
-  
-
-
 
   disconnect() {
     if (this.socket) {

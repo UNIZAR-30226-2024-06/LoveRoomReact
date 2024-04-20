@@ -11,15 +11,12 @@ const SearchBar = () => {
   const [listVideos, setListVideos] = useState([]);
   const [nextPageToken, setNextPageToken] = useState("");
 
-    // useEffect(() => {
-    //    setListVideos([]);
-    // }, [search]);
 
     const handlePeticion =() => {
         setNextPageToken("");
         setListVideos([]);
         const params = new URLSearchParams({
-            "key": "AIzaSyBr5DjVR2-rcywoSZ2Df2pmqDmS32_HVz4",
+            "key": `${process.env.EXPO_PUBLIC_YT_KEY}`,
             "part": "id, snippet",
             "q": search,
             "type": "video",
