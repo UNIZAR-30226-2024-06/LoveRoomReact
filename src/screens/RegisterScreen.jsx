@@ -132,6 +132,7 @@ export default function Login({ navigation }) {
           ]}
           placeholder="Introduzca su correo electrónico"
           onChangeText={handleEmailChange}
+          autoCapitalize="none"
         />
         {emailError && (
           <Text style={styles.errorText}>{emailErrorMessage}</Text> // Muestra el mensaje de error específico

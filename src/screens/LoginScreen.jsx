@@ -122,6 +122,7 @@ export default function LoginScreen({ navigation }) {
           ]}
           placeholder="Introduzca su correo electrónico"
           onChangeText={handleEmailChange}
+          autoCapitalize="none"
         />
         {emailError && (
           <Text style={styles.errorText}>* Por favor, introduzca un correo electrónico válido.</Text>
