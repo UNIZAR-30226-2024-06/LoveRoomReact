@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import AuthContext from '../components/AuthContext';
 import RegisterScreen from './RegisterScreen';
-import { Ionicons } from '@expo/vector-icons'; // Asegúrate de instalar @expo/vector-icons si aún no lo has hecho
+import { Ionicons } from '@expo/vector-icons'; 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen({ navigation }) {
@@ -107,7 +107,7 @@ export default function LoginScreen({ navigation }) {
       >
         <View style={styles.modalBackground}>
           <View style={styles.activityIndicatorWrapper}>
-            <ActivityIndicator animating={isLoading} size="large" color="#0000ff" />
+            <ActivityIndicator animating={isLoading} size="large" color="#F89F9F" />
             <Text style={styles.loadingText}>Iniciando sesión...</Text>
           </View>
         </View>
@@ -122,6 +122,7 @@ export default function LoginScreen({ navigation }) {
           ]}
           placeholder="Introduzca su correo electrónico"
           onChangeText={handleEmailChange}
+          autoCapitalize="none"
         />
         {emailError && (
           <Text style={styles.errorText}>* Por favor, introduzca un correo electrónico válido.</Text>
@@ -159,14 +160,14 @@ export default function LoginScreen({ navigation }) {
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
-            if (!isValidEmail) {
-              setEmailError(true); // Establecer el estado de error del correo electrónico
-            }
-            if (!isValidPassword) {
-              setPasswordError(true); // Establecer el estado de error de la contraseña
-            } else {
+            // if (!isValidEmail) {
+            //   setEmailError(true); // Establecer el estado de error del correo electrónico
+            // }
+            // if (!isValidPassword) {
+            //   setPasswordError(true); // Establecer el estado de error de la contraseña
+            // } else {
               handleLogin(); // Se ejecuta cuando tanto el correo electrónico como la contraseña son válidos
-            }
+            //}
           }}
         >
           <Text style={styles.buttonText}>Iniciar sesión</Text>

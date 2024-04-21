@@ -7,16 +7,12 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
-  Platform,
-  StatusBar,
   Dimensions
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import AuthContext from '../components/AuthContext';
 import * as FileSystem from 'expo-file-system';
-import Slider from '@react-native-community/slider';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import { Feather } from '@expo/vector-icons';
 
@@ -83,7 +79,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
   //Solo se hace estado cuando se quiere mostrar algo 
   const { authState } = useContext(AuthContext);
   const [name, setName] = useState(authState.nombre);
-  const [age, setAge] = useState(authState.edad);
+  const [fechaNacimiento, setFechaNacimiento] = useState(authState.fechaNacimiento);
   const [show, setShow] = useState(false);
   const [gender, setGender] = useState(authState.sexo);
   const [sexualPreference, setSexualPreference] = useState(authState.buscasexo);
@@ -93,9 +89,9 @@ export default function RegisterPreferencesScreen({ navigation }) {
   const [idLocalidad, setIdLocalidad] = useState(authState.idLocalidad);
   const [isProfileImageSelected, setIsProfileImageSelected] = useState();
   const { StorageAccessFramework } = FileSystem;
-  const [selectedProvincia, setSelectedProvincia] = useState(authState.idLocalidad || '');
 
   const handleSave = () => {
+    console.log(`${process.env.EXPO_PUBLIC_API_URL}/user/update`);
     fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/update`, {
       method: 'PUT',
       headers: {
@@ -106,7 +102,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
         nombre: name,
         correo: authState.email,
         contrasena: authState.password,
-        edad: age,
+        fechaNacimiento: fechaNacimiento,
         sexo: gender,
         buscaedadmin: agePreference[0],
         buscaedadmax: agePreference[1],
@@ -118,21 +114,57 @@ export default function RegisterPreferencesScreen({ navigation }) {
         baneado: authState.baneado
       })
     })
-      .then(response => {
-        if (response.ok) {
+    .then((response) => response.json())
+    .then((data) => {
+        console.log(data);
+        if (data.error == 'Usuario actualizado correctamente') {
           navigation.navigate('Cuenta');
-        } else {
+          console.log('Usuario actualizado correctamente')
+        } else if (data.error == 'Error al actualizar el usuario'){
           // Si la respuesta no es exitosa, obtener el mensaje de error del JSON
-          return response.json().then(data => {
-            const errorMessage = data.error || 'Error al actualizar el usuario';
-            // Mostrar un warning en pantalla (puedes usar un componente de alerta o similar)
-            alert(`Error: ${errorMessage}`);
-          });
+          Alert.alert('Error al actualizar el usuario')
         }
       })
       .catch((error) => {
         console.error('Error:', error);
       });
+  };
+
+  const valueToId = (value) => {
+    const index = provinciasDeEspana.indexOf(value);
+    setIdLocalidad(index + 1);
+  };
+
+  const idToValue = (id) => {
+    return provinciasDeEspana[id - 1];
+  };
+
+  const handleDateChange = (text) => {
+    // Elimina todos los caracteres que no sean números
+    const cleanedText = text.replace(/[^0-9]/g, '');
+
+    // Formatea la fecha de acuerdo al formato DD/MM/AAAA
+    let formattedText = '';
+    let formattedCursorPosition = cursorPosition;
+
+    for (let i = 0; i < cleanedText.length; i++) {
+      if (i === 2 || i === 4) {
+        formattedText += '/';
+        if (i < cursorPosition) {
+          formattedCursorPosition++;
+        }
+      }
+      formattedText += cleanedText[i];
+    }
+
+    // Asegúrate de que el texto formateado no exceda los 10 caracteres
+    if (formattedText.length > 10) {
+      formattedText = formattedText.slice(0, 10);
+    }
+
+    setFechaNacimiento(formattedText);
+    // Actualiza la posición del cursor
+    setCursorPosition(formattedCursorPosition);
   };
   
 
@@ -191,7 +223,6 @@ export default function RegisterPreferencesScreen({ navigation }) {
     <ScrollView style={styles.container}>
       <View style={styles.header} />
       <View style={styles.profileInfo}>
-        
         <Text style={styles.profileText}>Editar perfil</Text>
         <View style={styles.profileImageContainer}>
         <TouchableOpacity style={styles.editIconContainer} onPress={pickImage}>
@@ -220,31 +251,6 @@ export default function RegisterPreferencesScreen({ navigation }) {
           onChangeText={(text) => setName(text)}
         />
 
-        <Text style={styles.label}>Edad</Text>
-        <View style={{ ...styles.input, justifyContent: 'center' }}>
-          <Picker selectedValue={age} onValueChange={(itemValue) => setAge(itemValue)}>
-            {[...Array(83)].map((_, i) => (
-              <Picker.Item key={i} label={(i + 18).toString()} value={i + 18} />
-            ))}
-          </Picker>
-        </View>
-
-        <Text style={styles.label}>Localidad</Text>
-        <View style={{ ...styles.input, justifyContent: 'center' }}>
-          <Picker
-            selectedValue={selectedProvincia}
-            onValueChange={(value) => {
-              setSelectedProvincia(value);
-              setIdLocalidad(value);
-            }}
-            defaultValue={authState.idLocalidad}
-          >
-            {provinciasDeEspana.map((provincia, index) => (
-              <Picker.Item key={index} label={provincia} value={provincia} />
-            ))}
-          </Picker>
-        </View>
-
         <Text style={styles.label}>Sexo</Text>
         <View style={{ ...styles.input, justifyContent: 'center' }}>
           <Picker
@@ -258,7 +264,35 @@ export default function RegisterPreferencesScreen({ navigation }) {
             <Picker.Item label="Femenino" value="M" />
             <Picker.Item label="Otro" value="O" />
           </Picker>
+        </View> 
+
+        <Text style={styles.label}>Localidad</Text>
+        <View style={{ ...styles.input, justifyContent: 'center' }}>
+          <Picker
+            onValueChange={(value) => {
+              valueToId(value);
+            }}
+            defaultValue={idToValue(authState.idLocalidad) || 'Selecciona tu localidad'}
+          >
+            {provinciasDeEspana.map((provincia, index) => (
+              <Picker.Item key={index} label={provincia} value={provincia} />
+            ))}
+          </Picker>
         </View>
+
+        <Text style={styles.label}>Fecha de nacimiento</Text>
+        <TextInput
+          style={styles.dateInput}
+          value={fechaNacimiento}
+          onChangeText={handleDateChange}
+          placeholder="DD/MM/AAAA"
+          maxLength={10}
+          keyboardType="numeric"
+          onSelectionChange={(event) => {
+            // Captura la posición actual del cursor
+            setCursorPosition(event.nativeEvent.selection.start);
+          }}
+        />
 
         <Text style={styles.label}>Preferencia Sexual</Text>
         <View style={{ ...styles.input, justifyContent: 'center' }}>
@@ -343,9 +377,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.5)',
     borderRadius: 15,
     padding: 5,
-    borderColor: 'black', // Agrega el borde de color F89F9F
+    borderColor: 'black', 
     borderWidth: 1,
-    zIndex: 1 // Asegura que el ícono esté por encima de la imagen
+    zIndex: 1 
   },  
 
   header: {
@@ -524,5 +558,14 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     padding: 14
+  },
+  dateInput: {
+    height: 40,
+    borderColor: '#cccccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+    textAlign: 'left', // Centra el texto
   }
 });

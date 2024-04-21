@@ -94,6 +94,7 @@ export default function ProfileScreen({ navigation }) {
           onPress={() => {
             console.log(authState);
             navigation.navigate('EditProfile');
+            //navigation.navigate('RegisterPreferences');
           }}
         >
           <Text style={styles.editButtonText}>Editar perfil</Text>
