@@ -1,35 +1,52 @@
 // VideoScreen.jsx
-import React, {useState} from 'react';
+import React, {useContext} from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import YoutubePlayer from 'react-native-youtube-iframe'
-import Socket from '../components/Socket';
+import AuthContext from '../components/AuthContext';
 import { useEffect } from 'react';
-import { useNavigation } from '@react-navigation/native';
 import { socketEvents } from '../constants/SocketConstants';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { useNavigation } from '@react-navigation/native';
 
-const VideoScreen = ({ route }) => {
-  const { videoId } = route.params;
+const VideoScreen = ({route}) => {
   const navigation = useNavigation();
-  const [senderId, setSenderId] = useState('');
-  const [idVideo, setIdVideo] = useState(videoId);
-  const [receiverId, setReceiverId] = useState('');
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  
+  const { authState } = useContext(AuthContext);
+  const { socketState, setSocketState } = useContext(AuthContext);
   useEffect(() => {
-    // Función para conectar al socket
-    const connectToSocket = async () => {
-      await Socket.connect();
-      await Socket.waitForMatch(setSenderId, setReceiverId, setIdVideo, setIsPlaying);
-    };
 
-    // Llamar a la función para conectar al socket
-    connectToSocket();
+    setSocketState((prevState) => ({ ...prevState, senderId: authState.id}));
+
   }, []);
-  
+
+  useEffect(() => {
+    if( socketState.socket != null && socketState.socket.connected == true){
+      console.log('Eventos de socket');
+        // socketState.socket.on(socketEvents.MATCH, (senderId,receiverId, videoId) => {
+        //     console.log('Match event received: ', receiverId, senderId, videoId);
+        //     setSocketState((prevState) => ({ ...prevState, senderId: senderId, receiverId: receiverId, idVideo: videoId }));
+        //     setShowModal(false);
+        // });
+
+        socketState.socket.on(socketEvents.PAUSE, (senderId) => {
+          console.log('Pause event received: ', senderId);
+          setSocketState((prevState) => ({ ...prevState, isPlaying: false }));
+          console.log(false);
+        });
+
+        socketState.socket.on(socketEvents.PLAY, (senderId) => {
+          console.log('Play event received: ', senderId);
+          setSocketState((prevState) => ({ ...prevState, isPlaying: true }));
+          console.log(true);
+        });
+    }
+
+}, []);
+
+
   useEffect(() => {
     const unsubscribe = navigation.addListener('blur', () => {
-      Socket.disconnect();
+      socketState.socket.disconnect();
+      console.log('Socket disconnected');
     });
 
     // Devuelve una función de limpieza para ejecutar al desmontar el componente
@@ -39,17 +56,18 @@ const VideoScreen = ({ route }) => {
   const handleStateChange = (event) => { 
     if (event === 'playing') {
       console.log('playing');
-      setIsPlaying(true);
-      Socket.socket.emit(socketEvents.PLAY, senderId);
+      setSocketState((prevState) => ({ ...prevState, isPlaying: true }));
+      socketState.socket.emit(socketEvents.PLAY, socketState.senderId);
       console.log('Play event emitted');
       
     } else if (event === 'paused') {
       console.log('paused');
-      setIsPlaying(false);
-      Socket.socket.emit(socketEvents.PAUSE, senderId);
+      setSocketState((prevState) => ({ ...prevState, isPlaying: false }));
+      socketState.socket.emit(socketEvents.PAUSE, socketState.senderId);
       console.log('Pause event emitted');
     }
   };
+
 
 
   // if(Socket.socket !== null){
@@ -70,10 +88,15 @@ const VideoScreen = ({ route }) => {
 
   return (
     <View style={{flex : 1, alignItems:'center'}}>
-        <YoutubePlayer videoId={idVideo} height={'46%'} width={'95%'} webViewStyle={styles.Video} play={isPlaying} onChangeState={handleStateChange}/>
-        <Text>Sender: {senderId}</Text>
-        <Text>Receiver: {receiverId}</Text>
-        <Text>Video: {idVideo}</Text>
+        <YoutubePlayer videoId={socketState.idVideo} height={'46%'} width={'95%'} webViewStyle={styles.Video} play={socketState.isPlaying} onChangeState={handleStateChange}/>
+        <Text>Sender: {socketState.senderId}</Text>
+        <Text>Receiver: {socketState.receiverId}</Text>
+        <Text>Video: {socketState.idVideo}</Text>
+        <TouchableOpacity onPress={() => {console.log("videoScreen socketSTate"); console.log(socketState); 
+                console.log("videoScreen socketState.socket"); console.log(socketState.socket);
+                console.log("videoScreen authState"); console.log(authState)}}>
+          <Text>Console log</Text>
+        </TouchableOpacity>
       </View>
   );
 };

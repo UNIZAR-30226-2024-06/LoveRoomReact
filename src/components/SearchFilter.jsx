@@ -1,61 +1,36 @@
 import React, { useEffect, useState, useContext } from 'react'
 import { FlatList, StyleSheet, Text, View, Image, TouchableOpacity, Modal, ActivityIndicator } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
-import { socketEvents } from './Socket';
-import Socket from './Socket';
+import { socketEvents } from '../constants/SocketConstants';
+import {initializeSocket} from './AuthContext';
 import AuthContext from './AuthContext';
 
+// Muestra los videos resultados de la búsqueda
+// Además, si se clica en un video, comprueba que se realice el match
+// y en caso efectivo se redirige a la sala de video
 const SearchFilter = ({data, search, setListVideos, nextPageToken, setNextPageToken}) => {
     const navigation = useNavigation();
-    const [counter, setCounter] = useState(5);
-    const [showModal, setShowModal] = useState(false);
-    const [videoId, setVideoId] = useState('');
+    const [showModal, setShowModal] = useState(false); // Para la espera al cargar
     const { authState } = useContext(AuthContext);
+    const { socketState, setSocketState } = useContext(AuthContext);
+    const token = authState.token;
     const [mensaje, setMensaje] = useState('');
 
-    useEffect(() => {
-        let intervalId;
-        let count = 1;
-        if (showModal && counter > 0) {
-            intervalId = setInterval(() => {
-                setCounter(counter => counter - 1);
-            }, 1000);
-        } else if (counter === 0) {
-            clearInterval(intervalId);
-            setShowModal(false);
-            
-            if(count && mensaje!="Error al buscar match, inténtalo de nuevo"){
-                count = 0;
-                navigation.navigate('Video', {videoId: videoId});
-                alert(mensaje);
-            } else if( count && mensaje=="Error al buscar match, inténtalo de nuevo"){
-                alert(mensaje);
-            }
-        }
 
-        return () => clearInterval(intervalId);
-    }, [showModal, counter]);
 
-    useEffect(() => {
-        if (mensaje) {
-            setShowModal(true);
-        }
-    }, [mensaje]);
-        
-
-    const buscarMatch = (videoId) => {
-        setShowModal(true);
-        setCounter(5);   
-        fetchMatch(videoId);  
+    const buscarMatch = async (videoId) => {
+        setShowModal(true); 
+        await initializeSocket(token, setSocketState);
+        await fetchMatch(videoId);
     }
 
-    const fetchMatch = (videoId) => {
-        console.log(authState.token)
+    const fetchMatch = async (videoId) => {
+        console.log(`${process.env.EXPO_PUBLIC_API_URL}/videos/watch/${videoId}`);
         fetch(`${process.env.EXPO_PUBLIC_API_URL}/videos/watch/${videoId}`, {
-            method: 'GET',
+            method: 'POST',
             headers: {
                 'Content-Type': 'application',
-                Authorization: `Bearer ${authState.token}`
+                Authorization: `Bearer ${token}`
             }
         })
         .then((response) => response.json())
@@ -63,15 +38,24 @@ const SearchFilter = ({data, search, setListVideos, nextPageToken, setNextPageTo
             console.log(data);
             if(data.esSalaUnitaria==true){
                 setMensaje("No hay nadie en la sala, ¡espera a que alguien entre!");
-                setVideoId(videoId);
+                setSocketState((prevState) => ({ ...prevState, idVideo: videoId }));
+                setShowModal(false);
+                alert("No hay nadie en la sala, ¡espera a que alguien entre!");
             }
             else if(data.esSalaUnitaria==false){
                 // console.log("Sala con persona, ¡he hecho match!");
                 setMensaje("Has hecho match con alguien, ¡disfruta la sala!");
-                setVideoId(videoId);
+                setSocketState((prevState) => ({ ...prevState, idVideo: videoId }));
+                setShowModal(false); 
+                alert("Has hecho match con alguien, ¡disfruta la sala!");            
+            }
+            else if(data.message == "404 Not Found"){
+                setShowModal(false);
+                alert("Error al buscar match, inténtalo de nuevo");
             }
             else{
-                setMensaje("Error al buscar match, inténtalo de nuevo");
+                setShowModal(false);
+                alert("Error al buscar match, inténtalo de nuevo");
             }
         })
         .catch((error) => {
@@ -79,6 +63,13 @@ const SearchFilter = ({data, search, setListVideos, nextPageToken, setNextPageTo
         });
     }
 
+    useEffect(() => {
+        // Este efecto se ejecutará cada vez que socketState cambie
+        if (socketState.idVideo !== '') {
+            // Navegar a la página de video cuando el estado se actualice completamente
+            navigation.navigate('Video');
+        }
+    }, [socketState.idVideo]);
 
     const handlePeticionAux =() => {
         const params = new URLSearchParams({
@@ -138,10 +129,17 @@ const SearchFilter = ({data, search, setListVideos, nextPageToken, setNextPageTo
                 <View style={styles.modalBackground}>
                     <View style={styles.activityIndicatorWrapper}>
                         <ActivityIndicator animating={showModal} size="large" color="#0000ff" />
-                        <Text>Buscando match... {counter}</Text>
+                        <Text>Buscando match... </Text>
                     </View>
                 </View>
             </Modal>
+            <TouchableOpacity onPress={() =>
+                                        {console.log("En Searchfilter:"); 
+                                        console.log(socketState); 
+                                        console.log(socketState.socket);}
+                                    } >
+                <Text>Console log</Text>
+            </TouchableOpacity>
             <FlatList data={data} 
                     keyExtractor={(item, index) => item.id.videoId + index}
                     renderItem={({item}) => {
@@ -204,7 +202,9 @@ const SearchFilter = ({data, search, setListVideos, nextPageToken, setNextPageTo
             onEndReached={handlePeticionAux}
             onEndReachedThreshold={0.5}
             />
+
         </View>
+        
     );
 };
 
