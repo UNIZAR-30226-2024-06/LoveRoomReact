@@ -1,7 +1,30 @@
 import React, { useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import io from 'socket.io-client';
+import { socketEvents } from '../constants/SocketConstants';
 
 const AuthContext = React.createContext();
+
+// Inicializa el socket con el token del usuario
+export const initializeSocket = async (token, setSocketState) => {
+  const newSocket = io(`${process.env.EXPO_PUBLIC_API_URL}`, {
+    auth: {
+      token: `Bearer ${token}`
+    }
+  });
+  
+  await setSocketState(() => ({socket: newSocket, senderId: "", receiverId: "", idVideo: "", isPlaying: false}));
+
+  newSocket.on('connect', () => {
+    console.log('Connected to socket');
+    newSocket.on(socketEvents.MATCH, (senderId,receiverId, videoId) => {
+      console.log('Match event received: ', receiverId, senderId, videoId);
+      setSocketState(() => ({socket: socketState.socket, senderId: senderId, receiverId: receiverId, idVideo: videoId }));
+  });
+  });
+
+
+};
 
 export const AuthProvider = ({ children }) => {
   // useState se utiliza para definir y gestionar el estado local en componentes de función.
@@ -24,6 +47,14 @@ export const AuthProvider = ({ children }) => {
     descripcion: null,
     tipousuario: null,
     baneado: false
+  });
+
+  const [socketState, setSocketState] = useState({
+    socket: null,
+    senderId: authState.id,
+    receiverId: "",
+    idVideo: "",
+    isPlaying: false
   });
 
   // Función asincrónica que se encarga de verificar si hay un token de autenticación almacenado en AsyncStorage y si es válido.
@@ -71,7 +102,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ authState, setAuthState }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ authState, setAuthState, socketState, setSocketState }}>{children}</AuthContext.Provider>
   );
 };
 

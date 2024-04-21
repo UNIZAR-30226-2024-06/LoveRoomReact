@@ -6,20 +6,20 @@ import Login from './src/screens/LoginScreen';
 import { View } from 'react-native';
 import StackNavigator from './src/components/StackNavigator';
 import { AuthProvider } from './src/components/AuthContext';
-import { check } from 'prettier';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import AuthContext from './src/components/AuthContext';
+import { SocketProvider } from './src/components/SocketContext';
 
 export default function App() {
   return (
     <AuthProvider>
-      <View
-        style={{
-          flex: 1
-        }}
-      >
-        <StackNavigator />
-      </View>
+
+        <View
+          style={{
+            flex: 1
+          }}
+        >
+          <StackNavigator />
+        </View>
+
     </AuthProvider>
   );
 }
