@@ -76,6 +76,7 @@ const provinciasDeEspana = [
 ];
 
 export default function RegisterPreferencesScreen({ navigation }) {
+  console.log(authState);
   //Solo se hace estado cuando se quiere mostrar algo 
   const { authState } = useContext(AuthContext);
   const [name, setName] = useState(authState.nombre);
@@ -86,7 +87,8 @@ export default function RegisterPreferencesScreen({ navigation }) {
   const [agePreference, setAgePreference] = useState([authState.buscaedadmin, authState.buscaedadmax]);
   const [description, setDescription] = useState(authState.descripcion);
   const [profileImage, setProfileImage] = useState(authState.fotoperfil);
-  const [idLocalidad, setIdLocalidad] = useState(authState.idLocalidad);
+  const [idlocalidad, setIdLocalidad] = useState(authState.idlocalidad);
+  const [cursorPosition, setCursorPosition] = useState(0);
   const [isProfileImageSelected, setIsProfileImageSelected] = useState();
   const { StorageAccessFramework } = FileSystem;
 
@@ -99,34 +101,34 @@ export default function RegisterPreferencesScreen({ navigation }) {
         Authorization: `Bearer ${authState.token}`
       },
       body: JSON.stringify({
+        correo:  authState.correo,
         nombre: name,
-        correo: authState.email,
-        contrasena: authState.password,
-        fechaNacimiento: fechaNacimiento,
+        //FALTA PONER FECHA NACIMIENTO Y QUITAR EDAD
+        edad: 21,
         sexo: gender,
         buscaedadmin: agePreference[0],
         buscaedadmax: agePreference[1],
         buscasexo: sexualPreference,
         descripcion: description,
-        fotoperfil: profileImage,
-        idLocalidad: idLocalidad,
-        tipousuario: authState.tipousuario,
-        baneado: authState.baneado
+        //subir foto primero a multimedia yt luego actualizarla
+        fotoperfil: "null.jpg", //para que se pueda actualziar, subirla al multimedia y nos devolvera un path para subir,
+        idlocalidad: 1,
       })
     })
     .then((response) => response.json())
     .then((data) => {
         console.log(data);
-        if (data.error == 'Usuario actualizado correctamente') {
+        console.log(authState);
+        if (data == 'Usuario actualizado correctamente') {
           navigation.navigate('Cuenta');
-          console.log('Usuario actualizado correctamente')
-        } else if (data.error == 'Error al actualizar el usuario'){
-          // Si la respuesta no es exitosa, obtener el mensaje de error del JSON
-          Alert.alert('Error al actualizar el usuario')
+          console.log('G: Actualizo bien')
+        } else if (data.error == 'Error al actualizar el usuadrio'){
+          console.log('G: Actualizo mal')
         }
       })
       .catch((error) => {
         console.error('Error:', error);
+        console.log('Llega al catch');
       });
   };
 
@@ -235,7 +237,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
               source={
                 isProfileImageSelected
                   ? { uri: profileImage + '?' + new Date() }
-                  : require('../img/profileImage.jpg')
+                  : require('../img/profileImage.jpg') //OBTENER FOTO DE LA BASE DE DATOS NO?
               }
             />
           </View>
@@ -268,16 +270,17 @@ export default function RegisterPreferencesScreen({ navigation }) {
 
         <Text style={styles.label}>Localidad</Text>
         <View style={{ ...styles.input, justifyContent: 'center' }}>
-          <Picker
-            onValueChange={(value) => {
-              valueToId(value);
+        <Picker
+            selectedValue={idToValue(idlocalidad)}
+            onValueChange={(itemValue) => {
+                const index = provinciasDeEspana.indexOf(itemValue);
+                setIdLocalidad(index + 1);
             }}
-            defaultValue={idToValue(authState.idLocalidad) || 'Selecciona tu localidad'}
-          >
+        >
             {provinciasDeEspana.map((provincia, index) => (
-              <Picker.Item key={index} label={provincia} value={provincia} />
+                <Picker.Item key={index} label={provincia} value={provincia} />
             ))}
-          </Picker>
+        </Picker>
         </View>
 
         <Text style={styles.label}>Fecha de nacimiento</Text>
@@ -289,7 +292,6 @@ export default function RegisterPreferencesScreen({ navigation }) {
           maxLength={10}
           keyboardType="numeric"
           onSelectionChange={(event) => {
-            // Captura la posición actual del cursor
             setCursorPosition(event.nativeEvent.selection.start);
           }}
         />
@@ -348,6 +350,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
           placeholder="Cuéntanos un poco sobre ti..."
           multiline={true}
           numberOfLines={4}
+          defaultValue={authState.descripcion}
           onChangeText={(text) => setDescription(text)}
         />
 

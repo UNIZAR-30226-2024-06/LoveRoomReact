@@ -76,8 +76,8 @@ const provinciasDeEspana = [
 
 export default function RegisterPreferencesScreen({ navigation }) {
   const { authState, setAuthState } = useContext(AuthContext);
-  const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(false);
+  const [name, setName] = useState(authState.nombre);
   const [fechaNacimiento, setFechaNacimiento] = useState('');
   const [cursorPosition, setCursorPosition] = useState(0);
   const [gender, setGender] = useState('');
@@ -85,7 +85,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
   const [agePreference, setAgePreference] = useState([18, 100]);
   const [description, setDescription] = useState('');
   const [profileImage, setProfileImage] = useState('');
-  const [idLocalidad, setIdLocalidad] = useState('');
+  const [idlocalidad, setIdLocalidad] = useState('');
   const [isProfileImageSelected, setIsProfileImageSelected] = useState();
   const { StorageAccessFramework } = FileSystem;
 
@@ -98,30 +98,28 @@ export default function RegisterPreferencesScreen({ navigation }) {
         Authorization: `Bearer ${authState.token}`
       },
       body: JSON.stringify({
-        nombre: authState.nombre,
-        correo: authState.email,
-        contrasena: authState.password,
-        fechaNacimiento: fechaNacimiento,
+        correo:  authState.correo,
+        nombre: name,
+        //FALTA PONER FECHA NACIMIENTO Y QUITAR EDAD
+        edad: 21,
         sexo: gender,
         buscaedadmin: agePreference[0],
         buscaedadmax: agePreference[1],
         buscasexo: sexualPreference,
         descripcion: description,
-        fotoperfil: profileImage,
-        idLocalidad: idLocalidad,
-        tipousuario: authState.tipousuario,
-        baneado: authState.baneado
+        //subir foto primero a multimedia yt luego actualizarla
+        fotoperfil: "null.jpg", //para que se pueda actualziar, subirla al multimedia y nos devolvera un path para subir,
+        idlocalidad: idlocalidad
       })
     })
     .then((response) => response.json())
     .then((data) => {
         console.log(data);
-        if (data.error == 'Usuario actualizado correctamente') {
+        if (data == 'Usuario actualizado correctamente') {
           navigation.navigate('Cuenta');
-          console.log('Usuario actualizado correctamente')
-        } else if (data.error == 'Error al actualizar el usuario'){
-          // Si la respuesta no es exitosa, obtener el mensaje de error del JSON
-          Alert.alert('Error al actualizar el usuario')
+          console.log('G: Actualizo bien')
+        } else if (data.error == 'Error al actualizar el usuadrio'){
+          console.log('G: Actualizo mal')
         }
       })
       .catch((error) => {
@@ -237,7 +235,6 @@ export default function RegisterPreferencesScreen({ navigation }) {
             <Picker
               selectedValue={gender}
               onValueChange={(itemValue) => setGender(itemValue)}
-              defaultValue="Seleccione su género"
             >
               <Picker.Item label="Masculino" value="H" />
               <Picker.Item label="Femenino" value="M" />
@@ -247,16 +244,17 @@ export default function RegisterPreferencesScreen({ navigation }) {
 
         <Text style={styles.label}>Localidad</Text>
         <View style={{ ...styles.input, justifyContent: 'center' }}>
-          <Picker
-            onValueChange={(value) => {
-              valueToId(value);
+        <Picker
+            selectedValue={idToValue(idlocalidad)}
+            onValueChange={(itemValue) => {
+                const index = provinciasDeEspana.indexOf(itemValue);
+                setIdLocalidad(index + 1);
             }}
-            defaultValue={idToValue(authState.idLocalidad) || 'Selecciona tu localidad'}
-          >
+        >
             {provinciasDeEspana.map((provincia, index) => (
-              <Picker.Item key={index} label={provincia} value={provincia} />
+                <Picker.Item key={index} label={provincia} value={provincia} />
             ))}
-          </Picker>
+        </Picker>
         </View>
 
         <Text style={styles.label}>Fecha de nacimiento</Text>

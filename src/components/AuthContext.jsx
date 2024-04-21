@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
     nombre: null,
     sexo: null,
     fechanacimiento: null,
-    idLocalidad: null,
+    idlocalidad: null,
     buscaedadmin: null,
     buscaedadmax: null,
     buscasexo: null,

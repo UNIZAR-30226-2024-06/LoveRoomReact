@@ -58,6 +58,7 @@ export default function LoginScreen({ navigation }) {
       .then((response) => response.json())
       .then((data) => {
         setIsLoading(false);
+        console.log(data);
         if (data.token != null) {
           setAuthState({
             isLoggedIn: true,

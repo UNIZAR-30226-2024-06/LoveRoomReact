@@ -23,16 +23,33 @@ export default function ProfileScreen({ navigation }) {
   const { authState, setAuthState } = React.useContext(AuthContext);
   if (!authState.isLoggedIn) {
     return <NotRegisteredScreen />;
-    // navigation.navigate('RegisterPreferences');
   }
-  const scrollViewRef = useRef(null); // Referencia a ScrollView
+  const scrollViewRef = useRef(null); 
 
   const [isProfileImageSelected, setIsProfileImageSelected] = useState(false);
+
+  const handleDelete = () => {
+    console.log(`${process.env.EXPO_PUBLIC_API_URL}/user/delete`);
+    fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/delete`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authState.token}`
+      }
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        navigation.navigate('Login');
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+  };
 
   const handleScroll = (event) => {
     const { y } = event.nativeEvent.contentOffset;
     if (y < 0) {
-      // Si el usuario intenta desplazarse hacia abajo, establecer el desplazamiento en 0
       scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: false });
     }
   };
@@ -50,7 +67,6 @@ export default function ProfileScreen({ navigation }) {
     FileSystem.documentDirectory + 'userProfileImage.jpeg'
   );
 
-  // Update userProfileImage when the profile image is changed
   const updateProfileImage = async (newImageUri) => {
     setUserProfileImage(newImageUri);
   };
@@ -62,7 +78,7 @@ export default function ProfileScreen({ navigation }) {
   useFocusEffect(
     React.useCallback(() => {
       checkProfileImage();
-      return () => {}; // Esto es necesario para evitar un warning, pero puedes ignorarlo si no necesitas hacer nada al perder el foco
+      return () => {}; 
     }, [userProfileImage])
   );
 
@@ -70,8 +86,8 @@ export default function ProfileScreen({ navigation }) {
     <ScrollView
       style={styles.container}
       ref={scrollViewRef}
-      scrollEventThrottle={16} // Controla con qué frecuencia se llamará al evento onScroll
-      onScroll={handleScroll} // Manejador para el evento de desplazamiento
+      scrollEventThrottle={16} 
+      onScroll={handleScroll} 
     >
       <View style={styles.header} />
       <View style={styles.profileInfo}>
@@ -133,14 +149,6 @@ export default function ProfileScreen({ navigation }) {
 
             <TouchableOpacity style={styles.faqButton}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Image source={require('../img/verificado.png')} style={styles.faqIcon} />
-                <Text style={styles.faqText}>Consejos de seguridad </Text>
-              </View>
-              <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage} />
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.faqButton}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Image source={require('../img/llamada.png')} style={styles.faqIcon} />
                 <Text style={styles.faqText}>Contáctanos</Text>
               </View>
@@ -151,6 +159,14 @@ export default function ProfileScreen({ navigation }) {
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Image source={require('../img/informacion.png')} style={styles.faqIcon} />
                 <Text style={styles.faqText}>Sobre nosotros</Text>
+              </View>
+              <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage} />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.faqButton}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Image source={require('../img/verificado.png')} style={styles.faqIcon} />
+                <Text style={styles.faqText}>Gestión de credenciales</Text>
               </View>
               <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage} />
             </TouchableOpacity>
@@ -208,7 +224,47 @@ export default function ProfileScreen({ navigation }) {
             <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.faqButton}>
+          <TouchableOpacity
+            style={styles.faqButton}
+            onPress={() => {
+              Alert.alert(
+                'Borrar cuenta',
+                '¿Estás seguro de que quieres borrar tu cuenta?\n\nADVERTENCIA: Esta es una opción permanente y no se puede deshacer.',
+                [
+                  {
+                    text: 'Cancelar',
+                    style: 'cancel'
+                  },
+                  {
+                    text: 'OK',
+                    onPress: () => {
+                      handleDelete();
+                      setAuthState({
+                        isLoggedIn: false,
+                        id: null,
+                        token: null,
+                        correo: null,
+                        contrasena: null,
+                        nombre: null,
+                        sexo: null,
+                        edad: null,
+                        idLocalidad: null,
+                        buscaedadmin: null,
+                        buscaedadmax: null,
+                        buscasexo: null,
+                        fotoperfil: null,
+                        descripcion: null,
+                        tipousuario: null,
+                        baneado: false
+                      });
+                      AsyncStorage.removeItem('token');
+                    }
+                  }
+                ],
+                { cancelable: false }
+              );
+            }}
+          >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Image source={require('../img/borrar.png')} style={styles.faqIcon} />
               <Text style={styles.faqText}>Borrar cuenta</Text>
