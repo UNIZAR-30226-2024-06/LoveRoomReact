@@ -93,7 +93,6 @@ export default function RegisterPreferencesScreen({ navigation }) {
   const [idLocalidad, setIdLocalidad] = useState(authState.idLocalidad);
   const [isProfileImageSelected, setIsProfileImageSelected] = useState();
   const { StorageAccessFramework } = FileSystem;
-  const [selectedProvincia, setSelectedProvincia] = useState(authState.idLocalidad || '');
 
   const handleSave = () => {
     fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/update`, {
@@ -133,6 +132,15 @@ export default function RegisterPreferencesScreen({ navigation }) {
       .catch((error) => {
         console.error('Error:', error);
       });
+  };
+
+  const valueToId = (value) => {
+    const index = provinciasDeEspana.indexOf(value);
+    setIdLocalidad(index + 1);
+  };
+
+  const idToValue = (id) => {
+    return provinciasDeEspana[id - 1];
   };
   
 
@@ -232,12 +240,10 @@ export default function RegisterPreferencesScreen({ navigation }) {
         <Text style={styles.label}>Localidad</Text>
         <View style={{ ...styles.input, justifyContent: 'center' }}>
           <Picker
-            selectedValue={selectedProvincia}
             onValueChange={(value) => {
-              setSelectedProvincia(value);
-              setIdLocalidad(value);
+              valueToId(value);
             }}
-            defaultValue={authState.idLocalidad}
+            defaultValue={idToValue(authState.idLocalidad) || 'Selecciona tu localidad'}
           >
             {provinciasDeEspana.map((provincia, index) => (
               <Picker.Item key={index} label={provincia} value={provincia} />
@@ -343,9 +349,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.5)',
     borderRadius: 15,
     padding: 5,
-    borderColor: 'black', // Agrega el borde de color F89F9F
+    borderColor: 'black', 
     borderWidth: 1,
-    zIndex: 1 // Asegura que el ícono esté por encima de la imagen
+    zIndex: 1 
   },  
 
   header: {

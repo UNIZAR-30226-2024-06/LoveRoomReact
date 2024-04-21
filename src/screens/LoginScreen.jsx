@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import AuthContext from '../components/AuthContext';
 import RegisterScreen from './RegisterScreen';
-import { Ionicons } from '@expo/vector-icons'; // Asegúrate de instalar @expo/vector-icons si aún no lo has hecho
+import { Ionicons } from '@expo/vector-icons'; 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen({ navigation }) {
@@ -107,7 +107,7 @@ export default function LoginScreen({ navigation }) {
       >
         <View style={styles.modalBackground}>
           <View style={styles.activityIndicatorWrapper}>
-            <ActivityIndicator animating={isLoading} size="large" color="#0000ff" />
+            <ActivityIndicator animating={isLoading} size="large" color="#F89F9F" />
             <Text style={styles.loadingText}>Iniciando sesión...</Text>
           </View>
         </View>
