@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import AuthContext from '../components/AuthContext';
 import RegisterScreen from './RegisterScreen';
-import { Ionicons } from '@expo/vector-icons'; 
+import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen({ navigation }) {
@@ -36,7 +36,7 @@ export default function LoginScreen({ navigation }) {
     setIsValidEmail(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(text));
     setEmailError(false); // Reinicia el estado de error del correo electrónico
   };
-  
+
   const handlePasswordChange = (text) => {
     setPassword(text);
     setIsValidPassword(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,16}$/.test(text));
@@ -76,7 +76,7 @@ export default function LoginScreen({ navigation }) {
             fotoperfil: data.usuario.fotoperfil,
             descripcion: data.usuario.descripcion,
             tipousuario: data.usuario.tipousuario,
-            contrasena: data.usuario.contrasena,
+            contrasena: data.usuario.contrasena
           });
           AsyncStorage.setItem('token', data.token);
           navigation.navigate('Cuenta');
@@ -96,7 +96,6 @@ export default function LoginScreen({ navigation }) {
       style={styles.container}
       contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }}
     >
-
       <View style={[styles.logoContainer, { marginBottom: -90 }]}>
         <Image style={styles.logo} source={require('../img/logoTexto.png')} />
       </View>
@@ -104,7 +103,9 @@ export default function LoginScreen({ navigation }) {
         transparent={true}
         animationType={'none'}
         visible={isLoading}
-        onRequestClose={() => {console.log('close modal')}}
+        onRequestClose={() => {
+          console.log('close modal');
+        }}
       >
         <View style={styles.modalBackground}>
           <View style={styles.activityIndicatorWrapper}>
@@ -117,16 +118,15 @@ export default function LoginScreen({ navigation }) {
       <View style={styles.formContainer}>
         <Text style={styles.label}>Correo Electrónico</Text>
         <TextInput
-          style={[
-            styles.input,
-            emailError && styles.inputError 
-          ]}
+          style={[styles.input, emailError && styles.inputError]}
           placeholder="Introduzca su correo electrónico"
           onChangeText={handleEmailChange}
           autoCapitalize="none"
         />
         {emailError && (
-          <Text style={styles.errorText}>* Por favor, introduzca un correo electrónico válido.</Text>
+          <Text style={styles.errorText}>
+            * Por favor, introduzca un correo electrónico válido.
+          </Text>
         )}
 
         <Text style={styles.label}>Contraseña</Text>
@@ -154,8 +154,8 @@ export default function LoginScreen({ navigation }) {
             <Ionicons name={hidePassword ? 'eye-off' : 'eye'} size={24} color="black" />
           </TouchableOpacity>
           {passwordError && (
-          <Text style={[styles.errorText]}>* Por favor, introduzca una contraseña válida.</Text>
-        )}
+            <Text style={[styles.errorText]}>* Por favor, introduzca una contraseña válida.</Text>
+          )}
         </View>
 
         <TouchableOpacity
@@ -167,7 +167,7 @@ export default function LoginScreen({ navigation }) {
             // if (!isValidPassword) {
             //   setPasswordError(true); // Establecer el estado de error de la contraseña
             // } else {
-              handleLogin(); // Se ejecuta cuando tanto el correo electrónico como la contraseña son válidos
+            handleLogin(); // Se ejecuta cuando tanto el correo electrónico como la contraseña son válidos
             //}
           }}
         >
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     marginEnd: 5
   },
   inputError: {
-    borderColor: 'red', // Cambia el borde a rojo si hay un error
+    borderColor: 'red' // Cambia el borde a rojo si hay un error
   },
   button: {
     backgroundColor: '#F89F9F',
@@ -296,6 +296,6 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     textAlign: 'center', // Centra el texto
-    flexWrap: 'wrap', // Permite que el texto se ajuste
+    flexWrap: 'wrap' // Permite que el texto se ajuste
   }
 });

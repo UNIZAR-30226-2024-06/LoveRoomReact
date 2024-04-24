@@ -12,18 +12,27 @@ export const initializeSocket = async (token, setSocketState) => {
       token: `Bearer ${token}`
     }
   });
-  
-  await setSocketState(() => ({socket: newSocket, senderId: "", receiverId: "", idVideo: "", isPlaying: false}));
+
+  await setSocketState(() => ({
+    socket: newSocket,
+    senderId: '',
+    receiverId: '',
+    idVideo: '',
+    isPlaying: false
+  }));
 
   newSocket.on('connect', () => {
     console.log('Connected to socket');
-    newSocket.on(socketEvents.MATCH, (senderId,receiverId, videoId) => {
+    newSocket.on(socketEvents.MATCH, (senderId, receiverId, videoId) => {
       console.log('Match event received: ', receiverId, senderId, videoId);
-      setSocketState(() => ({socket: socketState.socket, senderId: senderId, receiverId: receiverId, idVideo: videoId }));
+      setSocketState(() => ({
+        socket: socketState.socket,
+        senderId: senderId,
+        receiverId: receiverId,
+        idVideo: videoId
+      }));
+    });
   });
-  });
-
-
 };
 
 export const AuthProvider = ({ children }) => {
@@ -52,8 +61,8 @@ export const AuthProvider = ({ children }) => {
   const [socketState, setSocketState] = useState({
     socket: null,
     senderId: authState.id,
-    receiverId: "",
-    idVideo: "",
+    receiverId: '',
+    idVideo: '',
     isPlaying: false
   });
 
@@ -79,7 +88,7 @@ export const AuthProvider = ({ children }) => {
             // Actualiza el estado de autenticación con el token y otros datos del usuario
             ...prevState,
             isLoggedIn: true,
-            token: token,
+            token: token
           }));
           // fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/check/token`,{
           //   method: 'GET',
@@ -102,7 +111,9 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ authState, setAuthState, socketState, setSocketState }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ authState, setAuthState, socketState, setSocketState }}>
+      {children}
+    </AuthContext.Provider>
   );
 };
 

@@ -11,15 +11,13 @@ import { SocketProvider } from './src/components/SocketContext';
 export default function App() {
   return (
     <AuthProvider>
-
-        <View
-          style={{
-            flex: 1
-          }}
-        >
-          <StackNavigator />
-        </View>
-
+      <View
+        style={{
+          flex: 1
+        }}
+      >
+        <StackNavigator />
+      </View>
     </AuthProvider>
   );
 }

@@ -32,17 +32,16 @@ export default function Login({ navigation }) {
     setEmail(text);
     setIsValidEmail(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(text));
     setEmailError(false); // Reinicia el estado de error del correo electrónico
-    if(!isValidEmail){
+    if (!isValidEmail) {
       setEmailErrorMessage('* Por favor, introduzca un correo electrónico válido.');
     }
   };
-  
+
   const handlePasswordChange = (text) => {
     setPassword(text);
     setIsValidPassword(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,16}$/.test(text));
     setPasswordError(false); // Reinicia el estado de error de la contraseña
   };
-
 
   const handleRegister = () => {
     setIsLoading(true);
@@ -126,10 +125,7 @@ export default function Login({ navigation }) {
         />
         <Text style={styles.label}>Correo Electrónico</Text>
         <TextInput
-          style={[
-            styles.input,
-            emailError && styles.inputError 
-          ]}
+          style={[styles.input, emailError && styles.inputError]}
           placeholder="Introduzca su correo electrónico"
           onChangeText={handleEmailChange}
           autoCapitalize="none"

@@ -24,7 +24,7 @@ export default function ProfileScreen({ navigation }) {
   if (!authState.isLoggedIn) {
     return <NotRegisteredScreen />;
   }
-  const scrollViewRef = useRef(null); 
+  const scrollViewRef = useRef(null);
 
   const [isProfileImageSelected, setIsProfileImageSelected] = useState(false);
 
@@ -78,7 +78,7 @@ export default function ProfileScreen({ navigation }) {
   useFocusEffect(
     React.useCallback(() => {
       checkProfileImage();
-      return () => {}; 
+      return () => {};
     }, [userProfileImage])
   );
 
@@ -86,8 +86,8 @@ export default function ProfileScreen({ navigation }) {
     <ScrollView
       style={styles.container}
       ref={scrollViewRef}
-      scrollEventThrottle={16} 
-      onScroll={handleScroll} 
+      scrollEventThrottle={16}
+      onScroll={handleScroll}
     >
       <View style={styles.header} />
       <View style={styles.profileInfo}>
@@ -104,7 +104,7 @@ export default function ProfileScreen({ navigation }) {
             />
           </View>
         </View>
-        
+
         <TouchableOpacity
           style={styles.editButton}
           onPress={() => {
@@ -139,7 +139,12 @@ export default function ProfileScreen({ navigation }) {
             <Text style={styles.headlineText}>Acerca de</Text>
           </View>
           <View>
-            <TouchableOpacity style={styles.faqButton} onPress={() => {navigation.navigate('FAQ');}}>
+            <TouchableOpacity
+              style={styles.faqButton}
+              onPress={() => {
+                navigation.navigate('FAQ');
+              }}
+            >
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Image source={require('../img/ayudar.png')} style={styles.faqIcon} />
                 <Text style={styles.faqText}>Preguntas frecuentes</Text>

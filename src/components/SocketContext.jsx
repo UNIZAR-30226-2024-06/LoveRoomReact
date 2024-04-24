@@ -12,7 +12,7 @@
 //       token: `Bearer ${token}`
 //     }
 //   });
-  
+
 //   await setSocketState(() => ({socket: newSocket, senderId: "", receiverId: "", idVideo: "", isPlaying: false}));
 
 //   newSocket.on('connect', () => {
@@ -23,14 +23,9 @@
 //   });
 //   });
 
-
 // };
 
-
 // export const SocketProvider = ({ children }) => {
-  
-
-
 
 //   return (
 //     <SocketContext.Provider value={{ socketState, setSocketState }}>
@@ -38,6 +33,5 @@
 //     </SocketContext.Provider>
 //   );
 // };
-
 
 // export default SocketContext;

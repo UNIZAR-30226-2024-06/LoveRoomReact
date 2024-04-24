@@ -16,7 +16,6 @@ import * as FileSystem from 'expo-file-system';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import { Feather } from '@expo/vector-icons';
 
-
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
 
@@ -77,14 +76,17 @@ const provinciasDeEspana = [
 
 export default function RegisterPreferencesScreen({ navigation }) {
   console.log(authState);
-  //Solo se hace estado cuando se quiere mostrar algo 
+  //Solo se hace estado cuando se quiere mostrar algo
   const { authState } = useContext(AuthContext);
   const [name, setName] = useState(authState.nombre);
   const [fechaNacimiento, setFechaNacimiento] = useState(authState.fechaNacimiento);
   const [show, setShow] = useState(false);
   const [gender, setGender] = useState(authState.sexo);
   const [sexualPreference, setSexualPreference] = useState(authState.buscasexo);
-  const [agePreference, setAgePreference] = useState([authState.buscaedadmin, authState.buscaedadmax]);
+  const [agePreference, setAgePreference] = useState([
+    authState.buscaedadmin,
+    authState.buscaedadmax
+  ]);
   const [description, setDescription] = useState(authState.descripcion);
   const [profileImage, setProfileImage] = useState(authState.fotoperfil);
   const [idlocalidad, setIdLocalidad] = useState(authState.idlocalidad);
@@ -101,7 +103,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
         Authorization: `Bearer ${authState.token}`
       },
       body: JSON.stringify({
-        correo:  authState.correo,
+        correo: authState.correo,
         nombre: name,
         //FALTA PONER FECHA NACIMIENTO Y QUITAR EDAD
         edad: 21,
@@ -111,19 +113,19 @@ export default function RegisterPreferencesScreen({ navigation }) {
         buscasexo: sexualPreference,
         descripcion: description,
         //subir foto primero a multimedia yt luego actualizarla
-        fotoperfil: "null.jpg", //para que se pueda actualziar, subirla al multimedia y nos devolvera un path para subir,
-        idlocalidad: 1,
+        fotoperfil: 'null.jpg', //para que se pueda actualziar, subirla al multimedia y nos devolvera un path para subir,
+        idlocalidad: 1
       })
     })
-    .then((response) => response.json())
-    .then((data) => {
+      .then((response) => response.json())
+      .then((data) => {
         console.log(data);
         console.log(authState);
         if (data == 'Usuario actualizado correctamente') {
           navigation.navigate('Cuenta');
-          console.log('G: Actualizo bien')
-        } else if (data.error == 'Error al actualizar el usuadrio'){
-          console.log('G: Actualizo mal')
+          console.log('G: Actualizo bien');
+        } else if (data.error == 'Error al actualizar el usuadrio') {
+          console.log('G: Actualizo mal');
         }
       })
       .catch((error) => {
@@ -168,7 +170,6 @@ export default function RegisterPreferencesScreen({ navigation }) {
     // Actualiza la posición del cursor
     setCursorPosition(formattedCursorPosition);
   };
-  
 
   const fileName = FileSystem.documentDirectory + 'userProfileImage.jpeg';
   const checkProfileImage = async () => {
@@ -227,11 +228,10 @@ export default function RegisterPreferencesScreen({ navigation }) {
       <View style={styles.profileInfo}>
         <Text style={styles.profileText}>Editar perfil</Text>
         <View style={styles.profileImageContainer}>
-        <TouchableOpacity style={styles.editIconContainer} onPress={pickImage}>
-          <Feather name="edit" size={25} color="black" />
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.editIconContainer} onPress={pickImage}>
+            <Feather name="edit" size={25} color="black" />
+          </TouchableOpacity>
           <View style={styles.profileImageBorder}>
-            
             <Image
               style={styles.profileImage}
               source={
@@ -245,7 +245,6 @@ export default function RegisterPreferencesScreen({ navigation }) {
       </View>
 
       <View style={styles.formContainer}>
-
         <Text style={styles.label}>Nombre completo</Text>
         <TextInput
           style={styles.textContainer}
@@ -266,21 +265,21 @@ export default function RegisterPreferencesScreen({ navigation }) {
             <Picker.Item label="Femenino" value="M" />
             <Picker.Item label="Otro" value="O" />
           </Picker>
-        </View> 
+        </View>
 
         <Text style={styles.label}>Localidad</Text>
         <View style={{ ...styles.input, justifyContent: 'center' }}>
-        <Picker
+          <Picker
             selectedValue={idToValue(idlocalidad)}
             onValueChange={(itemValue) => {
-                const index = provinciasDeEspana.indexOf(itemValue);
-                setIdLocalidad(index + 1);
+              const index = provinciasDeEspana.indexOf(itemValue);
+              setIdLocalidad(index + 1);
             }}
-        >
+          >
             {provinciasDeEspana.map((provincia, index) => (
-                <Picker.Item key={index} label={provincia} value={provincia} />
+              <Picker.Item key={index} label={provincia} value={provincia} />
             ))}
-        </Picker>
+          </Picker>
         </View>
 
         <Text style={styles.label}>Fecha de nacimiento</Text>
@@ -314,35 +313,35 @@ export default function RegisterPreferencesScreen({ navigation }) {
             <Picker.Item label="Ambos" value="T" />
           </Picker>
         </View>
-        
+
         <View style={styles.labelContainer}>
           <Text style={styles.label}>Preferencia de edad</Text>
-          <Text style={styles.sliderLabel}>{agePreference[0]}-{agePreference[1]}</Text>
+          <Text style={styles.sliderLabel}>
+            {agePreference[0]}-{agePreference[1]}
+          </Text>
         </View>
         <View style={styles.sliderContainer}>
-        <MultiSlider
-          values={agePreference}
-          sliderLength={screenWidth - 40} 
-          min={18}
-          max={100}
-          step={1}
-          onValuesChange={(values) => setAgePreference(values)}
-          allowOverlap={false}
-          snapped={true}
-          minMarkerOverlapDistance={20}
-          selectedStyle={{
-            backgroundColor: '#F89F9F'
-          }}
-          markerStyle={{
-            backgroundColor: '#F89F9F'
-          }}
-          customMarker={(e) => {
-            return (
-              <View style={styles.customMarker} />
-            );
-          }}
-        />
-      </View>
+          <MultiSlider
+            values={agePreference}
+            sliderLength={screenWidth - 40}
+            min={18}
+            max={100}
+            step={1}
+            onValuesChange={(values) => setAgePreference(values)}
+            allowOverlap={false}
+            snapped={true}
+            minMarkerOverlapDistance={20}
+            selectedStyle={{
+              backgroundColor: '#F89F9F'
+            }}
+            markerStyle={{
+              backgroundColor: '#F89F9F'
+            }}
+            customMarker={(e) => {
+              return <View style={styles.customMarker} />;
+            }}
+          />
+        </View>
 
         <Text style={styles.label}>Descripción</Text>
         <TextInput
@@ -380,10 +379,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.5)',
     borderRadius: 15,
     padding: 5,
-    borderColor: 'black', 
+    borderColor: 'black',
     borderWidth: 1,
-    zIndex: 1 
-  },  
+    zIndex: 1
+  },
 
   header: {
     height: screenHeight * 0.27,
@@ -423,7 +422,7 @@ const styles = StyleSheet.create({
     borderRadius: 70,
     marginBottom: 0,
     marginRight: 0 // Añade este estilo para evitar que el ícono de edición cubra la imagen
-  },  
+  },
   formContainer: {
     backgroundColor: '#ffffff',
     marginTop: 0,
@@ -444,7 +443,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 10
   },
-  
+
   sliderText: {
     fontSize: 16,
     marginBottom: 10
@@ -569,6 +568,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     marginBottom: 10,
-    textAlign: 'left', // Centra el texto
+    textAlign: 'left' // Centra el texto
   }
 });
