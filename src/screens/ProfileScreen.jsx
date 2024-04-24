@@ -21,12 +21,9 @@ const screenWidth = Dimensions.get('window').width;
 
 export default function ProfileScreen({ navigation }) {
   const { authState, setAuthState } = React.useContext(AuthContext);
-  if (!authState.isLoggedIn) {
-    return <NotRegisteredScreen />;
-  }
   const scrollViewRef = useRef(null);
-
   const [isProfileImageSelected, setIsProfileImageSelected] = useState(false);
+
 
   const handleDelete = () => {
     console.log(`${process.env.EXPO_PUBLIC_API_URL}/user/delete`);
@@ -81,6 +78,10 @@ export default function ProfileScreen({ navigation }) {
       return () => {};
     }, [userProfileImage])
   );
+
+  if (!authState.isLoggedIn) {
+    return <NotRegisteredScreen />;
+  }
 
   return (
     <ScrollView

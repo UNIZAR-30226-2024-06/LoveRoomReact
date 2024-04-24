@@ -25,8 +25,8 @@ export const initializeSocket = async (token, setSocketState) => {
     console.log('Connected to socket');
     newSocket.on(socketEvents.MATCH, (senderId, receiverId, videoId) => {
       console.log('Match event received: ', receiverId, senderId, videoId);
-      setSocketState(() => ({
-        socket: socketState.socket,
+      setSocketState((prevState) => ({
+        ...prevState,
         senderId: senderId,
         receiverId: receiverId,
         idVideo: videoId
@@ -88,7 +88,21 @@ export const AuthProvider = ({ children }) => {
             // Actualiza el estado de autenticación con el token y otros datos del usuario
             ...prevState,
             isLoggedIn: true,
-            token: token
+            token: token,
+            id: data.usuario.id,
+            correo: data.usuario.correo,
+            contrasena: data.usuario.contrasena,
+            nombre: data.usuario.nombre,
+            sexo: data.usuario.sexo,
+            edad: data.usuario.edad,
+            idlocalidad: data.usuario.idlocalidad,
+            buscaedadmin: data.usuario.buscaedadmin,
+            buscaedadmax: data.usuario.buscaedadmax,
+            buscasexo: data.usuario.buscasexo,
+            fotoperfil: data.usuario.fotoperfil,
+            descripcion: data.usuario.descripcion,
+            tipousuario: data.usuario.tipousuario,
+            baneado: data.usuario.baneador
           }));
           // fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/check/token`,{
           //   method: 'GET',

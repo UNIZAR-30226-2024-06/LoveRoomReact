@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useRef } from 'react';
 import {
   ScrollView,
   View,
@@ -80,15 +80,26 @@ export default function RegisterPreferencesScreen({ navigation }) {
   const [name, setName] = useState(authState.nombre);
   const [fechaNacimiento, setFechaNacimiento] = useState('');
   const [cursorPosition, setCursorPosition] = useState(0);
-  const [gender, setGender] = useState('');
-  const [sexualPreference, setSexualPreference] = useState('');
+  const [gender, setGender] = useState(authState.sexo);
+  const [sexualPreference, setSexualPreference] = useState(authState.buscasexo);
   const [agePreference, setAgePreference] = useState([18, 100]);
   const [description, setDescription] = useState('');
   const [profileImage, setProfileImage] = useState('');
-  const [idlocalidad, setIdLocalidad] = useState('');
+  const [idlocalidad, setIdLocalidad] = useState(authState.idlocalidad);
   const [isProfileImageSelected, setIsProfileImageSelected] = useState();
   const { StorageAccessFramework } = FileSystem;
+  const isDataSaved = useRef(false);
 
+  
+  React.useEffect(() => {
+    return () => {
+      console.log(isDataSaved);
+      if (isDataSaved.current === false) {
+        console.log('Cleaning up...');
+        handleDelete();
+      }
+    };
+  }, []);
   const handleSave = () => {
     console.log(`${process.env.EXPO_PUBLIC_API_URL}/user/update`);
     fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/update`, {
@@ -99,7 +110,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
       },
       body: JSON.stringify({
         correo: authState.correo,
-        nombre: name,
+        nombre: authState.nombre,
         //FALTA PONER FECHA NACIMIENTO Y QUITAR EDAD
         edad: 21,
         sexo: gender,
@@ -109,16 +120,29 @@ export default function RegisterPreferencesScreen({ navigation }) {
         descripcion: description,
         //subir foto primero a multimedia yt luego actualizarla
         fotoperfil: 'null.jpg', //para que se pueda actualziar, subirla al multimedia y nos devolvera un path para subir,
-        idlocalidad: idlocalidad
+        idlocalidad: 0
       })
     })
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
         if (data == 'Usuario actualizado correctamente') {
+          isDataSaved.current = true;
+          setAuthState((prevState) => ({
+            ...prevState,
+            edad: 21,
+            sexo: gender,
+            buscaedadmin: agePreference[0],
+            buscaedadmax: agePreference[1],
+            buscasexo: sexualPreference,
+            descripcion: description,
+            //subir foto primero a multimedia yt luego actualizarla
+            fotoperfil: 'null.jpg', //para que se pueda actualziar, subirla al multimedia y nos devolvera un path para subir,
+            idlocalidad: 0
+          }));
           navigation.navigate('Cuenta');
           console.log('G: Actualizo bien');
-        } else if (data.error == 'Error al actualizar el usuadrio') {
+        } else if (data.error == 'Error al actualizar el usuario') {
           console.log('G: Actualizo mal');
         }
       })
@@ -135,6 +159,26 @@ export default function RegisterPreferencesScreen({ navigation }) {
   const idToValue = (id) => {
     return provinciasDeEspana[id - 1];
   };
+
+  const handleDelete = () => {
+    console.log(`${process.env.EXPO_PUBLIC_API_URL}/user/delete`);
+    fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/delete`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authState.token}`
+      }
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        navigation.navigate('Register');
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+  };
+
 
   const handleDateChange = (text) => {
     // Elimina todos los caracteres que no sean números
@@ -326,6 +370,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
+            console.log('Guardando...: ', authState);
             handleSave();
           }}
         >

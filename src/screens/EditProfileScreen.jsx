@@ -77,7 +77,7 @@ const provinciasDeEspana = [
 export default function RegisterPreferencesScreen({ navigation }) {
   console.log(authState);
   //Solo se hace estado cuando se quiere mostrar algo
-  const { authState } = useContext(AuthContext);
+  const { authState, setAuthState } = useContext(AuthContext);
   const [name, setName] = useState(authState.nombre);
   const [fechaNacimiento, setFechaNacimiento] = useState(authState.fechaNacimiento);
   const [show, setShow] = useState(false);
@@ -122,9 +122,21 @@ export default function RegisterPreferencesScreen({ navigation }) {
         console.log(data);
         console.log(authState);
         if (data == 'Usuario actualizado correctamente') {
+          setAuthState((prevState) => ({
+            ...prevState,
+            edad: 21,
+            sexo: gender,
+            buscaedadmin: agePreference[0],
+            buscaedadmax: agePreference[1],
+            buscasexo: sexualPreference,
+            descripcion: description,
+            //subir foto primero a multimedia yt luego actualizarla
+            fotoperfil: 'null.jpg', //para que se pueda actualziar, subirla al multimedia y nos devolvera un path para subir,
+            idlocalidad: 0
+          }));
           navigation.navigate('Cuenta');
           console.log('G: Actualizo bien');
-        } else if (data.error == 'Error al actualizar el usuadrio') {
+        } else if (data.error == 'Error al actualizar el usuario') {
           console.log('G: Actualizo mal');
         }
       })
