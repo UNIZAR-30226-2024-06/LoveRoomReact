@@ -10,12 +10,15 @@ import {
   Platform,
   StatusBar,
   ActivityIndicator,
-  Modal
+  Modal,
+  Dimensions
 } from 'react-native';
+import Orientation from 'react-native-orientation-locker';
 import AuthContext from '../components/AuthContext';
 import RegisterScreen from './RegisterScreen';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 export default function LoginScreen({ navigation }) {
   const { authState, setAuthState } = React.useContext(AuthContext);
@@ -91,8 +94,28 @@ export default function LoginScreen({ navigation }) {
       });
   };
 
+//   React.useEffect(() => {
+//     // Bloquea la orientación en modo retrato (portrait)
+//     Orientation.lockToPortrait();
+
+//     // Restablece la orientación cuando se sale de la pantalla
+//     return () => {
+//         Orientation.unlockAllOrientations();
+//     };
+// }, []);
+
+
+    const { height, width } = Dimensions.get('window');
+
+  // Al calcular la menor dimensión (minDimension) entre la altura (height) y el ancho (width), estás obteniendo el valor más pequeño entre los dos,
+  // lo que te permite diseñar la UI de una forma más adaptable y flexible a los cambios de orientación.
+  const minDimension = Math.min(height, width);
+  // Calcular el margen inferior del 10%
+  const marginBottomLine = height * 0.07;
+  const marginBottomBackToLogin = height * 0.03;
+
   return (
-    <ScrollView
+    <View
       style={styles.container}
       contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }}
     >
@@ -134,7 +157,7 @@ export default function LoginScreen({ navigation }) {
           <TextInput
             style={[
               styles.input,
-              { paddingRight: 40, flex: 1 }, // Estilos para ocupar todo el espacio horizontal disponible
+              { paddingRight: 40, flex: 0 }, // Estilos para ocupar todo el espacio horizontal disponible
               passwordError && styles.inputError // Estilo de error si hay un error en la contraseña
             ]}
             placeholder="Introduzca la contraseña"
@@ -183,7 +206,18 @@ export default function LoginScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.line}></View>
+      <View style={[styles.line, { marginBottom: marginBottomLine }]} />
+       <View style={[styles.registerContainer, {marginBottom: marginBottomBackToLogin}]}>
+        <Text style={styles.registerText}>¿No tienes una cuenta? </Text>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('Register');
+          }}
+        >
+          <Text style={styles.registerLink}>Regístrate</Text>
+        </TouchableOpacity>
+      </View>
+      {/* <View style={styles.line}></View>
 
       <View style={styles.registerContainer}>
         <Text style={styles.registerText}>¿No tienes una cuenta?</Text>
@@ -194,15 +228,15 @@ export default function LoginScreen({ navigation }) {
         >
           <Text style={styles.registerLink}>Regístrate</Text>
         </TouchableOpacity>
-      </View>
-    </ScrollView>
+      </View> */}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff'
+    backgroundColor: '#fff',
   },
   logoContainer: {
     alignItems: 'center',
@@ -252,26 +286,32 @@ const styles = StyleSheet.create({
     color: '#F89F9F',
     textDecorationLine: 'underline'
   },
-  registerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    paddingBottom: '10%'
-  },
+  line: {
+    height: 2,
+    width: '100%', // Ancho del 80% de la pantalla
+    position: 'absolute', // Posicionamiento absoluto para colocar la línea en una posición específica
+    bottom: 0, // Al principio, la línea estará al fondo de la pantalla
+    borderBottomColor: '#ccc',
+    borderBottomWidth: 1,
+    alignSelf: 'stretch', // Ajuste para que la línea ocupe todo el ancho
+},
+
+registerContainer: {
+  position: 'absolute',
+  bottom: 0, // Coloca el contenedor en la parte inferior de la pantalla
+  justifyContent: 'center', // Centra el contenido horizontalmente
+  alignItems: 'center', // Centra el contenido verticalmente
+  flexDirection: 'row',
+  width: '100%', // Asegura que el contenedor ocupe todo el ancho de la pantalla
+},
   registerText: {
-    fontSize: 16
+    fontSize: 16,
+    
   },
   registerLink: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginLeft: 5,
-    color: '#F89F9F'
-  },
-  line: {
-    borderBottomColor: '#ccc',
-    borderBottomWidth: 1,
-    paddingBottom: '45%',
-    alignSelf: 'stretch', // Ajuste para que la línea ocupe todo el ancho
-    marginBottom: 10
+    color: '#F89F9F',
   },
   errorText: {
     color: 'red',

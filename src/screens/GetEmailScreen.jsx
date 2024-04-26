@@ -78,8 +78,8 @@ export default function GetEmailScreen({ navigation }) {
   // Calcular el margen inferior del 10%
   const marginBottomLine = height * 0.07;
   const marginBottomBackToLogin = height * 0.03;
-  const logoHeight = minDimension * -0.3;
-  const formHeight = minDimension * 0;
+  const logoHeight = height * -0.3;
+  const formHeight = height * 0;
 
   return (
     <View style={styles.container}>
@@ -138,16 +138,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#fff',
 },
-// Estilo para la línea horizontal
-  line: {
-      height: 2,
-      width: '100%', // Ancho del 80% de la pantalla
-      position: 'absolute', // Posicionamiento absoluto para colocar la línea en una posición específica
-      bottom: 0, // Al principio, la línea estará al fondo de la pantalla
-      borderBottomColor: '#ccc',
-      borderBottomWidth: 1,
-      alignSelf: 'stretch', // Ajuste para que la línea ocupe todo el ancho
-  },
   logo: {
     width: 200,
     height: 200,
@@ -190,6 +180,15 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontWeight: 'bold'
   },
+  line: {
+    height: 2,
+    width: '100%', // Ancho del 80% de la pantalla
+    position: 'absolute', // Posicionamiento absoluto para colocar la línea en una posición específica
+    bottom: 0, // Al principio, la línea estará al fondo de la pantalla
+    borderBottomColor: '#ccc',
+    borderBottomWidth: 1,
+    alignSelf: 'stretch', // Ajuste para que la línea ocupe todo el ancho
+},
 
   registerContainer: {
     position: 'absolute', // Posicionamiento absoluto para colocar la línea en una posición específica
