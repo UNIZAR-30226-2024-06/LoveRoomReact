@@ -161,14 +161,14 @@ export default function LoginScreen({ navigation }) {
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
-            // if (!isValidEmail) {
-            //   setEmailError(true); // Establecer el estado de error del correo electrónico
-            // }
-            // if (!isValidPassword) {
-            //   setPasswordError(true); // Establecer el estado de error de la contraseña
-            // } else {
+            if (!isValidEmail) {
+              setEmailError(true); // Establecer el estado de error del correo electrónico
+            }
+            if (!isValidPassword) {
+              setPasswordError(true); // Establecer el estado de error de la contraseña
+            } else {
             handleLogin(); // Se ejecuta cuando tanto el correo electrónico como la contraseña son válidos
-            //}
+            }
           }}
         >
           <Text style={styles.buttonText}>Iniciar sesión</Text>

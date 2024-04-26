@@ -7,12 +7,13 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
-  Alert
+  Alert,
+  Dimensions
 } from 'react-native';
 import AuthContext from '../components/AuthContext';
 
 export default function GetEmailScreen({ navigation }) {
-  // const { isRegistered, setIsRegistered } = React.useContext(AuthContext);
+  const { isRegistered, setIsRegistered } = React.useContext(AuthContext);
   const [email, setEmail] = React.useState('');
   const [isValidEmail, setIsValidEmail] = React.useState(true);
   const [formSubmitted, setFormSubmitted] = React.useState(false);
@@ -69,79 +70,95 @@ export default function GetEmailScreen({ navigation }) {
       });
   };
 
+  const { height, width } = Dimensions.get('window');
+
+  // Al calcular la menor dimensión (minDimension) entre la altura (height) y el ancho (width), estás obteniendo el valor más pequeño entre los dos,
+  // lo que te permite diseñar la UI de una forma más adaptable y flexible a los cambios de orientación.
+  const minDimension = Math.min(height, width);
+  // Calcular el margen inferior del 10%
+  const marginBottomLine = height * 0.07;
+  const marginBottomBackToLogin = height * 0.03;
+  const logoHeight = minDimension * -0.3;
+  const formHeight = minDimension * 0;
+
   return (
-    <ScrollView style={styles.container}>
-      <View style={[styles.logoContainer, { marginBottom: -90 }]}>
-        <Image style={styles.logo} source={require('../img/logoTexto.png')} />
-      </View>
+    <View style={styles.container}>
+        <Image style={[styles.logo, {marginTop: logoHeight}]} source={require('../img/logoTexto.png')} />
+        <View style={[styles.formContainer, {marginBottom: formHeight}]}>
+          <Text style={styles.label}>Correo electrónico</Text>
+          <TextInput
+            style={[
+              styles.input,
+              !isValidEmail && formSubmitted && styles.inputError,
+              errorText === 'Usuario no existente' && styles.inputError
+            ]}
+            placeholder="Introduzca su correo electrónico "
+            onChangeText={handleEmailChange}
+          />
+          {!isValidEmail && formSubmitted && errorText !== 'Usuario no existente' && (
+            <Text style={styles.errorText}>
+              * Por favor, introduzca un correo electrónico válido.
+            </Text>
+          )}
+          {errorText === 'Usuario no existente' && (
+            <Text style={styles.errorText}>
+              * No existe ninguna cuenta de usuario asociada a este correo electrónico.
+            </Text>
+          )}
 
-      <View style={styles.formContainer}>
-        <Text style={styles.label}>Correo electrónico</Text>
-        <TextInput
-          style={[
-            styles.input,
-            !isValidEmail && formSubmitted && styles.inputError,
-            errorText === 'Usuario no existente' && styles.inputError
-          ]}
-          placeholder="Introduzca su correo electrónico "
-          onChangeText={handleEmailChange}
-        />
-        {!isValidEmail && formSubmitted && errorText !== 'Usuario no existente' && (
-          <Text style={styles.errorText}>
-            * Por favor, introduzca un correo electrónico válido.
-          </Text>
-        )}
-        {errorText === 'Usuario no existente' && (
-          <Text style={styles.errorText}>
-            * No existe ninguna cuenta de usuario asociada a este correo electrónico.
-          </Text>
-        )}
+          <TouchableOpacity style={styles.button} onPress={handleChangePassword}>
+            <Text style={styles.buttonText}>Continuar</Text>
+          </TouchableOpacity>
+        </View>
 
-        <TouchableOpacity style={styles.button} onPress={handleChangePassword}>
-          <Text style={styles.buttonText}>Continuar</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.line}></View>
-
-      <View style={styles.registerContainer}>
-        <Text style={styles.registerText}>¿No tienes una cuenta?</Text>
+       <View style={[styles.line, { marginBottom: marginBottomLine }]} />
+       <View style={[styles.registerContainer, {marginBottom: marginBottomBackToLogin}]}>
+        <Text style={styles.registerText}>Volver al </Text>
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate('Register');
+            navigation.navigate('Login');
           }}
         >
-          <Text style={styles.registerLink}>Regístrate</Text>
+          <Text style={styles.registerLink}>Login</Text>
         </TouchableOpacity>
       </View>
-    </ScrollView>
+
+       
+    </View>
+    
+
+
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff'
-  },
-  logoContainer: {
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: 130
+    backgroundColor: '#fff',
+},
+// Estilo para la línea horizontal
+  line: {
+      height: 2,
+      width: '100%', // Ancho del 80% de la pantalla
+      position: 'absolute', // Posicionamiento absoluto para colocar la línea en una posición específica
+      bottom: 0, // Al principio, la línea estará al fondo de la pantalla
+      borderBottomColor: '#ccc',
+      borderBottomWidth: 1,
+      alignSelf: 'stretch', // Ajuste para que la línea ocupe todo el ancho
   },
   logo: {
     width: 200,
     height: 200,
     resizeMode: 'contain'
   },
-  logoText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginTop: 10
-  },
   formContainer: {
+    //position: 'absolute',
     backgroundColor: '#ffffff',
-    marginTop: 20,
     padding: 20,
-    borderRadius: 10
+    borderRadius: 10,
+    width: '100%'
   },
   label: {
     fontSize: 16,
@@ -174,18 +191,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold'
   },
 
-  line: {
-    borderBottomColor: '#ccc',
-    borderBottomWidth: 1,
-    paddingBottom: '80%',
-    alignSelf: 'stretch', // Ajuste para que la línea ocupe todo el ancho
-    marginBottom: 10
-  },
-
   registerContainer: {
-    flexDirection: 'row',
+    position: 'absolute', // Posicionamiento absoluto para colocar la línea en una posición específica
+    bottom: 0, // Al principio, la línea estará al fondo de la pantalla
     justifyContent: 'center',
-    paddingBottom: '10%'
+    flexDirection: 'row',
   },
   registerText: {
     fontSize: 16
@@ -193,7 +203,6 @@ const styles = StyleSheet.create({
   registerLink: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginLeft: 5,
-    color: '#F89F9F'
+    color: '#F89F9F',
   }
 });
