@@ -27,8 +27,8 @@ export const initializeSocket = async (token, setSocketState) => {
       console.log('Match event received: ', receiverId, senderId, videoId);
       setSocketState((prevState) => ({
         ...prevState,
-        senderId: senderId,
-        receiverId: receiverId,
+        senderId: receiverId,
+        receiverId: senderId,
         idVideo: videoId
       }));
     });

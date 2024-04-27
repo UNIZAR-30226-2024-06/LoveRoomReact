@@ -13,7 +13,7 @@ import {
   Modal,
   Dimensions
 } from 'react-native';
-import Orientation from 'react-native-orientation-locker';
+// import Orientation from 'react-native-orientation-locker';
 import AuthContext from '../components/AuthContext';
 import RegisterScreen from './RegisterScreen';
 import { Ionicons } from '@expo/vector-icons';
@@ -109,7 +109,7 @@ export default function LoginScreen({ navigation }) {
 
   // Al calcular la menor dimensión (minDimension) entre la altura (height) y el ancho (width), estás obteniendo el valor más pequeño entre los dos,
   // lo que te permite diseñar la UI de una forma más adaptable y flexible a los cambios de orientación.
-  const minDimension = Math.min(height, width);
+  // const minDimension = Math.min(height, width);
   // Calcular el margen inferior del 10%
   const marginBottomLine = height * 0.07;
   const marginBottomBackToLogin = height * 0.03;
