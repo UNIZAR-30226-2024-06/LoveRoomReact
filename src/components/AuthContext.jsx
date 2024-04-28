@@ -22,16 +22,24 @@ export const initializeSocket = async (token, setSocketState) => {
     idSala: ''
   }));
 
+  console.log('Socket initialized');
+
   newSocket.on('connect', () => {
     console.log('Connected to socket');
-    newSocket.on(socketEvents.MATCH, (senderId, receiverId, videoId) => {
+    console.log('Id socket: ', newSocket.id);
+    newSocket.on(socketEvents.MATCH, (senderId, receiverId, roomID, videoId) => {
       console.log('Match event received: ', receiverId, senderId, videoId);
       setSocketState((prevState) => ({
         ...prevState,
         senderId: receiverId,
         receiverId: senderId,
+        idSala: roomID,
         idVideo: videoId
       }));
+
+      console.log('Uniendose a la sala del match recibido: ', roomID);
+      // Nos unimos a la sala recibida
+      newSocket.emit(socketEvents.JOIN_ROOM, roomID.toString());
     });
   });
 };

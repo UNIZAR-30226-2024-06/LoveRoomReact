@@ -109,9 +109,10 @@ const Video = () => {
         message: newMessage,
         timestamp: Date.now()
       };
+      const idsala = socketState.idSala;
       console.log('Enviando mensaje: ', data);
 
-      socketState.socket.emit(socketEvents.CREATE_MESSAGE, data, (response) => {
+      socketState.socket.emit(socketEvents.CREATE_MESSAGE, data, idsala, response => {
         console.log('Mensaje enviado: ', response);
       });
       setMessages((prevState) => [...prevState, data]);

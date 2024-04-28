@@ -57,6 +57,19 @@ const SearchFilter = ({ data, search, setListVideos, nextPageToken, setNextPageT
             receiverId: data.idusuario,
             idSala: data.idsala
           }));
+          
+          // Nos unimos a la sala (NO FUNCIONA, NO SE HACE ASI. EL SOCKET NO ESTA CONECTADO)
+          // const newSocket = socketState.socket;
+          // console.log('Socketstate socket en SearchFilter: ', socketState.socket);
+          // console.log('Socket en SearchFilter: ', newSocket);
+          // newSocket.on('connect', () => {
+          //   console.log('Connected to socket');
+          //   console.log('Id socket: ', newSocket.id);
+          //   console.log('Uniendose a la sala del match creado: ', data.idsala);
+          //   // Nos unimos a la sala recibida
+          //   newSocket.emit(socketEvents.JOIN_ROOM, data.idsala.toString());
+          // });
+
           setShowModal(false);
           alert('Has hecho match con alguien, ¡disfruta la sala!');
         } else if (data.message == '404 Not Found') {
