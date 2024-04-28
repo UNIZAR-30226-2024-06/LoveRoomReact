@@ -1,6 +1,6 @@
 // VideoScreen.jsx
 import React, { useContext, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TextInput, Button, Modal } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TextInput, Button, Modal, Image, StatusBar } from 'react-native';
 import YoutubePlayer from 'react-native-youtube-iframe';
 import AuthContext from '../components/AuthContext';
 import { useEffect } from 'react';
@@ -12,6 +12,7 @@ import { Icon } from 'react-native-elements';
 import * as ImagePicker from 'expo-image-picker';
 import { ActionSheetProvider, useActionSheet } from '@expo/react-native-action-sheet';
 import { Dimensions } from 'react-native';
+import defaultProfilePicture from '../img/perfil-vacio.png';
 
 const Video = () => {
   const navigation = useNavigation();
@@ -20,6 +21,19 @@ const Video = () => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const { showActionSheetWithOptions } = useActionSheet();
+  const [user, setUser] = useState({});
+  const statusBarHeight = StatusBar.currentHeight;
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', () => {
+      socketState.socket.disconnect();
+      setSocketState((prevState) => ({ ...prevState, receiverId: '', idVideo: '', isPlaying: false}));
+      console.log('Socket disconnected');
+    });
+  
+    // Devuelve una función de limpieza para ejecutar al desmontar el componente
+    return unsubscribe;
+  }, [navigation]);
 
   const screenHeight = Dimensions.get('window').height;
 
@@ -44,8 +58,12 @@ const Video = () => {
   };
 
   useEffect(() => {
-    setSocketState((prevState) => ({ ...prevState, senderId: authState.id }));
+    handleInfoReceiver();
   }, []);
+
+  useEffect(() => {
+    handleInfoReceiver();
+  }, [socketState.receiverId]);
 
   const handleImagePicker = async (mediaType) => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -119,15 +137,26 @@ const Video = () => {
     }
   };
 
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('blur', () => {
-      socketState.socket.disconnect();
-      console.log('Socket disconnected');
-    });
 
-    // Devuelve una función de limpieza para ejecutar al desmontar el componente
-    return unsubscribe;
-  }, [navigation]);
+
+  const handleInfoReceiver = () => {
+    console.log(`${process.env.EXPO_PUBLIC_API_URL}/user/${socketState.receiverId}`);
+    fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/${socketState.receiverId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authState.token}`
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log('Success:', data);
+        setUser(data);
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+  };
 
   const handleStateChange = (event) => {
     if (event === 'playing') {
@@ -145,7 +174,18 @@ const Video = () => {
 
   return (
     <View style={{ flex: 1, padding: 10 }}>
-      <View style={{ flex: 0.85, alignItems: 'center', height: screenHeight * 0.5 }}>
+      {socketState.receiverId != "" && (
+        <TouchableOpacity style={{flexDirection: 'row', alignItems: 'center', padding: 15 }}
+          onPress={() => {navigation.navigate("OtherProfile", {user: user})}}>
+          <View style={{ flex:1,alignItems: 'center', flexDirection: 'row'}}>
+            <Image source={user.fotoperfil === "null.jpg" ? defaultProfilePicture : { uri: user.fotoperfil }} style={{ width: 50, height: 50 }} />
+            <Text style={{padding:15}}>{user.nombre}, Edad: {user.edad}</Text>
+          </View>
+          <Text style={{padding:5}}>Ver perfil</Text>
+          <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage} />
+        </TouchableOpacity>
+      )}
+      <View style={{alignItems: 'center', flex: 1 }}>
         <YoutubePlayer
           videoId={socketState.idVideo}
           height={'100%'}
@@ -155,22 +195,6 @@ const Video = () => {
           onChangeState={handleStateChange}
         />
       </View>
-      {/* <Text>Sender: {socketState.senderId}</Text>
-      <Text>Receiver: {socketState.receiverId}</Text>
-      <Text>Video: {socketState.idVideo}</Text>
-      <TouchableOpacity
-        onPress={() => {
-          console.log('videoScreen socketSTate');
-          console.log(socketState);
-          console.log('videoScreen socketState.socket');
-          console.log(socketState.socket);
-          console.log('videoScreen authState');
-          console.log(authState);
-          console.log(messages);
-        }}
-      >
-        <Text>Console log</Text>
-      </TouchableOpacity> */}
       <View style={styles.chatContainer}>
         <FlatList
           data={messages}

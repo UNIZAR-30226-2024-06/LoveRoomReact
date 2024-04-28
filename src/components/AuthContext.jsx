@@ -24,13 +24,13 @@ export const initializeSocket = async (token, setSocketState) => {
 
   newSocket.on('connect', () => {
     console.log('Connected to socket');
-    newSocket.on(socketEvents.MATCH, (senderId, receiverId, videoId) => {
-      console.log('Match event received: ', receiverId, senderId, videoId);
+    newSocket.on(socketEvents.MATCH, (senderId, receiverId, idSala) => {
+      console.log('Match event received: ', receiverId, senderId, idSala);
       setSocketState((prevState) => ({
         ...prevState,
         senderId: receiverId,
         receiverId: senderId,
-        idVideo: videoId
+        idSala: idSala
       }));
     });
   });
