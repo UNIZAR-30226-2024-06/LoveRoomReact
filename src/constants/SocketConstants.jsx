@@ -10,4 +10,5 @@ export const socketEvents = {
   NOTHING: 'do-nothing',
   JOIN_ROOM: 'join-room',
   LEAVE_ROOM: 'leave-room',
+  CHANGE_VIDEO: 'change-video',
 };

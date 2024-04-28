@@ -40,6 +40,11 @@ export const initializeSocket = async (token, setSocketState) => {
       console.log('Uniendose a la sala del match recibido: ', roomID);
       // Nos unimos a la sala recibida
       newSocket.emit(socketEvents.JOIN_ROOM, roomID.toString());
+      // Cambiamos el video de la sala
+      newSocket.emit(socketEvents.CHANGE_VIDEO, roomID.toString(), 'video1', (response) => {
+        console.log('Cambiando video: ', response);
+      });
+      
     });
   });
 };

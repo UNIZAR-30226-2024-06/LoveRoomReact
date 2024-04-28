@@ -112,8 +112,8 @@ const Video = () => {
       const idsala = socketState.idSala;
       console.log('Enviando mensaje: ', data);
 
-      socketState.socket.emit(socketEvents.CREATE_MESSAGE, data, idsala, response => {
-        console.log('Mensaje enviado: ', response);
+      socketState.socket.emit(socketEvents.CREATE_MESSAGE, idsala, data.message, null, response => {
+        console.log('Callback: ', response);
       });
       setMessages((prevState) => [...prevState, data]);
       setNewMessage('');
