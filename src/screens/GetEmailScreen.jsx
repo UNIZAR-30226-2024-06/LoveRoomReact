@@ -83,36 +83,39 @@ export default function GetEmailScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-        <Image style={[styles.logo, {marginTop: logoHeight}]} source={require('../img/logoTexto.png')} />
-        <View style={[styles.formContainer, {marginBottom: formHeight}]}>
-          <Text style={styles.label}>Correo electrónico</Text>
-          <TextInput
-            style={[
-              styles.input,
-              !isValidEmail && formSubmitted && styles.inputError,
-              errorText === 'Usuario no existente' && styles.inputError
-            ]}
-            placeholder="Introduzca su correo electrónico "
-            onChangeText={handleEmailChange}
-          />
-          {!isValidEmail && formSubmitted && errorText !== 'Usuario no existente' && (
-            <Text style={styles.errorText}>
-              * Por favor, introduzca un correo electrónico válido.
-            </Text>
-          )}
-          {errorText === 'Usuario no existente' && (
-            <Text style={styles.errorText}>
-              * No existe ninguna cuenta de usuario asociada a este correo electrónico.
-            </Text>
-          )}
+      <Image
+        style={[styles.logo, { marginTop: logoHeight }]}
+        source={require('../img/logoTexto.png')}
+      />
+      <View style={[styles.formContainer, { marginBottom: formHeight }]}>
+        <Text style={styles.label}>Correo electrónico</Text>
+        <TextInput
+          style={[
+            styles.input,
+            !isValidEmail && formSubmitted && styles.inputError,
+            errorText === 'Usuario no existente' && styles.inputError
+          ]}
+          placeholder="Introduzca su correo electrónico "
+          onChangeText={handleEmailChange}
+        />
+        {!isValidEmail && formSubmitted && errorText !== 'Usuario no existente' && (
+          <Text style={styles.errorText}>
+            * Por favor, introduzca un correo electrónico válido.
+          </Text>
+        )}
+        {errorText === 'Usuario no existente' && (
+          <Text style={styles.errorText}>
+            * No existe ninguna cuenta de usuario asociada a este correo electrónico.
+          </Text>
+        )}
 
-          <TouchableOpacity style={styles.button} onPress={handleChangePassword}>
-            <Text style={styles.buttonText}>Continuar</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity style={styles.button} onPress={handleChangePassword}>
+          <Text style={styles.buttonText}>Continuar</Text>
+        </TouchableOpacity>
+      </View>
 
-       <View style={[styles.line, { marginBottom: marginBottomLine }]} />
-       <View style={[styles.registerContainer, {marginBottom: marginBottomBackToLogin}]}>
+      <View style={[styles.line, { marginBottom: marginBottomLine }]} />
+      <View style={[styles.registerContainer, { marginBottom: marginBottomBackToLogin }]}>
         <Text style={styles.registerText}>Volver al </Text>
         <TouchableOpacity
           onPress={() => {
@@ -122,12 +125,7 @@ export default function GetEmailScreen({ navigation }) {
           <Text style={styles.registerLink}>Login</Text>
         </TouchableOpacity>
       </View>
-
-       
     </View>
-    
-
-
   );
 }
 
@@ -136,8 +134,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
-},
+    backgroundColor: '#fff'
+  },
   logo: {
     width: 200,
     height: 200,
@@ -187,14 +185,14 @@ const styles = StyleSheet.create({
     bottom: 0, // Al principio, la línea estará al fondo de la pantalla
     borderBottomColor: '#ccc',
     borderBottomWidth: 1,
-    alignSelf: 'stretch', // Ajuste para que la línea ocupe todo el ancho
-},
+    alignSelf: 'stretch' // Ajuste para que la línea ocupe todo el ancho
+  },
 
   registerContainer: {
     position: 'absolute', // Posicionamiento absoluto para colocar la línea en una posición específica
     bottom: 0, // Al principio, la línea estará al fondo de la pantalla
     justifyContent: 'center',
-    flexDirection: 'row',
+    flexDirection: 'row'
   },
   registerText: {
     fontSize: 16
@@ -202,6 +200,6 @@ const styles = StyleSheet.create({
   registerLink: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#F89F9F',
+    color: '#F89F9F'
   }
 });

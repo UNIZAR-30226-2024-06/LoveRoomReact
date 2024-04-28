@@ -90,7 +90,6 @@ export default function RegisterPreferencesScreen({ navigation }) {
   const { StorageAccessFramework } = FileSystem;
   const isDataSaved = useRef(false);
 
-  
   React.useEffect(() => {
     return () => {
       console.log(isDataSaved);
@@ -178,7 +177,6 @@ export default function RegisterPreferencesScreen({ navigation }) {
         console.error('Error:', error);
       });
   };
-
 
   const handleDateChange = (text) => {
     // Elimina todos los caracteres que no sean números

@@ -18,7 +18,8 @@ export const initializeSocket = async (token, setSocketState) => {
     senderId: '',
     receiverId: '',
     idVideo: '',
-    isPlaying: false
+    isPlaying: false,
+    idSala: ''
   }));
 
   newSocket.on('connect', () => {

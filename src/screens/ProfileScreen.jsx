@@ -24,7 +24,6 @@ export default function ProfileScreen({ navigation }) {
   const scrollViewRef = useRef(null);
   const [isProfileImageSelected, setIsProfileImageSelected] = useState(false);
 
-
   const handleDelete = () => {
     console.log(`${process.env.EXPO_PUBLIC_API_URL}/user/delete`);
     fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/delete`, {

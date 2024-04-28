@@ -51,7 +51,12 @@ const SearchFilter = ({ data, search, setListVideos, nextPageToken, setNextPageT
         } else if (data.esSalaUnitaria == false) {
           // console.log("Sala con persona, ¡he hecho match!");
           setMensaje('Has hecho match con alguien, ¡disfruta la sala!');
-          setSocketState((prevState) => ({ ...prevState, idVideo: videoId }));
+          setSocketState((prevState) => ({
+            ...prevState,
+            idVideo: videoId,
+            receiverId: data.idusuario,
+            idSala: data.idsala
+          }));
           setShowModal(false);
           alert('Has hecho match con alguien, ¡disfruta la sala!');
         } else if (data.message == '404 Not Found') {

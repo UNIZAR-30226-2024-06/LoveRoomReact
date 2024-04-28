@@ -19,7 +19,6 @@ import RegisterScreen from './RegisterScreen';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
 export default function LoginScreen({ navigation }) {
   const { authState, setAuthState } = React.useContext(AuthContext);
   const [email, setEmail] = React.useState('');
@@ -94,18 +93,17 @@ export default function LoginScreen({ navigation }) {
       });
   };
 
-//   React.useEffect(() => {
-//     // Bloquea la orientación en modo retrato (portrait)
-//     Orientation.lockToPortrait();
+  //   React.useEffect(() => {
+  //     // Bloquea la orientación en modo retrato (portrait)
+  //     Orientation.lockToPortrait();
 
-//     // Restablece la orientación cuando se sale de la pantalla
-//     return () => {
-//         Orientation.unlockAllOrientations();
-//     };
-// }, []);
+  //     // Restablece la orientación cuando se sale de la pantalla
+  //     return () => {
+  //         Orientation.unlockAllOrientations();
+  //     };
+  // }, []);
 
-
-    const { height, width } = Dimensions.get('window');
+  const { height, width } = Dimensions.get('window');
 
   // Al calcular la menor dimensión (minDimension) entre la altura (height) y el ancho (width), estás obteniendo el valor más pequeño entre los dos,
   // lo que te permite diseñar la UI de una forma más adaptable y flexible a los cambios de orientación.
@@ -190,7 +188,7 @@ export default function LoginScreen({ navigation }) {
             if (!isValidPassword) {
               setPasswordError(true); // Establecer el estado de error de la contraseña
             } else {
-            handleLogin(); // Se ejecuta cuando tanto el correo electrónico como la contraseña son válidos
+              handleLogin(); // Se ejecuta cuando tanto el correo electrónico como la contraseña son válidos
             }
           }}
         >
@@ -207,7 +205,7 @@ export default function LoginScreen({ navigation }) {
       </View>
 
       <View style={[styles.line, { marginBottom: marginBottomLine }]} />
-       <View style={[styles.registerContainer, {marginBottom: marginBottomBackToLogin}]}>
+      <View style={[styles.registerContainer, { marginBottom: marginBottomBackToLogin }]}>
         <Text style={styles.registerText}>¿No tienes una cuenta? </Text>
         <TouchableOpacity
           onPress={() => {
@@ -236,7 +234,7 @@ export default function LoginScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#fff'
   },
   logoContainer: {
     alignItems: 'center',
@@ -293,25 +291,24 @@ const styles = StyleSheet.create({
     bottom: 0, // Al principio, la línea estará al fondo de la pantalla
     borderBottomColor: '#ccc',
     borderBottomWidth: 1,
-    alignSelf: 'stretch', // Ajuste para que la línea ocupe todo el ancho
-},
+    alignSelf: 'stretch' // Ajuste para que la línea ocupe todo el ancho
+  },
 
-registerContainer: {
-  position: 'absolute',
-  bottom: 0, // Coloca el contenedor en la parte inferior de la pantalla
-  justifyContent: 'center', // Centra el contenido horizontalmente
-  alignItems: 'center', // Centra el contenido verticalmente
-  flexDirection: 'row',
-  width: '100%', // Asegura que el contenedor ocupe todo el ancho de la pantalla
-},
+  registerContainer: {
+    position: 'absolute',
+    bottom: 0, // Coloca el contenedor en la parte inferior de la pantalla
+    justifyContent: 'center', // Centra el contenido horizontalmente
+    alignItems: 'center', // Centra el contenido verticalmente
+    flexDirection: 'row',
+    width: '100%' // Asegura que el contenedor ocupe todo el ancho de la pantalla
+  },
   registerText: {
-    fontSize: 16,
-    
+    fontSize: 16
   },
   registerLink: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#F89F9F',
+    color: '#F89F9F'
   },
   errorText: {
     color: 'red',
