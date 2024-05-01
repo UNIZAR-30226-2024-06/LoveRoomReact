@@ -130,8 +130,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
         <Picker
           selectedValue={gender}
           style={styles.input}
-          onValueChange={(itemValue, itemIndex) => setGender(itemValue)}
-        >
+          onValueChange={(itemValue, itemIndex) => setGender(itemValue)}>
           <Picker.Item label="Masculino" value="H" />
           <Picker.Item label="Femenino" value="M" />
           <Picker.Item label="Otro" value="O" />
@@ -141,8 +140,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
         <Picker
           selectedValue={sexualPreference}
           style={styles.input}
-          onValueChange={(itemValue, itemIndex) => setSexualPreference(itemValue)}
-        >
+          onValueChange={(itemValue, itemIndex) => setSexualPreference(itemValue)}>
           <Picker.Item label="Seleccione su preferencia sexual" value="" />
           <Picker.Item label="Hombres" value="H" />
           <Picker.Item label="Mujeres" value="M" />
@@ -159,8 +157,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
           <Picker
             selectedValue={agePreferenceStart}
             style={styles.ageInput}
-            onValueChange={(itemValue, itemIndex) => setAgePreferenceStart(itemValue)}
-          >
+            onValueChange={(itemValue, itemIndex) => setAgePreferenceStart(itemValue)}>
             {[...Array(100).keys()].map((value, index) => (
               <Picker.Item key={index} label={value.toString()} value={value} />
             ))}
@@ -169,8 +166,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
           <Picker
             selectedValue={agePreferenceEnd}
             style={styles.ageInput}
-            onValueChange={(itemValue, itemIndex) => setAgePreferenceEnd(itemValue)}
-          >
+            onValueChange={(itemValue, itemIndex) => setAgePreferenceEnd(itemValue)}>
             {[...Array(100).keys()].map((value, index) => (
               <Picker.Item key={index} label={value.toString()} value={value} />
             ))}
@@ -200,8 +196,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
               descripcion: description
             }));
             navigation.navigate('UserGuidelines');
-          }}
-        >
+          }}>
           <Text style={styles.buttonText}>Registrarse</Text>
         </TouchableOpacity>
       </View>

@@ -19,7 +19,7 @@ import * as FileSystem from 'expo-file-system';
 import Slider from '@react-native-community/slider';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import { Feather } from '@expo/vector-icons'; // Importa el ícono de Feather
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
@@ -33,13 +33,14 @@ export default function RegisterPreferencesScreen({ navigation }) {
   const [show, setShow] = useState(false);
   const [gender, setGender] = useState(authState.sexo);
   const [sexualPreference, setSexualPreference] = useState(authState.buscasexo);
-  const [agePreference, setAgePreference] = useState([authState.buscaedadmin, authState.buscaedadmax]);
+  const [agePreference, setAgePreference] = useState([
+    authState.buscaedadmin,
+    authState.buscaedadmax
+  ]);
   const [description, setDescription] = useState(authState.descripcion);
   const [profileImage, setProfileImage] = useState(authState.fotoperfil);
   const [isProfileImageSelected, setIsProfileImageSelected] = useState();
   const { StorageAccessFramework } = FileSystem;
-
-  
 
   const fileName = FileSystem.documentDirectory + 'userProfileImage.jpeg';
   const checkProfileImage = async () => {
@@ -51,6 +52,39 @@ export default function RegisterPreferencesScreen({ navigation }) {
   useEffect(() => {
     checkProfileImage();
   }, []);
+
+  const updateProfileImage = async () => {
+    url = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/upload/foto/${authState.id}`;
+    console.log(url);
+    const token = await AsyncStorage.getItem('token');
+    console.log('token ' + token);
+
+    // Create a new FormData instance
+    let formData = new FormData();
+
+    // Fetch the image file
+    let image = await fetch(profileImage);
+
+    // Convert the fetched image to blob
+    let blob = await image.blob();
+
+    // // Append the image blob to the form data
+    // formData.append('file', blob, 'userProfileImage.jpeg');
+
+    fetch(url, {
+      method: 'POST',
+      body: blob,
+      // 👇 Set headers manually for single profileImage upload
+      headers: {
+        'content-type': profileImage.type,
+        'content-length': `${profileImage.size}`, // 👈 Headers need to be a string
+        authorization: `Bearer ${token}`
+      }
+    })
+      .then((res) => res.json())
+      .then((data) => console.log(' data ' + data))
+      .catch((err) => console.error(err));
+  };
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
@@ -79,6 +113,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
       //   console.log('fileInfo dentro', fileInfo);
       setProfileImage(fileName + '?' + new Date().getTime());
       setIsProfileImageSelected(true);
+      updateProfileImage();
     }
   };
 
@@ -96,28 +131,25 @@ export default function RegisterPreferencesScreen({ navigation }) {
     <ScrollView style={styles.container}>
       <View style={styles.header} />
       <View style={styles.profileInfo}>
-        
         <Text style={styles.profileText}>Editar perfil</Text>
         <View style={styles.profileImageContainer}>
-        <TouchableOpacity style={styles.editIconContainer} onPress={pickImage}>
-          <Feather name="edit" size={25} color="black" />
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.editIconContainer} onPress={pickImage}>
+            <Feather name="edit" size={25} color="black" />
+          </TouchableOpacity>
           <View style={styles.profileImageBorder}>
-            
             <Image
               style={styles.profileImage}
               source={
                 isProfileImageSelected
                   ? { uri: profileImage + '?' + new Date() }
                   : require('../img/profileImage.jpg')
-      }
-    />
+              }
+            />
           </View>
         </View>
       </View>
 
       <View style={styles.formContainer}>
-
         <Text style={styles.label}>Nombre completo</Text>
         <TextInput
           style={styles.textContainer}
@@ -156,8 +188,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
             onValueChange={(itemValue) => setGender(itemValue)}
             defaultValue={
               authState.sexo == 'H' ? 'Masculino' : authState.sexo == 'M' ? 'Femenino' : 'Otro'
-            }
-          >
+            }>
             <Picker.Item label="Masculino" value="H" />
             <Picker.Item label="Femenino" value="M" />
             <Picker.Item label="Otro" value="O" />
@@ -175,8 +206,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
                 : authState.buscasexo == 'M'
                   ? 'Mujeres'
                   : 'Todos'
-            }
-          >
+            }>
             <Picker.Item label="Hombres" value="H" />
             <Picker.Item label="Mujeres" value="M" />
             <Picker.Item label="Todos" value="T" />
@@ -184,34 +214,33 @@ export default function RegisterPreferencesScreen({ navigation }) {
         </View>
         <View style={styles.labelContainer}>
           <Text style={styles.label}>Preferencia de edad</Text>
-          <Text style={styles.sliderLabel}>{agePreference[0]}-{agePreference[1]}</Text>
+          <Text style={styles.sliderLabel}>
+            {agePreference[0]}-{agePreference[1]}
+          </Text>
         </View>
-        <View style={styles.sliderLabelsContainer}>
-        </View>
+        <View style={styles.sliderLabelsContainer}></View>
         <View style={styles.sliderContainer}>
-        <MultiSlider
-          values={agePreference}
-          sliderLength={screenWidth - 40} // Utiliza el ancho total de la pantalla menos los márgenes
-          min={18}
-          max={100}
-          step={1}
-          onValuesChange={(values) => setAgePreference(values)}
-          allowOverlap={false}
-          snapped={true}
-          minMarkerOverlapDistance={20}
-          selectedStyle={{
-            backgroundColor: '#F89F9F'
-          }}
-          markerStyle={{
-            backgroundColor: '#F89F9F'
-          }}
-          customMarker={(e) => {
-            return (
-              <View style={styles.customMarker} />
-            );
-          }}
-        />
-      </View>
+          <MultiSlider
+            values={agePreference}
+            sliderLength={screenWidth - 40} // Utiliza el ancho total de la pantalla menos los márgenes
+            min={18}
+            max={100}
+            step={1}
+            onValuesChange={(values) => setAgePreference(values)}
+            allowOverlap={false}
+            snapped={true}
+            minMarkerOverlapDistance={20}
+            selectedStyle={{
+              backgroundColor: '#F89F9F'
+            }}
+            markerStyle={{
+              backgroundColor: '#F89F9F'
+            }}
+            customMarker={(e) => {
+              return <View style={styles.customMarker} />;
+            }}
+          />
+        </View>
 
         <Text style={styles.label}>Descripción</Text>
         <TextInput
@@ -227,8 +256,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
           onPress={() => {
             // TODO: handleRegister();
             navigation.navigate('Cuenta');
-          }}
-        >
+          }}>
           <Text style={styles.buttonText}>Guardar</Text>
         </TouchableOpacity>
       </View>
@@ -252,7 +280,7 @@ const styles = StyleSheet.create({
     borderColor: 'black', // Agrega el borde de color F89F9F
     borderWidth: 1,
     zIndex: 1 // Asegura que el ícono esté por encima de la imagen
-  },  
+  },
 
   header: {
     height: screenHeight * 0.27,
@@ -292,7 +320,7 @@ const styles = StyleSheet.create({
     borderRadius: 70,
     marginBottom: 0,
     marginRight: 0 // Añade este estilo para evitar que el ícono de edición cubra la imagen
-  },  
+  },
   formContainer: {
     backgroundColor: '#ffffff',
     marginTop: 0,
@@ -313,7 +341,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 10
   },
-  
+
   sliderContainer: {
     marginBottom: 20
   },
