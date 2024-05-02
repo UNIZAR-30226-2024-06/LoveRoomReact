@@ -1,5 +1,5 @@
 // VideoScreen.jsx
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -33,6 +33,7 @@ const Video = () => {
   const { showActionSheetWithOptions } = useActionSheet();
   const [user, setUser] = useState({});
   const statusBarHeight = StatusBar.currentHeight;
+  const ignoreStateChange = useRef(false);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
@@ -112,12 +113,14 @@ const Video = () => {
   };
 
   const handlePause = () => {
-    console.log('Pause event received');
+    console.log('Pause event received by ', authState.id);
+    ignoreStateChange.current = true;
     setSocketState((prevState) => ({ ...prevState, isPlaying: false }));
   };
 
   const handlePlay = () => {
-    console.log('Play event received');
+    console.log('Play event received by ', authState.id);
+    ignoreStateChange.current = true;
     setSocketState((prevState) => ({ ...prevState, isPlaying: true }));
   };
 
@@ -195,21 +198,30 @@ const Video = () => {
 
   const handleStateChange = (event) => {
     if (event === 'playing') {
-      console.log('playing'); 
+      if (ignoreStateChange.current) {
+        ignoreStateChange.current = false;
+        return;
+      }
+      // console.log('playing');
+      // console.log('isPlaying:', socketState.isPlaying); // Debería ser 'false' siempre
       setSocketState((prevState) => ({ ...prevState, isPlaying: true }));
       const callback = (message) => {
         console.log('Respuesta del servidor:', message);
       };
       socketState.socket.emit(socketEvents.PLAY, socketState.idSala, callback);
-      console.log('Play event emitted');
+      // console.log('Play event emitted by ', authState.id);
     } else if (event === 'paused') {
-      console.log('paused');
+      if (ignoreStateChange.current) {
+        ignoreStateChange.current = false;
+        return;
+      }
+      //console.log('paused');
       const callback = (message) => {
         console.log('Respuesta del servidor:', message);
       };
       setSocketState((prevState) => ({ ...prevState, isPlaying: false }));
       socketState.socket.emit(socketEvents.PAUSE, socketState.idSala, callback);
-      console.log('Pause event emitted');
+      //console.log('Pause event emitted by ', authState.id);
     }
   };
 

@@ -54,6 +54,7 @@ const SearchFilter = ({ data, search, setListVideos, nextPageToken, setNextPageT
           setSocketState((prevState) => ({
             ...prevState,
             idVideo: videoId,
+            senderId: authState.id,
             receiverId: data.idusuario,
             idSala: data.idsala.toString()
           }));
