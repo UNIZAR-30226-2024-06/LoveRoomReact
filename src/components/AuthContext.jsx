@@ -18,7 +18,6 @@ export const initializeSocket = async (token, setSocketState) => {
     senderId: '',
     receiverId: '',
     idVideo: '',
-    isPlaying: false,
     idSala: ''
   }));
 
@@ -65,7 +64,7 @@ export const AuthProvider = ({ children }) => {
     senderId: authState.id,
     receiverId: '',
     idVideo: '',
-    isPlaying: false
+    idSala: ''
   });
 
   // Función asincrónica que se encarga de verificar si hay un token de autenticación almacenado en AsyncStorage y si es válido.

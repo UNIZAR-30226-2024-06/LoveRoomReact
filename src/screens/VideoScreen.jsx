@@ -34,6 +34,7 @@ const Video = () => {
   const [user, setUser] = useState({});
   const statusBarHeight = StatusBar.currentHeight;
   const ignoreStateChange = useRef(false);
+  const [videoPlaying, setVideoPlaying] = useState(false);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
@@ -41,8 +42,7 @@ const Video = () => {
       setSocketState((prevState) => ({
         ...prevState,
         receiverId: '',
-        idVideo: '',
-        isPlaying: false
+        idVideo: ''
       }));
       console.log('Socket disconnected');
     });
@@ -115,13 +115,13 @@ const Video = () => {
   const handlePause = () => {
     console.log('Pause event received by ', authState.id);
     ignoreStateChange.current = true;
-    setSocketState((prevState) => ({ ...prevState, isPlaying: false }));
+    setVideoPlaying(false);
   };
 
   const handlePlay = () => {
     console.log('Play event received by ', authState.id);
     ignoreStateChange.current = true;
-    setSocketState((prevState) => ({ ...prevState, isPlaying: true }));
+    setVideoPlaying(true);
   };
 
   const handleMessage = (senderId, texto, multimedia) => {
@@ -202,9 +202,8 @@ const Video = () => {
         ignoreStateChange.current = false;
         return;
       }
-      // console.log('playing');
-      // console.log('isPlaying:', socketState.isPlaying); // Debería ser 'false' siempre
-      setSocketState((prevState) => ({ ...prevState, isPlaying: true }));
+      console.log('Playing: videoPlaying ', videoPlaying); // Deberia ser false siempre
+      setVideoPlaying(true);
       const callback = (message) => {
         console.log('Respuesta del servidor:', message);
       };
@@ -215,11 +214,11 @@ const Video = () => {
         ignoreStateChange.current = false;
         return;
       }
-      //console.log('paused');
       const callback = (message) => {
         console.log('Respuesta del servidor:', message);
       };
-      setSocketState((prevState) => ({ ...prevState, isPlaying: false }));
+      console.log('Paused: videoPlaying ', videoPlaying); // Deberia ser true siempre
+      setVideoPlaying(false);
       socketState.socket.emit(socketEvents.PAUSE, socketState.idSala, callback);
       //console.log('Pause event emitted by ', authState.id);
     }
@@ -255,7 +254,7 @@ const Video = () => {
           height={'100%'}
           width={'95%'}
           webViewStyle={styles.Video}
-          play={socketState.isPlaying}
+          play={videoPlaying}
           onChangeState={handleStateChange}
         />
       </View>
