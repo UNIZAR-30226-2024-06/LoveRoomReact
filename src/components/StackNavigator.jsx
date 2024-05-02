@@ -57,7 +57,10 @@ export default function StackNavigator() {
           component={EditProfileScreen}
           options={{ headerShown: false }}
         />
-        <Stack.Screen name="Video" component={VideoScreen} options={{
+        <Stack.Screen
+          name="Video"
+          component={VideoScreen}
+          options={{
             tabBarIcon: ({ color, size }) => (
               <Image
                 source={require('../img/HomeTab.png')}
@@ -74,9 +77,15 @@ export default function StackNavigator() {
             headerStyle: {
               backgroundColor: '#F89F9F'
             },
-            headerShadowVisible: false }} />
+            headerShadowVisible: false
+          }}
+        />
         <Stack.Screen name="FAQ" component={FAQScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="OtherProfile" component={OtherProfile} options={{ headerShown: false }} />
+        <Stack.Screen
+          name="OtherProfile"
+          component={OtherProfile}
+          options={{ headerShown: false }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

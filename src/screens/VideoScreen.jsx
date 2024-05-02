@@ -1,6 +1,16 @@
 // VideoScreen.jsx
 import React, { useContext, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TextInput, Button, Modal, Image, StatusBar } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TextInput,
+  Button,
+  Modal,
+  Image,
+  StatusBar
+} from 'react-native';
 import YoutubePlayer from 'react-native-youtube-iframe';
 import AuthContext from '../components/AuthContext';
 import { useEffect } from 'react';
@@ -27,10 +37,15 @@ const Video = () => {
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
       socketState.socket.disconnect();
-      setSocketState((prevState) => ({ ...prevState, receiverId: '', idVideo: '', isPlaying: false}));
+      setSocketState((prevState) => ({
+        ...prevState,
+        receiverId: '',
+        idVideo: '',
+        isPlaying: false
+      }));
       console.log('Socket disconnected');
     });
-  
+
     // Devuelve una función de limpieza para ejecutar al desmontar el componente
     return unsubscribe;
   }, [navigation]);
@@ -63,7 +78,17 @@ const Video = () => {
 
   useEffect(() => {
     handleInfoReceiver();
+    if(socketState.socket != null && socketState.socket.connected == true){
+    }
   }, [socketState.receiverId]);
+
+  useEffect(() => {
+    console.log('ID de sala:', socketState.idSala);
+    if(socketState.idSala != '' || socketState.idSala != null){
+      console.log('Emitiendo evento JOIN_ROOM');
+      socketState.socket.emit(socketEvents.JOIN_ROOM, socketState.idSala);
+    }
+  }, [socketState.idSala]);
 
   const handleImagePicker = async (mediaType) => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -86,20 +111,20 @@ const Video = () => {
     }
   };
 
-  const handlePause = (receiverId) => {
-    console.log('Pause event received: ', receiverId);
+  const handlePause = () => {
+    console.log('Pause event received');
     setSocketState((prevState) => ({ ...prevState, isPlaying: false }));
     console.log(false);
   };
 
-  const handlePlay = (receiverId) => {
-    console.log('Play event received: ', receiverId);
+  const handlePlay = () => {
+    console.log('Play event received');
     setSocketState((prevState) => ({ ...prevState, isPlaying: true }));
     console.log(true);
   };
 
-  const handleMessage = (data) => {
-    console.log('Mensaje recibido: ', data);
+  const handleMessage = (senderId, texto, multimedia) => {
+    console.log('Mensaje recibido: ', senderId);
     setMessages((prevState) => [...prevState, data]);
   };
 
@@ -109,7 +134,13 @@ const Video = () => {
 
       socketState.socket.on(socketEvents.PAUSE, handlePause);
       socketState.socket.on(socketEvents.PLAY, handlePlay);
-      socketState.socket.on(socketEvents.SEND_MESSAGE, handleMessage);
+      socketState.socket.on(socketEvents.RECEIVE_MESSAGE, (senderID, texto, rutamultimedia) => {
+        // Esta es la función que se ejecutará cuando se reciba el evento RECEIVE_MESSAGE
+        // Aquí puedes hacer algo con senderID, texto, y rutamultimedia
+        console.log('Mensaje recibido de: ', senderID);
+        console.log('Texto del mensaje: ', texto);
+        console.log('Ruta multimedia: ', rutamultimedia);
+      });
 
       return () => {
         socketState.socket.off(socketEvents.PAUSE, handlePause);
@@ -122,22 +153,25 @@ const Video = () => {
   const sendMessage = () => {
     if (socketState.socket != null && socketState.socket.connected == true && newMessage != '') {
       const data = {
-        senderId: parseInt(socketState.senderId, 10),
-        receiverId: parseInt(socketState.receiverId, 10),
+        senderId: null,
         message: newMessage,
-        timestamp: Date.now()
+        timestamp: null
       };
       console.log('Enviando mensaje: ', data);
-
-      socketState.socket.emit(socketEvents.CREATE_MESSAGE, data, (response) => {
-        console.log('Mensaje enviado: ', response);
-      });
-      setMessages((prevState) => [...prevState, data]);
-      setNewMessage('');
+      const idsala = socketState.idSala;
+      const texto = data.message;
+      const rutamultimedia = null;
+      const callback = (message, timestamp) => {
+        console.log('Respuesta del servidor:', message);
+        console.log('Timestamp:', timestamp);
+        data.timestamp = timestamp;
+        data.senderId = socketState.senderId;
+        setMessages((prevState) => [...prevState, data]);
+        setNewMessage('');
+      };
+      socketState.socket.emit(socketEvents.CREATE_MESSAGE, idsala, texto, rutamultimedia, callback);
     }
   };
-
-
 
   const handleInfoReceiver = () => {
     console.log(`${process.env.EXPO_PUBLIC_API_URL}/user/${socketState.receiverId}`);
@@ -145,8 +179,8 @@ const Video = () => {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authState.token}`
-      },
+        Authorization: `Bearer ${authState.token}`
+      }
     })
       .then((response) => response.json())
       .then((data) => {
@@ -160,32 +194,49 @@ const Video = () => {
 
   const handleStateChange = (event) => {
     if (event === 'playing') {
-      console.log('playing');
+      console.log('playing'); 
       setSocketState((prevState) => ({ ...prevState, isPlaying: true }));
-      socketState.socket.emit(socketEvents.PLAY, socketState.receiverId);
+      const callback = (message) => {
+        console.log('Respuesta del servidor:', message);
+      };
+      socketState.socket.emit(socketEvents.PLAY, socketState.idSala, callback);
       console.log('Play event emitted');
     } else if (event === 'paused') {
       console.log('paused');
+      const callback = (message) => {
+        console.log('Respuesta del servidor:', message);
+      };
       setSocketState((prevState) => ({ ...prevState, isPlaying: false }));
-      socketState.socket.emit(socketEvents.PAUSE, socketState.receiverId);
+      socketState.socket.emit(socketEvents.PAUSE, socketState.idSala, callback);
       console.log('Pause event emitted');
     }
   };
 
   return (
     <View style={{ flex: 1, padding: 10 }}>
-      {socketState.receiverId != "" && (
-        <TouchableOpacity style={{flexDirection: 'row', alignItems: 'center', padding: 15 }}
-          onPress={() => {navigation.navigate("OtherProfile", {user: user})}}>
-          <View style={{ flex:1,alignItems: 'center', flexDirection: 'row'}}>
-            <Image source={user.fotoperfil === "null.jpg" ? defaultProfilePicture : { uri: user.fotoperfil }} style={{ width: 50, height: 50 }} />
-            <Text style={{padding:15}}>{user.nombre}, Edad: {user.edad}</Text>
+      {socketState.receiverId != '' && (
+        <TouchableOpacity
+          style={{ flexDirection: 'row', alignItems: 'center', padding: 15 }}
+          onPress={() => {
+            navigation.navigate('OtherProfile', { user: user });
+          }}
+        >
+          <View style={{ flex: 1, alignItems: 'center', flexDirection: 'row' }}>
+            <Image
+              source={
+                user.fotoperfil === 'null.jpg' ? defaultProfilePicture : { uri: user.fotoperfil }
+              }
+              style={{ width: 50, height: 50 }}
+            />
+            <Text style={{ padding: 15 }}>
+              {user.nombre}, Edad: {user.edad}
+            </Text>
           </View>
-          <Text style={{padding:5}}>Ver perfil</Text>
+          <Text style={{ padding: 5 }}>Ver perfil</Text>
           <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage} />
         </TouchableOpacity>
       )}
-      <View style={{alignItems: 'center', flex: 1 }}>
+      <View style={{ alignItems: 'center', flex: 1 }}>
         <YoutubePlayer
           videoId={socketState.idVideo}
           height={'100%'}

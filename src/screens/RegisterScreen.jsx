@@ -46,6 +46,7 @@ export default function Login({ navigation }) {
   const handleRegister = () => {
     setIsLoading(true);
     console.log(`${process.env.EXPO_PUBLIC_API_URL}/user/create`);
+    console.log(name, email, password);
     fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/create`, {
       method: 'POST',
       headers: {
