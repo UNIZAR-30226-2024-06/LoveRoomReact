@@ -55,7 +55,7 @@ const SearchFilter = ({ data, search, setListVideos, nextPageToken, setNextPageT
             ...prevState,
             idVideo: videoId,
             receiverId: data.idusuario,
-            idSala: data.idsala
+            idSala: data.idsala.toString()
           }));
           setShowModal(false);
           alert('Has hecho match con alguien, ¡disfruta la sala!');

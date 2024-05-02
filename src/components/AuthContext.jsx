@@ -30,7 +30,7 @@ export const initializeSocket = async (token, setSocketState) => {
         ...prevState,
         senderId: receiverId,
         receiverId: senderId,
-        idSala: idSala
+        idSala: idSala.toString()
       }));
     });
   });

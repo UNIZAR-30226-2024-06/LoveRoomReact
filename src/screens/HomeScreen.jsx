@@ -14,7 +14,7 @@ export default function HomeScreen({ navigation }) {
   // }
   return (
     <View style={{ flex: 1, alignItems: 'center' }}>
-      <Text style={styles.TextBienvenida}> ¡Bienvenido de nuevo, {authState.nombre}! </Text>
+      <Text style={styles.TextBienvenida}> ¡Hola de nuevo, {authState.nombre}! </Text>
       <SearchBar />
       {/* <View style={styles.Video}>
           <YouTubeIframe videoId={'TQtT9QgWjIY'} height={220} width={'100%'} style={styles.Video} />

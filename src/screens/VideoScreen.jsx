@@ -84,9 +84,9 @@ const Video = () => {
 
   useEffect(() => {
     console.log('ID de sala:', socketState.idSala);
-    if(socketState.idSala != '' || socketState.idSala != null){
+    if(socketState.idSala != '' && socketState.idSala != null){
       console.log('Emitiendo evento JOIN_ROOM');
-      socketState.socket.emit(socketEvents.JOIN_ROOM, socketState.idSala);
+      socketState.socket.emit(socketEvents.JOIN_ROOM, socketState.idSala); // Necesario que idSala sea un string
     }
   }, [socketState.idSala]);
 
@@ -114,13 +114,11 @@ const Video = () => {
   const handlePause = () => {
     console.log('Pause event received');
     setSocketState((prevState) => ({ ...prevState, isPlaying: false }));
-    console.log(false);
   };
 
   const handlePlay = () => {
     console.log('Play event received');
     setSocketState((prevState) => ({ ...prevState, isPlaying: true }));
-    console.log(true);
   };
 
   const handleMessage = (senderId, texto, multimedia) => {
@@ -143,12 +141,15 @@ const Video = () => {
       });
 
       return () => {
+        console.log('Desmontando eventos de socket');
         socketState.socket.off(socketEvents.PAUSE, handlePause);
         socketState.socket.off(socketEvents.PLAY, handlePlay);
         socketState.socket.off(socketEvents.SEND_MESSAGE, handleMessage);
       };
+    } else {
+      console.log('Socket = null');
     }
-  }, []);
+  }, [socketState.socket]);
 
   const sendMessage = () => {
     if (socketState.socket != null && socketState.socket.connected == true && newMessage != '') {
