@@ -9,7 +9,8 @@ import {
   Button,
   Modal,
   Image,
-  StatusBar
+  StatusBar,
+  Switch
 } from 'react-native';
 import YoutubePlayer from 'react-native-youtube-iframe';
 import AuthContext from '../components/AuthContext';
@@ -23,6 +24,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { ActionSheetProvider, useActionSheet } from '@expo/react-native-action-sheet';
 import { Dimensions } from 'react-native';
 import defaultProfilePicture from '../img/perfil-vacio.png';
+import SearchBar from '../components/SearchBarYt';
 
 const Video = () => {
   const navigation = useNavigation();
@@ -34,16 +36,18 @@ const Video = () => {
   const [user, setUser] = useState({});
   const statusBarHeight = StatusBar.currentHeight;
   const ignoreStateChange = useRef(false);
-  const [videoPlaying, setVideoPlaying] = useState(false);
+  const [videoPlaying, setVideoPlaying] = useState(true);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
+      socketState.socket.emit(socketEvents.LEAVE_ROOM, socketState.idSala);
       socketState.socket.disconnect();
       setSocketState((prevState) => ({
         ...prevState,
         receiverId: '',
         idVideo: ''
       }));
+
       console.log('Socket disconnected');
     });
 
@@ -73,19 +77,55 @@ const Video = () => {
     );
   };
 
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedVideoUrl, setSelectedVideoUrl] = useState('');
+
+  const handleSelectVideo =async(videoUrl) => {
+    console.log('Video seleccionado en la seleccion:', videoUrl);
+    setSelectedVideoUrl(videoUrl);
+    setModalVisible(false);
+  };
+  
+
+  const handleChangeVideo = () => {
+    console.log('Video seleccionado:', selectedVideoUrl); 
+    socketState.socket.emit(socketEvents.CHANGE_VIDEO, socketState.idSala, selectedVideoUrl, (message) => {
+      console.log('Respuesta del servidor:', message);
+      if(message){
+        setSocketState((prevState) => ({
+          ...prevState,
+          idVideo: selectedVideoUrl
+        }));
+      }
+    });
+    setSelectedVideoUrl('');
+  };
+  
   useEffect(() => {
+    if (selectedVideoUrl !== '') {
+      handleChangeVideo();
+    }
+  }, [selectedVideoUrl]);
+
+
+  useEffect(() => {
+    console.log('Efecto ejecutado. receiverId:', socketState.receiverId);
+    setIsEnabled(true);
     handleInfoReceiver();
+    if (socketState.idSala != '' && socketState.idSala != null && socketState.socket != null && socketState.socket.connected == true) {
+      console.log('Emitiendo evento JOIN_ROOM');
+      socketState.socket.emit(socketEvents.JOIN_ROOM, socketState.idSala); // Necesario que idSala sea un string
+    }
   }, []);
 
   useEffect(() => {
+    console.log('Efecto ejecutado. receiverId:', socketState.receiverId);
     handleInfoReceiver();
-    if(socketState.socket != null && socketState.socket.connected == true){
-    }
   }, [socketState.receiverId]);
 
   useEffect(() => {
     console.log('ID de sala:', socketState.idSala);
-    if(socketState.idSala != '' && socketState.idSala != null){
+    if (socketState.idSala != '' && socketState.idSala != null) {
       console.log('Emitiendo evento JOIN_ROOM');
       socketState.socket.emit(socketEvents.JOIN_ROOM, socketState.idSala); // Necesario que idSala sea un string
     }
@@ -112,6 +152,30 @@ const Video = () => {
     }
   };
 
+  const [isEnabled, setIsEnabled] = useState(false);
+
+  const toggleSwitch = () => {
+    setIsEnabled(previousState => {
+      if (previousState) {
+        console.log('Sync off');
+        socketState.socket.emit(socketEvents.SYNC_OFF, socketState.idSala, (boolean) => {
+          if(boolean == false) {
+            return previousState;
+          }
+        });
+      } else {
+        console.log('Sync on');
+        socketState.socket.emit(socketEvents.SYNC_ON, socketState.idSala, (boolean) => {
+          if(boolean == false) {
+            return previousState;
+          }
+        });
+      }
+      
+      return !previousState;
+    });
+  };
+
   const handlePause = () => {
     console.log('Pause event received by ', authState.id);
     ignoreStateChange.current = true;
@@ -124,35 +188,68 @@ const Video = () => {
     setVideoPlaying(true);
   };
 
-  const handleMessage = (senderId, texto, multimedia) => {
-    console.log('Mensaje recibido: ', senderId);
+  const handleMessage = (senderId, texto, rutamultimedia) => {
+    console.log('Mensaje recibido de: ', senderId);
+    console.log('Texto del mensaje: ', texto);
+    console.log('Ruta multimedia: ', rutamultimedia);
+    const data = {
+      senderId: senderId,
+      message: texto,
+      timestamp: Date.now()
+    };
+
     setMessages((prevState) => [...prevState, data]);
   };
 
   useEffect(() => {
     if (socketState.socket != null) {
       console.log('Eventos de socket');
-
+  
+      // Desuscribirse de los eventos anteriores
+      socketState.socket.off(socketEvents.PAUSE, handlePause);
+      socketState.socket.off(socketEvents.PLAY, handlePlay);
+      socketState.socket.off(socketEvents.RECEIVE_MESSAGE, handleMessage);
+      socketState.socket.off(socketEvents.SYNC_ON);
+      socketState.socket.off(socketEvents.SYNC_OFF);
+      socketState.socket.off(socketEvents.CHANGE_VIDEO);
+  
+      // Suscribirse a los nuevos eventos
       socketState.socket.on(socketEvents.PAUSE, handlePause);
       socketState.socket.on(socketEvents.PLAY, handlePlay);
-      socketState.socket.on(socketEvents.RECEIVE_MESSAGE, (senderID, texto, rutamultimedia) => {
-        // Esta es la función que se ejecutará cuando se reciba el evento RECEIVE_MESSAGE
-        // Aquí puedes hacer algo con senderID, texto, y rutamultimedia
-        console.log('Mensaje recibido de: ', senderID);
-        console.log('Texto del mensaje: ', texto);
-        console.log('Ruta multimedia: ', rutamultimedia);
+      socketState.socket.on(socketEvents.RECEIVE_MESSAGE, handleMessage);
+      socketState.socket.on(socketEvents.CHANGE_VIDEO, (idVideo) => {
+        console.log('Change video event received');
+        setSocketState((prevState) => ({
+          ...prevState,
+          idVideo: idVideo
+        }));
       });
-
+  
+      socketState.socket.on(socketEvents.SYNC_ON, () => {
+        setIsEnabled(prevState => !prevState);
+        console.log('Sync on received');
+      });
+  
+      socketState.socket.on(socketEvents.SYNC_OFF, () => {
+        setIsEnabled(prevState => !prevState);
+        console.log('Sync off received');
+      });
+  
       return () => {
         console.log('Desmontando eventos de socket');
+        // Desuscribirse de los eventos al desmontar el componente
         socketState.socket.off(socketEvents.PAUSE, handlePause);
         socketState.socket.off(socketEvents.PLAY, handlePlay);
-        socketState.socket.off(socketEvents.SEND_MESSAGE, handleMessage);
+        socketState.socket.off(socketEvents.RECEIVE_MESSAGE, handleMessage);
+        socketState.socket.off(socketEvents.SYNC_ON);
+        socketState.socket.off(socketEvents.SYNC_OFF);
+        socketState.socket.off(socketEvents.CHANGE_VIDEO);
       };
     } else {
       console.log('Socket = null');
     }
   }, [socketState.socket]);
+  
 
   const sendMessage = () => {
     if (socketState.socket != null && socketState.socket.connected == true && newMessage != '') {
@@ -173,7 +270,9 @@ const Video = () => {
         setMessages((prevState) => [...prevState, data]);
         setNewMessage('');
       };
+      
       socketState.socket.emit(socketEvents.CREATE_MESSAGE, idsala, texto, rutamultimedia, callback);
+
     }
   };
 
@@ -207,7 +306,9 @@ const Video = () => {
       const callback = (message) => {
         console.log('Respuesta del servidor:', message);
       };
-      socketState.socket.emit(socketEvents.PLAY, socketState.idSala, callback);
+      if(isEnabled) {
+        socketState.socket.emit(socketEvents.PLAY, socketState.idSala, callback);
+      }
       // console.log('Play event emitted by ', authState.id);
     } else if (event === 'paused') {
       if (ignoreStateChange.current) {
@@ -219,13 +320,34 @@ const Video = () => {
       };
       console.log('Paused: videoPlaying ', videoPlaying); // Deberia ser true siempre
       setVideoPlaying(false);
-      socketState.socket.emit(socketEvents.PAUSE, socketState.idSala, callback);
+      if(isEnabled) {
+        socketState.socket.emit(socketEvents.PAUSE, socketState.idSala, callback);
+      }
       //console.log('Pause event emitted by ', authState.id);
     }
   };
 
   return (
     <View style={{ flex: 1, padding: 10 }}>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(false);
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <View style={styles.contentContainer}>
+              <SearchBar setVideoUrl={handleSelectVideo} />
+            </View>
+            <View style={[styles.button, styles.buttonClose]}>
+              <Icon name="close"  type="ionicon" color="white" onPress={()=>{setModalVisible(false)}} />
+            </View>
+          </View>
+        </View>
+      </Modal>
       {socketState.receiverId != '' && (
         <TouchableOpacity
           style={{ flexDirection: 'row', alignItems: 'center', padding: 15 }}
@@ -248,7 +370,7 @@ const Video = () => {
           <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage} />
         </TouchableOpacity>
       )}
-      <View style={{ alignItems: 'center', flex: 1 }}>
+      <View style={{ alignItems: 'center', flex: 0.7 }}>
         <YoutubePlayer
           videoId={socketState.idVideo}
           height={'100%'}
@@ -257,11 +379,35 @@ const Video = () => {
           play={videoPlaying}
           onChangeState={handleStateChange}
         />
+        {/* <TouchableOpacity onPress={console.log("SocketState en video Screen: ", socketState)}>
+          <Text>Console log</Text>
+        </TouchableOpacity> */}
+      </View>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10, flex:0.15 }}>
+        
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={{fontSize: 12, fontWeight: 'bold', padding:10}}>¡Cambia el vídeo!</Text>
+          <Icon name="refresh-cw" type="feather" onPress={() => {
+            console.log('Emitiendo evento CHANGE_VIDEO');
+            setModalVisible(true);
+            // socketState.socket.emit(socketEvents.CHANGE_VIDEO, socketState.idSala);
+          }} />
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={{fontSize: 12, fontWeight: 'bold'}}>Sala Sincronizada</Text>
+          <Switch
+            trackColor={{ false: "#767577", true: "gray" }}
+            thumbColor={'lightgray'}
+            ios_backgroundColor="#3e3e3e"
+            onValueChange={toggleSwitch}
+            value={isEnabled}
+          />
+        </View>
       </View>
       <View style={styles.chatContainer}>
         <FlatList
           data={messages}
-          keyExtractor={(item) => item.timestamp}
+          keyExtractor={(item) => item.timestamp+ item.message}
           renderItem={({ item }) => <ChatMessage data={item} />}
           ref={(ref) => (this.flatList = ref)}
           onContentSizeChange={() => this.flatList.scrollToEnd({ animated: true })}
@@ -303,7 +449,51 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 20
-  }
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    maxHeight: '80%',
+    overflow: 'hidden'
+  },
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+    marginTop: 10,
+  },
+  buttonClose: {
+    backgroundColor: '#2196F3',
+  },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  contentContainer: {
+    flex: 1, // Toma todo el espacio disponible
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
+  },
 });
 
 const VideoScreen = () => {
