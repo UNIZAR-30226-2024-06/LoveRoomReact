@@ -204,8 +204,17 @@ const Video = () => {
   useEffect(() => {
     if (socketState.socket != null) {
       console.log('Eventos de socket');
-
-
+  
+      // Desuscribirse de los eventos anteriores
+      socketState.socket.off(socketEvents.PAUSE, handlePause);
+      socketState.socket.off(socketEvents.PLAY, handlePlay);
+      socketState.socket.off(socketEvents.RECEIVE_MESSAGE, handleMessage);
+      socketState.socket.off(socketEvents.SYNC_ON);
+      socketState.socket.off(socketEvents.SYNC_OFF);
+      socketState.socket.off(socketEvents.CHANGE_VIDEO);
+  
+      // Suscribirse a los nuevos eventos
+      
       // Para que al reconectarse al socket se vuelva a hacer JOIN_ROOM
       socketState.socket.on('connect', () => {
         socketState.socket.on(socketEvents.CHECK_ROOM, () => {
@@ -222,16 +231,6 @@ const Video = () => {
         });
       });
 
-  
-      // Desuscribirse de los eventos anteriores
-      socketState.socket.off(socketEvents.PAUSE, handlePause);
-      socketState.socket.off(socketEvents.PLAY, handlePlay);
-      socketState.socket.off(socketEvents.RECEIVE_MESSAGE, handleMessage);
-      socketState.socket.off(socketEvents.SYNC_ON);
-      socketState.socket.off(socketEvents.SYNC_OFF);
-      socketState.socket.off(socketEvents.CHANGE_VIDEO);
-  
-      // Suscribirse a los nuevos eventos
       socketState.socket.on(socketEvents.PAUSE, handlePause);
       socketState.socket.on(socketEvents.PLAY, handlePlay);
       socketState.socket.on(socketEvents.RECEIVE_MESSAGE, handleMessage);
