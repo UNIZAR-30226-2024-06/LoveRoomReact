@@ -12,5 +12,6 @@ export const socketEvents = {
   LEAVE_ROOM: 'leave-room',
   CHANGE_VIDEO: 'change-video',
   SYNC_ON: 'sync-on',
-  SYNC_OFF: 'sync-off'
+  SYNC_OFF: 'sync-off',
+  CHECK_ROOM: 'check-room'
 };
