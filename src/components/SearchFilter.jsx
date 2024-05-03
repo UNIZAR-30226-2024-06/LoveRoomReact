@@ -17,7 +17,7 @@ import AuthContext from './AuthContext';
 // Muestra los videos resultados de la búsqueda
 // Además, si se clica en un video, comprueba que se realice el match
 // y en caso efectivo se redirige a la sala de video
-const SearchFilter = ({ data, search, setListVideos, nextPageToken, setNextPageToken }) => {
+const SearchFilter = ({ data, search, setListVideos, nextPageToken, setNextPageToken, setVideoUrl }) => {
   const navigation = useNavigation();
   const [showModal, setShowModal] = useState(false); // Para la espera al cargar
   const { authState } = useContext(AuthContext);
@@ -143,15 +143,6 @@ const SearchFilter = ({ data, search, setListVideos, nextPageToken, setNextPageT
           </View>
         </View>
       </Modal>
-      <TouchableOpacity
-        onPress={() => {
-          console.log('En Searchfilter:');
-          console.log(socketState);
-          console.log(socketState.socket);
-        }}
-      >
-        <Text>Console log</Text>
-      </TouchableOpacity>
       <FlatList
         data={data}
         keyExtractor={(item, index) => item.id.videoId + index}
@@ -161,7 +152,11 @@ const SearchFilter = ({ data, search, setListVideos, nextPageToken, setNextPageT
             <TouchableOpacity
               onPress={() => {
                 // navigation.navigate('Video', {videoId: item.id.videoId})
-                buscarMatch(item.id.videoId);
+                if(setVideoUrl==null){
+                  buscarMatch(item.id.videoId);
+                } else {
+                  setVideoUrl(item.id.videoId);
+                }
               }}
             >
               <View

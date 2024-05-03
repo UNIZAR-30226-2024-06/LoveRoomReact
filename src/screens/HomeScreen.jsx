@@ -15,15 +15,7 @@ export default function HomeScreen({ navigation }) {
   return (
     <View style={{ flex: 1, alignItems: 'center' }}>
       <Text style={styles.TextBienvenida}> ¡Hola de nuevo, {authState.nombre}! </Text>
-      <SearchBar />
-      {/* <View style={styles.Video}>
-          <YouTubeIframe videoId={'TQtT9QgWjIY'} height={220} width={'100%'} style={styles.Video} />
-        </View> */}
-      {/* <YoutubeSearch /> */}
-      {/* <Button
-          title="Go to Login"
-          onPress={() => navigation.navigate('Login')}
-        /> */}
+      <SearchBar setVideoUrl={null} />
     </View>
   );
 }

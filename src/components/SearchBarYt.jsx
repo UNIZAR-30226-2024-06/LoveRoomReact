@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import SearchFilter from './SearchFilter';
 
-const SearchBar = () => {
+const SearchBar = ({setVideoUrl}) => {
   const [search, setSearch] = useState('');
   const [listVideos, setListVideos] = useState([]);
   const [nextPageToken, setNextPageToken] = useState('');
@@ -71,6 +71,7 @@ const SearchBar = () => {
         setListVideos={setListVideos}
         nextPageToken={nextPageToken}
         setNextPageToken={setNextPageToken}
+        setVideoUrl={setVideoUrl}
       />
     </View>
   );
