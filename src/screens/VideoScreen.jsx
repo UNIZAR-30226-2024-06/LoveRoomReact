@@ -214,21 +214,19 @@ const Video = () => {
       socketState.socket.off(socketEvents.CHANGE_VIDEO);
   
       // Suscribirse a los nuevos eventos
-      
+
       // Para que al reconectarse al socket se vuelva a hacer JOIN_ROOM
-      socketState.socket.on('connect', () => {
-        socketState.socket.on(socketEvents.CHECK_ROOM, () => {
-          console.log('CHECK_ROOM event received by ', authState.id);
-          if (socketState.idSala != null && socketState.idSala != '') {
-            // Si estabamos en una sala, al reconectarnos al socket volvemos a hacer JOIN_ROOM
-            console.log('Emitiendo evento JOIN_ROOM');
-            socketState.socket.emit(socketEvents.JOIN_ROOM, socketState.idSala);
-          } else {
-            // Aqui se deberia volver a la pantalla de búsqueda ya que el usuario ya no va a poder hacer match
-            alert('Te has desconectado del vídeo.\n Si quieres hacer match debes salir y volver a entrar.')
-            //navigation.navigate('Search');???
-          }
-        });
+      socketState.socket.on(socketEvents.CHECK_ROOM, () => {
+        console.log('CHECK_ROOM event received by ', authState.id);
+        if (socketState.idSala != null && socketState.idSala != '') {
+          // Si estabamos en una sala, al reconectarnos al socket volvemos a hacer JOIN_ROOM
+          console.log('Emitiendo evento JOIN_ROOM');
+          socketState.socket.emit(socketEvents.JOIN_ROOM, socketState.idSala);
+        } else {
+          // Aqui se deberia volver a la pantalla de búsqueda ya que el usuario ya no va a poder hacer match
+          alert('Te has desconectado del vídeo.\n Si quieres hacer match debes salir y volver a entrar.')
+          //navigation.navigate('Search');???
+        }
       });
 
       socketState.socket.on(socketEvents.PAUSE, handlePause);
