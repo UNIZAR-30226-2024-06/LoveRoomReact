@@ -9,6 +9,7 @@ import HomeScreen from '../screens/HomeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import { Image } from 'react-native';
 import AuthContext from './AuthContext';
+import MyRoomsScreen from '../screens/MyRoomsScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -65,7 +66,7 @@ export default function BottomTab({ initialScreen }) {
       />
       <Tab.Screen
         name="Mis salas"
-        component={ProfileScreen}
+        component={MyRoomsScreen}
         options={{
           tabBarIcon: ({ focused, color, size }) => (
             <Image

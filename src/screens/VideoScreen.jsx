@@ -36,7 +36,7 @@ const Video = () => {
   const [user, setUser] = useState({});
   const statusBarHeight = StatusBar.currentHeight;
   const ignoreStateChange = useRef(false);
-  const [videoPlaying, setVideoPlaying] = useState(true);
+  const [videoPlaying, setVideoPlaying] = useState(false);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
