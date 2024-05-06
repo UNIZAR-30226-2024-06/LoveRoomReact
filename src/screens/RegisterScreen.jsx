@@ -18,15 +18,26 @@ export default function Login({ navigation }) {
   const { authState, setAuthState } = React.useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
+
+  const [isValidName, setIsValidName] = useState(false); 
+  const [nameError, setNameError] = useState(false);
+  const [nameErrorMessage, setNameErrorMessage] = useState('');
+
   const [isValidEmail, setIsValidEmail] = useState(false);
   const [emailError, setEmailError] = useState(false);
-  const [emailErrorMessage, setEmailErrorMessage] = useState(''); // Nuevo estado para el mensaje de error específico
+  const [emailErrorMessage, setEmailErrorMessage] = useState('* Por favor, introduzca un correo electrónico válido.'); 
 
   const [password, setPassword] = useState('');
   const [isValidPassword, setIsValidPassword] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   const [hidePassword, setHidePassword] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleNameChange = (text) => {
+    setName(text);
+    setIsValidName(text.trim().length > 0); 
+    setNameError(false); 
+  };
 
   const handleEmailChange = (text) => {
     setEmail(text);
@@ -84,9 +95,7 @@ export default function Login({ navigation }) {
           AsyncStorage.setItem('token', data.token);
           navigation.navigate('RegisterPreferences');
         } else if (data.error === 'Ya existe un usuario con ese correo') {
-          // Establece el estado de error del correo electrónico
           setEmailError(true);
-          // Establece el mensaje de error específico
           setEmailErrorMessage('* Este correo electrónico ya está registrado');
         } else {
           alert('Error al conectar con la base de datos');
@@ -120,19 +129,25 @@ export default function Login({ navigation }) {
       <View style={styles.formContainer}>
         <Text style={styles.label}>Nombre completo</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, nameError && styles.inputError]}
           placeholder="Introduzca su nombre completo"
-          onChangeText={(text) => setName(text)}
+          onChangeText={handleNameChange}
+          maxLength={50}
         />
+        {nameError && (
+          <Text style={styles.errorText}>* Por favor, introduzca su nombre completo.</Text>
+        )}
+
         <Text style={styles.label}>Correo Electrónico</Text>
         <TextInput
           style={[styles.input, emailError && styles.inputError]}
           placeholder="Introduzca su correo electrónico"
           onChangeText={handleEmailChange}
           autoCapitalize="none"
+          maxLength={254}
         />
         {emailError && (
-          <Text style={styles.errorText}>{emailErrorMessage}</Text> // Muestra el mensaje de error específico
+          <Text style={styles.errorText}>{emailErrorMessage}</Text> 
         )}
 
         <Text style={styles.label}>Contraseña</Text>
@@ -140,12 +155,13 @@ export default function Login({ navigation }) {
           <TextInput
             style={[
               styles.input,
-              { paddingRight: 40, flex: 1 }, // Estilos para ocupar todo el espacio horizontal disponible
-              passwordError && styles.inputError // Estilo de error si hay un error en la contraseña
+              { paddingRight: 40, flex: 1 },
+              passwordError && styles.inputError 
             ]}
             placeholder="Introduzca una contraseña"
             secureTextEntry={hidePassword}
             onChangeText={handlePasswordChange}
+            maxLength={100}
           />
           <TouchableOpacity
             onPress={() => setHidePassword(!hidePassword)}
@@ -170,21 +186,30 @@ export default function Login({ navigation }) {
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
-            if (!isValidEmail) {
-              console.log('Email invalido');
-              setEmailError(true); // Establecer el estado de error del correo electrónico
-            }
-            if (!isValidPassword) {
-              console.log('Contra invalido');
-              setPasswordError(true); // Establecer el estado de error de la contraseña
-            } else {
-              console.log('Todo bien');
-              handleRegister(); // Se ejecuta cuando tanto el correo electrónico como la contraseña son válidos
-            }
+              let isFormValid = true; 
+
+              if (!isValidName) {
+                  setNameError(true); 
+                  isFormValid = false; 
+              }
+
+              if (!isValidEmail) {
+                  setEmailError(true); 
+                  isFormValid = false;
+              }
+
+              if (!isValidPassword) {
+                  setPasswordError(true); 
+                  isFormValid = false; 
+              }
+
+              if (isFormValid) {
+                  handleRegister();
+              }
           }}
-        >
+      >
           <Text style={styles.buttonText}>Registrarse</Text>
-        </TouchableOpacity>
+      </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -234,7 +259,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold'
   },
   inputError: {
-    borderColor: 'red' // Cambia el borde a rojo si hay un error
+    borderColor: 'red' 
   },
   errorText: {
     color: 'red',

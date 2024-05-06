@@ -15,6 +15,7 @@ export default function App() {
           flex: 1
         }}
       >
+        
         <StackNavigator />
       </View>
     </AuthProvider>

@@ -72,7 +72,7 @@ const provinciasDeEspana = [
   'Vizcaya',
   'Zamora',
   'Zaragoza'
-];
+]; 
 
 export default function RegisterPreferencesScreen({ navigation }) {
   console.log(authState);
@@ -114,7 +114,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
         descripcion: description,
         //subir foto primero a multimedia yt luego actualizarla
         fotoperfil: 'null.jpg', //para que se pueda actualziar, subirla al multimedia y nos devolvera un path para subir,
-        idlocalidad: 1
+        idlocalidad: idlocalidad
       })
     })
       .then((response) => response.json())
@@ -126,13 +126,14 @@ export default function RegisterPreferencesScreen({ navigation }) {
             ...prevState,
             edad: 21,
             sexo: gender,
+            nombre: name,
             buscaedadmin: agePreference[0],
             buscaedadmax: agePreference[1],
             buscasexo: sexualPreference,
             descripcion: description,
             //subir foto primero a multimedia yt luego actualizarla
             fotoperfil: 'null.jpg', //para que se pueda actualziar, subirla al multimedia y nos devolvera un path para subir,
-            idlocalidad: 0
+            idlocalidad: idlocalidad
           }));
           navigation.navigate('Cuenta');
           console.log('G: Actualizo bien');
@@ -264,7 +265,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
           onChangeText={(text) => setName(text)}
         />
 
-        <Text style={styles.label}>Sexo</Text>
+        <Text style={styles.label}>Género</Text>
         <View style={{ ...styles.input, justifyContent: 'center' }}>
           <Picker
             selectedValue={gender}
@@ -521,7 +522,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 10,
-    marginBottom: 10,
+    height: 35,
+    marginBottom: 0,
     textAlignVertical: 'center'
   },
   button: {

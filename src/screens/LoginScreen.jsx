@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ScrollView,
   View,
@@ -18,6 +18,12 @@ import AuthContext from '../components/AuthContext';
 import RegisterScreen from './RegisterScreen';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Orientation, { 
+    useDeviceOrientationChange,
+    useLockListener,
+    useOrientationChange,
+} from 'react-native-orientation-locker'; 
+import { OrientationLocker, PORTRAIT, LANDSCAPE } from "react-native-orientation-locker";
 
 export default function LoginScreen({ navigation }) {
   const { authState, setAuthState } = React.useContext(AuthContext);
@@ -30,8 +36,9 @@ export default function LoginScreen({ navigation }) {
   const [passwordError, setPasswordError] = React.useState(false);
 
   const [hidePassword, setHidePassword] = useState(true);
-
   const [isLoading, setIsLoading] = useState(false);
+
+  // Orientation.lockToPortrait();
 
   const handleEmailChange = (text) => {
     setEmail(text);
@@ -117,6 +124,7 @@ export default function LoginScreen({ navigation }) {
       style={styles.container}
       contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }}
     >
+      
       <View style={[styles.logoContainer, { marginBottom: -90 }]}>
         <Image style={styles.logo} source={require('../img/logoTexto.png')} />
       </View>
@@ -215,18 +223,6 @@ export default function LoginScreen({ navigation }) {
           <Text style={styles.registerLink}>Regístrate</Text>
         </TouchableOpacity>
       </View>
-      {/* <View style={styles.line}></View>
-
-      <View style={styles.registerContainer}>
-        <Text style={styles.registerText}>¿No tienes una cuenta?</Text>
-        <TouchableOpacity
-          onPress={() => {
-            navigation.navigate('Register');
-          }}
-        >
-          <Text style={styles.registerLink}>Regístrate</Text>
-        </TouchableOpacity>
-      </View> */}
     </View>
   );
 }
