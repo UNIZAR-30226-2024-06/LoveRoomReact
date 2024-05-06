@@ -18,7 +18,8 @@ export const initializeSocket = async (token, setSocketState) => {
     senderId: '',
     receiverId: '',
     idVideo: '',
-    idSala: ''
+    idSala: '',
+    matchRecibido: false
   }));
 
   newSocket.on('connect', () => {
@@ -30,8 +31,10 @@ export const initializeSocket = async (token, setSocketState) => {
         senderId: receiverId,
         receiverId: senderId,
         idSala: idSala.toString(),
-        idVideo: idVideo
+        idVideo: idVideo,
+        matchRecibido: true
       }));
+      alert('Has hecho match con alguien, ¡disfruta la sala!');
     });
   });
 };
@@ -64,7 +67,8 @@ export const AuthProvider = ({ children }) => {
     senderId: authState.id,
     receiverId: '',
     idVideo: '',
-    idSala: ''
+    idSala: '',
+    matchRecibido: false
   });
 
   // Función asincrónica que se encarga de verificar si hay un token de autenticación almacenado en AsyncStorage y si es válido.

@@ -36,7 +36,11 @@ const Video = () => {
   const [user, setUser] = useState({});
   const statusBarHeight = StatusBar.currentHeight;
   const ignoreStateChange = useRef(false);
-  const [videoPlaying, setVideoPlaying] = useState(true);
+  const [videoPlaying, setVideoPlaying] = useState(false);
+  const playerRef = useRef(null); // Referencia al reproductor de video
+  const idRoom = useRef(null);
+  const [isEnabled, setIsEnabled] = useState(false);
+  const forcePause = useRef(false);  // Se activa solo para indicar que cuando llegue el play hay que pausar (necesario para sincronizar)
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
@@ -114,19 +118,26 @@ const Video = () => {
     handleInfoReceiver();
     if (socketState.idSala != '' && socketState.idSala != null && socketState.socket != null && socketState.socket.connected == true) {
       console.log('Emitiendo evento JOIN_ROOM');
+      if (idRoom.current == null) {
+        idRoom.current = socketState.idSala;
+      }
       socketState.socket.emit(socketEvents.JOIN_ROOM, socketState.idSala); // Necesario que idSala sea un string
     }
   }, []);
 
   useEffect(() => {
-    console.log('Efecto ejecutado. receiverId:', socketState.receiverId);
+    console.log('Efecto ejecutado2. receiverId:', socketState.receiverId);
     handleInfoReceiver();
   }, [socketState.receiverId]);
 
+  // Se ejecuta por ambos cuando se actualiza el idSala, es decir, cuando se hace match
   useEffect(() => {
     console.log('ID de sala:', socketState.idSala);
     if (socketState.idSala != '' && socketState.idSala != null) {
-      console.log('Emitiendo evento JOIN_ROOM');
+      console.log('Emitiendo evento JOIN_ROOM by ', authState.id);
+      if (idRoom.current == null) {
+        idRoom.current = socketState.idSala;
+      }
       socketState.socket.emit(socketEvents.JOIN_ROOM, socketState.idSala); // Necesario que idSala sea un string
     }
   }, [socketState.idSala]);
@@ -152,28 +163,35 @@ const Video = () => {
     }
   };
 
-  const [isEnabled, setIsEnabled] = useState(false);
-
   const toggleSwitch = () => {
     setIsEnabled(previousState => {
       if (previousState) {
-        console.log('Sync off');
+        console.log(authState.id, ' enviando Sync off');
         socketState.socket.emit(socketEvents.SYNC_OFF, socketState.idSala, (boolean) => {
           if(boolean == false) {
             return previousState;
           }
         });
       } else {
-        console.log('Sync on');
-        socketState.socket.emit(socketEvents.SYNC_ON, socketState.idSala, (boolean) => {
-          if(boolean == false) {
-            return previousState;
-          }
-        });
+        handleSendSync();
       }
       
       return !previousState;
     });
+  };
+
+  // USO IDROOM.CURRENT PORQUE idSala va mal
+  // De momento por defecto, el video se pausa al sincronizar
+  const handleSendSync = async () => {
+    // Pausamos el video
+    ignoreStateChange.current = true;
+    setVideoPlaying(false);
+    // Obtenemos el tiempo actual del video
+    const timesegundos = await playerRef.current?.getCurrentTime();
+    // Enviamos el evento SYNC_ON para que el otro usuario se sincronice con nosotros
+    console.log(authState.id, ' enviando Sync on con idsala:', idRoom.current, ' idvideo:', socketState.idVideo, ' timesegundos:', timesegundos);
+    socketState.socket.emit(socketEvents.SYNC_ON, idRoom.current, socketState.idVideo, timesegundos, true);
+    alert('¡Vídeo sincronizado con el otro usuario!');
   };
 
   const handlePause = () => {
@@ -201,6 +219,38 @@ const Video = () => {
     setMessages((prevState) => [...prevState, data]);
   };
 
+  const handleSyncOn = async (idVideo, timesegundos, pausado) => {
+    if (!isEnabled) {
+      setIsEnabled(true);
+    }
+    console.log('Sync on received by ', authState.id, ' idVideo:', idVideo, ' timesegundos:', timesegundos, ' pausado:', pausado);
+
+    // Cambiamos el video actual al video que nos envia el otro usuario
+    if (idVideo != null && socketState.idVideo != idVideo) {
+      console.log('Cambiando video a: ', idVideo);
+      setSocketState((prevState) => ({
+        ...prevState,
+        idVideo: idVideo
+      }));
+    }
+
+    // Pausamos o reproducimos el video según el estado que nos envia el otro usuario
+    // if (pausado) {
+    //   ignoreStateChange.current = true;
+    //   setVideoPlaying(false);
+    // } else {
+    //   ignoreStateChange.current = true;
+    //   setVideoPlaying(true);
+    // }
+
+    if (timesegundos != null) {
+      console.log('Cambiando tiempo a: ', timesegundos);
+      playerRef.current?.seekTo(timesegundos, true);
+    } else {
+      console.log('No se ha recibido tiempo');
+    }
+  };
+
   useEffect(() => {
     if (socketState.socket != null) {
       console.log('Eventos de socket');
@@ -220,7 +270,7 @@ const Video = () => {
         console.log('CHECK_ROOM event received by ', authState.id);
         if (socketState.idSala != null && socketState.idSala != '') {
           // Si estabamos en una sala, al reconectarnos al socket volvemos a hacer JOIN_ROOM
-          console.log('Emitiendo evento JOIN_ROOM');
+          console.log('Emitiendo evento JOIN_ROOM para reconectarse a la sala by ', authState.id);
           socketState.socket.emit(socketEvents.JOIN_ROOM, socketState.idSala);
         } else {
           // Aqui se deberia volver a la pantalla de búsqueda ya que el usuario ya no va a poder hacer match
@@ -229,6 +279,12 @@ const Video = () => {
         }
       });
 
+      socketState.socket.on(socketEvents.GET_SYNC, () => {
+        console.log('GET_SYNC event received by ', authState.id);
+        // Llamamos a la función handleSendSync para enviar nuestro video y tiempo al otro usuario
+        handleSendSync();
+      });
+      
       socketState.socket.on(socketEvents.PAUSE, handlePause);
       socketState.socket.on(socketEvents.PLAY, handlePlay);
       socketState.socket.on(socketEvents.RECEIVE_MESSAGE, handleMessage);
@@ -240,9 +296,8 @@ const Video = () => {
         }));
       });
   
-      socketState.socket.on(socketEvents.SYNC_ON, () => {
-        setIsEnabled(prevState => !prevState);
-        console.log('Sync on received');
+      socketState.socket.on(socketEvents.SYNC_ON, (idVideo, timesegundos, pausado) => {
+        handleSyncOn(idVideo, timesegundos, pausado);
       });
   
       socketState.socket.on(socketEvents.SYNC_OFF, () => {
@@ -312,6 +367,13 @@ const Video = () => {
 
   const handleStateChange = (event) => {
     if (event === 'playing') {
+      if (forcePause.current) {  // Si se requiere un pause forzado para la sincronización, lo pausamos
+        forcePause.current = false;
+        ignoreStateChange.current = true;
+        setVideoPlaying(false);
+        console.log('Parando video por forcePause')
+        return;
+      }
       if (ignoreStateChange.current) {
         ignoreStateChange.current = false;
         return;
@@ -321,8 +383,8 @@ const Video = () => {
       const callback = (message) => {
         console.log('Respuesta del servidor:', message);
       };
-      if(isEnabled) {
-        socketState.socket.emit(socketEvents.PLAY, socketState.idSala, callback);
+      if(isEnabled && idRoom.current != null) {
+        socketState.socket.emit(socketEvents.PLAY, idRoom.current, callback);
       }
       // console.log('Play event emitted by ', authState.id);
     } else if (event === 'paused') {
@@ -335,10 +397,30 @@ const Video = () => {
       };
       console.log('Paused: videoPlaying ', videoPlaying); // Deberia ser true siempre
       setVideoPlaying(false);
-      if(isEnabled) {
-        socketState.socket.emit(socketEvents.PAUSE, socketState.idSala, callback);
+      if(isEnabled && idRoom.current != null) {
+        socketState.socket.emit(socketEvents.PAUSE, idRoom.current, callback);
       }
       //console.log('Pause event emitted by ', authState.id);
+    }
+  };
+
+  // Cuando el reproductor de youtube este listo
+  const handleReady = () => {
+    // Si soy el ultimo usuario en unirme a la sala, mando un GET_SYNC para que el otro usuario me mande su tiempo
+    if (socketState.idSala != '' && socketState.idSala != null && socketState.matchRecibido == false) {
+      // Antes de mandar el GET_SYNC, hay que darle a play y luego pause para que el video cargue un poco 
+      // y se quede pausado tras el seekto()
+      forcePause.current = true; // Para que se pause en el handleStateChange
+      setVideoPlaying(true);  // Play
+
+      console.log( authState.id, ' emitiendo evento GET_SYNC');
+      socketState.socket.emit(socketEvents.GET_SYNC, socketState.idSala);
+    } else {
+      // Si soy el primer usuario en unirme a la sala
+      // Por temas de sincronización, al cargar el reproductor hay que darle a play
+      console.log('Reproductor listo, dandole a play')
+      ignoreStateChange.current = true;
+      setVideoPlaying(true);
     }
   };
 
@@ -387,12 +469,14 @@ const Video = () => {
       )}
       <View style={{ alignItems: 'center', flex: 0.7 }}>
         <YoutubePlayer
+          ref={playerRef}
           videoId={socketState.idVideo}
           height={'100%'}
           width={'95%'}
           webViewStyle={styles.Video}
           play={videoPlaying}
           onChangeState={handleStateChange}
+          onReady={handleReady}
         />
         {/* <TouchableOpacity onPress={console.log("SocketState en video Screen: ", socketState)}>
           <Text>Console log</Text>

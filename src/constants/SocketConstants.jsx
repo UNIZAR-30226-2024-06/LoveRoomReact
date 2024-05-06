@@ -11,5 +11,6 @@ export const socketEvents = {
   CHANGE_VIDEO_UNITARIA: 'change-video-uni',
   SYNC_ON: 'sync-on',
   SYNC_OFF: 'sync-off',
-  CHECK_ROOM: 'check-room'
+  CHECK_ROOM: 'check-room',
+  GET_SYNC: 'get-sync'
 }
