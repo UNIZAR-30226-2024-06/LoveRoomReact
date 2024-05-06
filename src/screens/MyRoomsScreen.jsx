@@ -1,5 +1,14 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { FlatList, StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, Image , Modal} from 'react-native';
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  ActivityIndicator,
+  Image,
+  Modal
+} from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import AuthContext, { initializeSocket } from '../components/AuthContext';
 import NotRegisteredScreen from './NotRegisteredScreen';
@@ -45,48 +54,50 @@ const MyRoomsScreen = () => {
   };
 
   useEffect(() => {
-    const initializeAndProceed = () => {
-      const { isSocketInitialized } =  true;
-      //initializeSocket(token, setSocketState, socketState);
-  
+    const initializeAndProceed = async () => {
+      const { isSocketInitialized } = await initializeSocket(token, setSocketState, socketState);
+
       // Esperar hasta que el socket esté completamente inicializado antes de continuar
       if (isSocketInitialized) {
         // Realizar las acciones que dependen del socket completamente inicializado
         console.log('Socket initialized, proceeding with further actions...');
-        setViewModal(false);
-  
-        // Utilizar una promesa para esperar 2 segundos antes de navegar a la pantalla de Video
-        // setTimeout(() => {
-        //   navigation.navigate('Video');
-        // }, 2000);
-  
-        
+        setTimeout(() => {
+          console.log('Navigating to Video...');
+          setViewModal(false);
+          navigation.navigate('Video');
+        }, 3000);
+
       } else {
         console.log('Socket is not yet initialized, waiting...');
       }
     };
-  
+
     console.log('View modal:', viewModal);
     if (viewModal) {
       initializeAndProceed();
     }
-  }, [viewModal]);
+  }, [viewModal, socketState.socket]);
 
-  // useEffect(() => {
-  //   if (socketState.socket != null && socketState.socket.connected==true) {
-  //     setViewModal(false);
-  //     navigation.navigate('Video');
-  //   }
-  // }, [socketState.socket]);
 
-  const handleRoomPress = (room) => {
+
+  const handleRoomUseless = async (room) => {
     console.log('Socket state:', socketState.socket);
-    setSocketState((prevState) => ({ ...prevState, idSala: room.idsala.toString(), receiverId: room.idusuariomatch.toString(), idVideo: room.idvideo}));
+    console.log('Room:', room);
+    await setSocketState((prevState) => ({
+      ...prevState,
+      idSala: room.idsala,
+      receiverId: room.idusuariomatch,
+      idVideo: room.idvideo,
+      senderId: authState.id
+    }));
+    setViewModal(true);
   };
 
   const fetchVideoInfo = async (videoId) => {
     try {
-      const response = await fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${process.env.EXPO_PUBLIC_YT_KEY}&part=snippet`);
+      const response = await fetch(
+        `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${process.env.EXPO_PUBLIC_YT_KEY}&part=snippet`
+      );
       const data = await response.json();
       if (data.items.length > 0) {
         console.log(data.items[0].snippet.thumbnails.default.url);
@@ -103,29 +114,27 @@ const MyRoomsScreen = () => {
     }
   };
 
-    const [thumbnails, setThumbnails] = useState({});
+  const [thumbnails, setThumbnails] = useState({});
 
-    useEffect(() => {
-        const fetchThumbnails = async () => {
-          const newThumbnails = { ...thumbnails };
-          for (const room of myRooms) {
-            if (!newThumbnails[room.idvideo]) {
-              newThumbnails[room.idvideo] = await fetchVideoInfo(room.idvideo);
-            }
-          }
-          setThumbnails(newThumbnails);
-          console.log(newThumbnails);
-        };
-        if (myRooms.length > 0){
-          fetchThumbnails();
+  useEffect(() => {
+    const fetchThumbnails = async () => {
+      const newThumbnails = { ...thumbnails };
+      for (const room of myRooms) {
+        if (!newThumbnails[room.idvideo]) {
+          newThumbnails[room.idvideo] = await fetchVideoInfo(room.idvideo);
         }
-      }, [myRooms]);
-
-    if(!authState.isLoggedIn || authState.token == null) {
-      return (
-          <NotRegisteredScreen />
-      );
       }
+      setThumbnails(newThumbnails);
+      console.log(newThumbnails);
+    };
+    if (myRooms.length > 0) {
+      fetchThumbnails();
+    }
+  }, [myRooms]);
+
+  if (!authState.isLoggedIn || authState.token == null) {
+    return <NotRegisteredScreen />;
+  }
 
   if (loading) {
     return (
@@ -146,19 +155,27 @@ const MyRoomsScreen = () => {
           </View>
         </View>
       </Modal>
-      <TouchableOpacity onPress={()=>{console.log(socketState)}}>
+      <TouchableOpacity
+        onPress={() => {
+          console.log(socketState);
+        }}
+      >
         <Text>Socket state</Text>
       </TouchableOpacity>
       <FlatList
         data={myRooms}
         keyExtractor={(item) => item.idsala.toString()}
         renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => { handleRoomPress(item);setViewModal(true);}}>
+          <TouchableOpacity
+            onPress={() => {
+              handleRoomUseless(item);
+            }}
+          >
             <View style={styles.roomItem}>
-                <Image
-                    source={{ uri: thumbnails[item.idvideo] }}
-                    style={[styles.thumbnail, { width: width, height: height }]}
-                />
+              <Image
+                source={{ uri: thumbnails[item.idvideo] }}
+                style={[styles.thumbnail, { width: width, height: height }]}
+              />
               <Text style={styles.roomTitle}>{item.nombre}</Text>
             </View>
           </TouchableOpacity>

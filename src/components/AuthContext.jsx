@@ -6,7 +6,7 @@ import { socketEvents } from '../constants/SocketConstants';
 const AuthContext = React.createContext();
 
 // Inicializa el socket con el token del usuario
-export const initializeSocket = (token, setSocketState, socketState) => {
+export const initializeSocket = async(token, setSocketState, socketState) => {
   let newSocket = socketState.socket;
   let isSocketInitialized = false; // Bandera para controlar si el socket está inicializado
 
@@ -18,12 +18,9 @@ export const initializeSocket = (token, setSocketState, socketState) => {
       }
     });
 
-    setSocketState(() => ({
+    await setSocketState((prevState) => ({
+      ...prevState,
       socket: newSocket,
-      receiverId: '',
-      idVideo: '',
-      idSala: '',
-      matchRecibido: false
     }));
 
     newSocket.on('connect', () => {
@@ -41,20 +38,18 @@ export const initializeSocket = (token, setSocketState, socketState) => {
         }));
         alert('Has hecho match con alguien, ¡disfruta la sala!');
       });
-
     });
   } else if (!newSocket.connected) {
     console.log('Socket already initialized but not connected, reconnecting...');
-    newSocket.connect();
+    await newSocket.connect();
     isSocketInitialized = true; // Establecer la bandera en true cuando el socket esté completamente inicializado
   } else {
     console.log('Socket already initialized and connected');
     isSocketInitialized = true; // Establecer la bandera en true cuando el socket esté completamente inicializado
   }
 
-  return {isSocketInitialized}; // Devolver el socket y la bandera
+  return { isSocketInitialized }; // Devolver el socket y la bandera
 };
-
 
 export const AuthProvider = ({ children }) => {
   // useState se utiliza para definir y gestionar el estado local en componentes de función.
@@ -78,6 +73,7 @@ export const AuthProvider = ({ children }) => {
     tipousuario: null,
     baneado: false
   });
+  console.log(authState);
 
   const [socketState, setSocketState] = useState({
     socket: null,

@@ -9,15 +9,22 @@ import {
   Modal,
   ActivityIndicator
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import { socketEvents } from '../constants/SocketConstants';
 import { initializeSocket } from './AuthContext';
 import AuthContext from './AuthContext';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 
 // Muestra los videos resultados de la búsqueda
 // Además, si se clica en un video, comprueba que se realice el match
 // y en caso efectivo se redirige a la sala de video
-const SearchFilter = ({ data, search, setListVideos, nextPageToken, setNextPageToken, setVideoUrl }) => {
+const SearchFilter = ({
+  data,
+  search,
+  setListVideos,
+  nextPageToken,
+  setNextPageToken,
+  setVideoUrl
+}) => {
   const navigation = useNavigation();
   const [showModal, setShowModal] = useState(false); // Para la espera al cargar
   const { authState } = useContext(AuthContext);
@@ -45,7 +52,7 @@ const SearchFilter = ({ data, search, setListVideos, nextPageToken, setNextPageT
         console.log(data);
         if (data.esSalaUnitaria == true) {
           setMensaje('No hay nadie en la sala, ¡espera a que alguien entre!');
-          setSocketState((prevState) => ({ ...prevState, idVideo: videoId }));
+          setSocketState((prevState) => ({ ...prevState, idVideo: videoId, senderId: authState.id}));
           setShowModal(false);
           alert('No hay nadie en la sala, ¡espera a que alguien entre!');
         } else if (data.esSalaUnitaria == false) {
@@ -73,13 +80,13 @@ const SearchFilter = ({ data, search, setListVideos, nextPageToken, setNextPageT
       });
   };
 
+  const isFocused = useIsFocused();
+
   useEffect(() => {
-    // Este efecto se ejecutará cada vez que socketState cambie
-    if (socketState.idVideo !== '') {
-      // Navegar a la página de video cuando el estado se actualice completamente
+    if (isFocused && socketState.idVideo !== '') {
       navigation.navigate('Video');
     }
-  }, [socketState.idVideo]);
+  }, [isFocused, socketState.idVideo]);
 
   const handlePeticionAux = () => {
     const params = new URLSearchParams({
@@ -152,7 +159,7 @@ const SearchFilter = ({ data, search, setListVideos, nextPageToken, setNextPageT
             <TouchableOpacity
               onPress={() => {
                 // navigation.navigate('Video', {videoId: item.id.videoId})
-                if(setVideoUrl==null){
+                if (setVideoUrl == null) {
                   buscarMatch(item.id.videoId);
                 } else {
                   setVideoUrl(item.id.videoId);
