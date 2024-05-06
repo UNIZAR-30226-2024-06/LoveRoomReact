@@ -27,7 +27,7 @@ const SearchFilter = ({ data, search, setListVideos, nextPageToken, setNextPageT
 
   const buscarMatch = async (videoId) => {
     setShowModal(true);
-    await initializeSocket(token, setSocketState);
+    initializeSocket(token, setSocketState, socketState);
     await fetchMatch(videoId);
   };
 

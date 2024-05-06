@@ -41,17 +41,20 @@ const Video = () => {
   const idRoom = useRef(null);
   const [isEnabled, setIsEnabled] = useState(false);
   const forcePause = useRef(false);  // Se activa solo para indicar que cuando llegue el play hay que pausar (necesario para sincronizar)
+  // console.log('SocketState en video Screen: ', socketState);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
       socketState.socket.emit(socketEvents.LEAVE_ROOM, socketState.idSala);
       socketState.socket.disconnect();
+      socketState.socket.off('connect');
       setSocketState((prevState) => ({
         ...prevState,
         receiverId: '',
-        idVideo: ''
+        idVideo: '',
+        idSala: '',
+        matchRecibido: false
       }));
-
       console.log('Socket disconnected');
     });
 
@@ -116,6 +119,8 @@ const Video = () => {
     console.log('Efecto ejecutado. receiverId:', socketState.receiverId);
     setIsEnabled(true);
     handleInfoReceiver();
+    console.log('ID de sala:', socketState.idSala);
+    console.log('Socket:', socketState.socket);
     if (socketState.idSala != '' && socketState.idSala != null && socketState.socket != null && socketState.socket.connected == true) {
       console.log('Emitiendo evento JOIN_ROOM');
       if (idRoom.current == null) {
@@ -337,6 +342,8 @@ const Video = () => {
         console.log('Timestamp:', timestamp);
         data.timestamp = timestamp;
         data.senderId = socketState.senderId;
+        console.log(socketState.senderId);
+        console.log('Data en el callback: ', data);
         setMessages((prevState) => [...prevState, data]);
         setNewMessage('');
       };
@@ -389,6 +396,7 @@ const Video = () => {
       // console.log('Play event emitted by ', authState.id);
     } else if (event === 'paused') {
       if (ignoreStateChange.current) {
+        console.log('Ignorando evento de pausa');
         ignoreStateChange.current = false;
         return;
       }
@@ -397,7 +405,12 @@ const Video = () => {
       };
       console.log('Paused: videoPlaying ', videoPlaying); // Deberia ser true siempre
       setVideoPlaying(false);
+      console.log(idRoom.current, ' enviando evento PAUSE');
+      console.log('isEnabled:', isEnabled);
       if(isEnabled && idRoom.current != null) {
+        console.log('Emitiendo evento PAUSE');
+        console.log(socketState.socket.connected);
+        console.log(socketState.socket);
         socketState.socket.emit(socketEvents.PAUSE, idRoom.current, callback);
       }
       //console.log('Pause event emitted by ', authState.id);

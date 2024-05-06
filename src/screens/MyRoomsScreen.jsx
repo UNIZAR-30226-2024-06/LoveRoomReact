@@ -1,18 +1,14 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { FlatList, StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
+import { FlatList, StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, Image , Modal} from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import AuthContext from '../components/AuthContext';
+import AuthContext, { initializeSocket } from '../components/AuthContext';
 import NotRegisteredScreen from './NotRegisteredScreen';
 
 const MyRoomsScreen = () => {
   const navigation = useNavigation();
   const { authState } = useContext(AuthContext);
-
-  if(!authState.isLoggedIn || authState.token == null) {
-    return (
-        <NotRegisteredScreen />
-    );
-    }
+  const { socketState, setSocketState } = useContext(AuthContext);
+  const [viewModal, setViewModal] = useState(false);
   const token = authState.token;
   const [myRooms, setMyRooms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,7 +17,10 @@ const MyRoomsScreen = () => {
 
   useFocusEffect(
     React.useCallback(() => {
-      fetchMyRooms();
+      console.log('Fetching rooms...');
+      if (authState.isLoggedIn || authState.token != null) {
+        fetchMyRooms();
+      }
     }, [])
   );
 
@@ -45,9 +44,44 @@ const MyRoomsScreen = () => {
     }
   };
 
-  const handleRoomPress = (roomId) => {
-    // Navegar a la pantalla de la sala con el ID de la sala seleccionada
-    // navigation.navigate('RoomScreen', { roomId });
+  useEffect(() => {
+    const initializeAndProceed = () => {
+      const { isSocketInitialized } =  true;
+      //initializeSocket(token, setSocketState, socketState);
+  
+      // Esperar hasta que el socket esté completamente inicializado antes de continuar
+      if (isSocketInitialized) {
+        // Realizar las acciones que dependen del socket completamente inicializado
+        console.log('Socket initialized, proceeding with further actions...');
+        setViewModal(false);
+  
+        // Utilizar una promesa para esperar 2 segundos antes de navegar a la pantalla de Video
+        // setTimeout(() => {
+        //   navigation.navigate('Video');
+        // }, 2000);
+  
+        
+      } else {
+        console.log('Socket is not yet initialized, waiting...');
+      }
+    };
+  
+    console.log('View modal:', viewModal);
+    if (viewModal) {
+      initializeAndProceed();
+    }
+  }, [viewModal]);
+
+  // useEffect(() => {
+  //   if (socketState.socket != null && socketState.socket.connected==true) {
+  //     setViewModal(false);
+  //     navigation.navigate('Video');
+  //   }
+  // }, [socketState.socket]);
+
+  const handleRoomPress = (room) => {
+    console.log('Socket state:', socketState.socket);
+    setSocketState((prevState) => ({ ...prevState, idSala: room.idsala.toString(), receiverId: room.idusuariomatch.toString(), idVideo: room.idvideo}));
   };
 
   const fetchVideoInfo = async (videoId) => {
@@ -82,9 +116,16 @@ const MyRoomsScreen = () => {
           setThumbnails(newThumbnails);
           console.log(newThumbnails);
         };
-      
-        fetchThumbnails();
+        if (myRooms.length > 0){
+          fetchThumbnails();
+        }
       }, [myRooms]);
+
+    if(!authState.isLoggedIn || authState.token == null) {
+      return (
+          <NotRegisteredScreen />
+      );
+      }
 
   if (loading) {
     return (
@@ -97,11 +138,22 @@ const MyRoomsScreen = () => {
 
   return (
     <View style={styles.container}>
+      <Modal transparent={true} animationType={'none'} visible={viewModal}>
+        <View style={styles.modalBackground}>
+          <View style={styles.activityIndicatorWrapper}>
+            <ActivityIndicator animating={viewModal} size="large" color="#0000ff" />
+            <Text>Cargando Sala... </Text>
+          </View>
+        </View>
+      </Modal>
+      <TouchableOpacity onPress={()=>{console.log(socketState)}}>
+        <Text>Socket state</Text>
+      </TouchableOpacity>
       <FlatList
         data={myRooms}
         keyExtractor={(item) => item.idsala.toString()}
         renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => handleRoomPress(item.idsala)}>
+          <TouchableOpacity onPress={() => { handleRoomPress(item);setViewModal(true);}}>
             <View style={styles.roomItem}>
                 <Image
                     source={{ uri: thumbnails[item.idvideo] }}
@@ -141,6 +193,22 @@ const styles = StyleSheet.create({
   },
   thumbnail: {
     marginLeft: 10
+  },
+  modalBackground: {
+    flex: 1,
+    alignItems: 'center',
+    flexDirection: 'column',
+    justifyContent: 'space-around',
+    backgroundColor: '#00000040'
+  },
+  activityIndicatorWrapper: {
+    backgroundColor: '#FFFFFF',
+    height: 100,
+    width: 200,
+    borderRadius: 10,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-around'
   }
 });
 
