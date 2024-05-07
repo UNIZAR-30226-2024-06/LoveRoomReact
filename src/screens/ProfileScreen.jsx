@@ -152,7 +152,12 @@ export default function ProfileScreen({ navigation }) {
               <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.faqButton}>
+            <TouchableOpacity 
+              style={styles.faqButton}
+              onPress={() => {
+                Alert.alert('¡Contáctanos!', 'Correo: loveroomapp@gmail.com', [ { text: 'OK' } ]);
+              }}
+              >
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Image source={require('../img/llamada.png')} style={styles.faqIcon} />
                 <Text style={styles.faqText}>Contáctanos</Text>
@@ -160,15 +165,13 @@ export default function ProfileScreen({ navigation }) {
               <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.faqButton}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Image source={require('../img/informacion.png')} style={styles.faqIcon} />
-                <Text style={styles.faqText}>Sobre nosotros</Text>
-              </View>
-              <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage} />
-            </TouchableOpacity>
 
-            <TouchableOpacity style={styles.faqButton}>
+
+            <TouchableOpacity 
+            style={styles.faqButton}
+            onPress ={() => {
+              navigation.navigate('ChangePassword')
+            }}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Image source={require('../img/verificado.png')} style={styles.faqIcon} />
                 <Text style={styles.faqText}>Gestión de credenciales</Text>
@@ -360,7 +363,7 @@ const styles = StyleSheet.create({
   },
 
   headlineCuentaCont: {
-    marginTop: 185,
+    marginTop: 140,
     width: '100%',
     height: 130
   },

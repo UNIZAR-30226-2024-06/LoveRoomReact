@@ -20,6 +20,7 @@ const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
 
 const provinciasDeEspana = [
+  '-- Seleccione su localidad --',
   'Álava',
   'Albacete',
   'Alicante',
@@ -80,15 +81,23 @@ export default function RegisterPreferencesScreen({ navigation }) {
   const [name, setName] = useState(authState.nombre);
   const [fechaNacimiento, setFechaNacimiento] = useState('');
   const [cursorPosition, setCursorPosition] = useState(0);
-  const [gender, setGender] = useState(authState.sexo);
-  const [sexualPreference, setSexualPreference] = useState(authState.buscasexo);
+  const [gender, setGender] = useState('');
+  const [sexualPreference, setSexualPreference] = useState('');
   const [agePreference, setAgePreference] = useState([18, 100]);
   const [description, setDescription] = useState('');
   const [profileImage, setProfileImage] = useState('');
-  const [idlocalidad, setIdLocalidad] = useState(authState.idlocalidad);
+  const [idlocalidad, setIdLocalidad] = useState(0);
   const [isProfileImageSelected, setIsProfileImageSelected] = useState();
   const { StorageAccessFramework } = FileSystem;
   const isDataSaved = useRef(false);
+  const [descriptionLength, setDescriptionLength] = useState(0);
+
+
+  const [genderError, setGenderError] = useState(false);
+  const [idlocalidadError, setIdLocalidadError] = useState(false);
+  const [sexualPreferenceError, setSexualPreferenceError] = useState(false);
+  const [fechaNacimientoError, setFechaNacimientoError] = useState(false);
+  const [isValidDate, setIsValidDate] = useState(false);
 
   React.useEffect(() => {
     return () => {
@@ -99,6 +108,8 @@ export default function RegisterPreferencesScreen({ navigation }) {
       }
     };
   }, []);
+
+
   const handleSave = () => {
     console.log(`${process.env.EXPO_PUBLIC_API_URL}/user/update`);
     fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/update`, {
@@ -119,7 +130,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
         descripcion: description,
         //subir foto primero a multimedia yt luego actualizarla
         fotoperfil: 'null.jpg', //para que se pueda actualziar, subirla al multimedia y nos devolvera un path para subir,
-        idlocalidad: 0
+        idlocalidad: idlocalidad
       })
     })
       .then((response) => response.json())
@@ -137,12 +148,12 @@ export default function RegisterPreferencesScreen({ navigation }) {
             descripcion: description,
             //subir foto primero a multimedia yt luego actualizarla
             fotoperfil: 'null.jpg', //para que se pueda actualziar, subirla al multimedia y nos devolvera un path para subir,
-            idlocalidad: 0
+            idlocalidad: idlocalidad
           }));
           navigation.navigate('Cuenta');
-          console.log('G: Actualizo bien');
+          console.log('Preferencias del registro configuradas correctamente');
         } else if (data.error == 'Error al actualizar el usuario') {
-          console.log('G: Actualizo mal');
+          console.log('Error al configurar las preferencias del usuario');
         }
       })
       .catch((error) => {
@@ -150,13 +161,8 @@ export default function RegisterPreferencesScreen({ navigation }) {
       });
   };
 
-  const valueToId = (value) => {
-    const index = provinciasDeEspana.indexOf(value);
-    setIdLocalidad(index + 1);
-  };
-
   const idToValue = (id) => {
-    return provinciasDeEspana[id - 1];
+    return provinciasDeEspana[id];
   };
 
   const handleDelete = () => {
@@ -178,7 +184,46 @@ export default function RegisterPreferencesScreen({ navigation }) {
       });
   };
 
-  const handleDateChange = (text) => {
+  // Función para verificar si un año es bisiesto
+const isLeapYear = (year) => {
+  return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+};
+
+// Función para obtener el número de días en un mes específico
+const getDaysInMonth = (month, year) => {
+  const daysInMonths = {
+      1: 31,
+      2: isLeapYear(year) ? 29 : 28, // febrero tiene 28 días o 29 si es bisiesto
+      3: 31,
+      4: 30,
+      5: 31,
+      6: 30,
+      7: 31,
+      8: 31,
+      9: 30,
+      10: 31,
+      11: 30,
+      12: 31
+  };
+  return daysInMonths[month];
+};
+
+// Función para verificar si una fecha es válida considerando los años bisiestos y días en cada mes
+const checkDate = (day, month, year) => {
+  if (year < 1900 || year > new Date().getFullYear()) {
+      return false;
+  }
+
+  if (month < 1 || month > 12) {
+      return false;
+  }
+
+  const daysInMonth = getDaysInMonth(month, year);
+
+  return day >= 1 && day <= daysInMonth;
+};
+
+const handleDateChange = (text) => {
     // Elimina todos los caracteres que no sean números
     const cleanedText = text.replace(/[^0-9]/g, '');
 
@@ -187,24 +232,31 @@ export default function RegisterPreferencesScreen({ navigation }) {
     let formattedCursorPosition = cursorPosition;
 
     for (let i = 0; i < cleanedText.length; i++) {
-      if (i === 2 || i === 4) {
-        formattedText += '/';
-        if (i < cursorPosition) {
-          formattedCursorPosition++;
+        if (i === 2 || i === 4) {
+            formattedText += '/';
+            if (i < cursorPosition) {
+                formattedCursorPosition++;
+            }
         }
-      }
-      formattedText += cleanedText[i];
+        formattedText += cleanedText[i];
     }
 
     // Asegúrate de que el texto formateado no exceda los 10 caracteres
     if (formattedText.length > 10) {
-      formattedText = formattedText.slice(0, 10);
+        formattedText = formattedText.slice(0, 10);
     }
 
     setFechaNacimiento(formattedText);
-    // Actualiza la posición del cursor
     setCursorPosition(formattedCursorPosition);
-  };
+
+    // Valida la fecha para evitar errores en el input
+    const [day, month, year] = formattedText.split('/').map(Number);
+    const valid = checkDate(day, month, year);
+    setIsValidDate(valid);
+    setFechaNacimientoError(false);
+
+    
+};
 
   const fileName = FileSystem.documentDirectory + 'userProfileImage.jpeg';
   const checkProfileImage = async () => {
@@ -247,6 +299,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
     }
   };
 
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header} />
@@ -270,22 +323,35 @@ export default function RegisterPreferencesScreen({ navigation }) {
       </View>
 
       <View style={styles.formContainer}>
-        <Text style={styles.label}>Sexo</Text>
-        <View style={{ ...styles.input, justifyContent: 'center' }}>
-          <Picker selectedValue={gender} onValueChange={(itemValue) => setGender(itemValue)}>
+        <Text style={styles.label}>Género</Text>
+        <View style={[styles.input, genderError && styles.inputError]}>
+        <Picker
+          selectedValue={gender}
+          onValueChange={(itemValue) => {
+              setGender(itemValue);
+              setGenderError(false);
+          }}
+        >
+            <Picker.Item label="-- Seleccione su género --" value="" />
             <Picker.Item label="Masculino" value="H" />
             <Picker.Item label="Femenino" value="M" />
             <Picker.Item label="Otro" value="O" />
           </Picker>
         </View>
+        {genderError && (
+                <Text style={styles.errorText}>
+                    * Por favor, seleccione un género.
+                </Text>
+            )}
 
         <Text style={styles.label}>Localidad</Text>
-        <View style={{ ...styles.input, justifyContent: 'center' }}>
+        <View style={[styles.input, idlocalidadError && styles.inputError]}>
           <Picker
             selectedValue={idToValue(idlocalidad)}
             onValueChange={(itemValue) => {
               const index = provinciasDeEspana.indexOf(itemValue);
-              setIdLocalidad(index + 1);
+              setIdLocalidad(index);
+              setIdLocalidadError(false);
             }}
           >
             {provinciasDeEspana.map((provincia, index) => (
@@ -293,39 +359,46 @@ export default function RegisterPreferencesScreen({ navigation }) {
             ))}
           </Picker>
         </View>
+        {idlocalidadError && (
+          <Text style={styles.errorText}>* Por favor, seleccione una localidad.</Text>
+        )}
 
         <Text style={styles.label}>Fecha de nacimiento</Text>
         <TextInput
-          style={styles.dateInput}
+          style={[styles.dateInput, fechaNacimientoError && styles.dateInputError]}
           value={fechaNacimiento}
           onChangeText={handleDateChange}
           placeholder="DD/MM/AAAA"
           maxLength={10}
           keyboardType="numeric"
-          onSelectionChange={(event) => {
+          onSelectionChange={(event) => { 
             // Captura la posición actual del cursor
             setCursorPosition(event.nativeEvent.selection.start);
           }}
         />
+        {fechaNacimientoError && (
+          <Text style={styles.errorText}>* Por favor, introduzca una fecha de nacimiento válida.</Text>
+        )}
 
         <Text style={styles.label}>Preferencia Sexual</Text>
-        <View style={{ ...styles.input, justifyContent: 'center' }}>
-          <Picker
+        <View style={[styles.input, sexualPreferenceError && styles.inputError]}>
+        <Picker
             selectedValue={sexualPreference}
-            onValueChange={(itemValue, itemIndex) => setSexualPreference(itemValue)}
-            defaultValue={
-              authState.buscasexo == 'H'
-                ? 'Hombres'
-                : authState.buscasexo == 'M'
-                  ? 'Mujeres'
-                  : 'Todos'
-            }
-          >
+            onValueChange={(itemValue) => {
+                // Utiliza llaves para encapsular ambas instrucciones
+                setSexualPreference(itemValue);
+                setSexualPreferenceError(false);
+            }}
+        >
+            <Picker.Item label="-- Seleccione su preferencia sexual --" value="" />
             <Picker.Item label="Hombres" value="H" />
             <Picker.Item label="Mujeres" value="M" />
             <Picker.Item label="Ambos" value="T" />
           </Picker>
         </View>
+        {sexualPreferenceError && (
+          <Text style={styles.errorText}>* Por favor, seleccione una preferencia sexual.</Text>
+        )}
 
         <View style={styles.labelContainer}>
           <Text style={styles.label}>Preferencia de edad</Text>
@@ -357,19 +430,48 @@ export default function RegisterPreferencesScreen({ navigation }) {
         </View>
 
         <Text style={styles.label}>Descripción</Text>
-        <TextInput
-          style={styles.description}
-          placeholder="Cuéntanos un poco sobre ti..."
-          multiline={true}
-          numberOfLines={4}
-          onChangeText={(text) => setDescription(text)}
-        />
+        <View style={styles.descriptionInputContainer}>
+            <TextInput
+                style={styles.description}
+                placeholder="Cuéntanos un poco sobre ti..."
+                multiline={true}
+                numberOfLines={4}
+                maxLength={500}
+                onChangeText={(text) => {
+                    setDescription(text);
+                    setDescriptionLength(text.length); 
+                }}
+                value={description}
+            />
+            <Text style={styles.characterCount}>{descriptionLength}/500</Text>
+        </View>
+
+
 
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
-            console.log('Guardando...: ', authState);
-            handleSave();
+            let isFormValid = true; 
+            if (gender === '') {
+              setGenderError(true); 
+              isFormValid = false;
+            }
+            if (idlocalidad === 0) {
+              setIdLocalidadError(true);
+              isFormValid = false;
+            }
+            if (sexualPreference === '') {
+              setSexualPreferenceError(true);
+              isFormValid = false;
+            }
+            if (!isValidDate) {
+              setFechaNacimientoError(true);
+              isFormValid = false;
+            }
+            if (isFormValid) {
+              console.log('Guardando...: ', authState);
+              handleSave();
+            }
           }}
         >
           <Text style={styles.buttonText}> Guardar</Text>
@@ -384,6 +486,26 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff'
   },
+
+  descriptionInputContainer: {
+    position: 'relative',
+},
+description: {
+    height: 100, 
+    borderColor: '#cccccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    paddingRight: 40,
+    marginBottom: 10,
+},
+characterCount: {
+    position: 'absolute',
+    bottom: 15, 
+    right: 8,
+    color: '#666',
+    fontSize: 12, 
+},
 
   editIconContainer: {
     position: 'absolute',
@@ -457,12 +579,14 @@ const styles = StyleSheet.create({
     marginTop: 10
   },
 
-  sliderText: {
-    fontSize: 16,
-    marginBottom: 10
-  },
   slider: {
     width: '100%'
+  },
+
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginBottom: 5
   },
 
   sliderContainer: {
@@ -475,10 +599,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: '#F89F9F'
   },
-  sliderLabelsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between'
-  },
+
   sliderLabel: {
     fontSize: 16
   },
@@ -487,26 +608,20 @@ const styles = StyleSheet.create({
     height: 40,
     borderColor: '#cccccc',
     borderWidth: 1,
-    borderRadius: 10
+    borderRadius: 10,
+    justifyContent: 'center'
   },
-  dateInput: {
+
+  inputError: {
     height: 40,
-    borderColor: '#cccccc',
+    borderColor: 'red',
     borderWidth: 1,
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
-    alignContent: 'center'
+    borderRadius: 10,
+    justifyContent: 'center'
   },
-  ageInput: {
-    height: 40,
-    borderColor: '#cccccc',
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 10,
-    width: '45%'
-  },
+
+
+
   description: {
     height: 240,
     borderColor: '#cccccc',
@@ -517,14 +632,7 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
     padding: 10
   },
-  textContainer: {
-    borderColor: '#cccccc',
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 10,
-    textAlignVertical: 'center'
-  },
+
   button: {
     backgroundColor: '#F89F9F',
     paddingVertical: 10,
@@ -537,46 +645,20 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16
   },
-  errores: {
-    marginTop: -10,
-    color: 'red',
-    fontSize: 12,
-    marginBottom: 10
-  },
-  forgotPassword: {
-    textAlign: 'right',
-    marginTop: 10,
-    color: '#F89F9F',
-    textDecorationLine: 'underline'
-  },
-  registerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    paddingBottom: '10%'
-  },
-  registerText: {
-    fontSize: 16
-  },
-  registerLink: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginLeft: 5,
-    color: '#F89F9F'
-  },
-  line: {
-    borderBottomColor: '#ccc',
-    borderBottomWidth: 1,
-    paddingBottom: '45%',
-    alignSelf: 'stretch' // Ajuste para que la línea ocupe todo el ancho
-  },
-  rayaEdad: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    padding: 14
-  },
+
   dateInput: {
     height: 40,
     borderColor: '#cccccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+    textAlign: 'left' // Centra el texto
+  },
+
+  dateInputError: {
+    height: 40,
+    borderColor: 'red',
     borderWidth: 1,
     borderRadius: 5,
     padding: 10,

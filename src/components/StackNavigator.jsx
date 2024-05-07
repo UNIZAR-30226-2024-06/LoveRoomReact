@@ -16,6 +16,7 @@ import UserGuidelinesScreen from '../screens/UserGuidelinesScreen';
 import VideoScreen from '../screens/VideoScreen';
 import FAQScreen from '../screens/FAQScreen';
 import OtherProfile from '../screens/OtherProfileScreen';
+import ChangePassword from '../screens/ChangePasswdScreen';
 
 const Stack = createStackNavigator();
 
@@ -84,6 +85,11 @@ export default function StackNavigator() {
         <Stack.Screen
           name="OtherProfile"
           component={OtherProfile}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="changePassword"
+          component={ChangePassword}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
