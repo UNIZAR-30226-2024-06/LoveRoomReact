@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   ScrollView,
   View,
@@ -11,28 +11,22 @@ import {
   StatusBar
 } from 'react-native';
 import AuthContext from '../components/AuthContext';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function ChangePasswdScreen({ navigation }) {
   const { setIsRegistered } = React.useContext(AuthContext);
-  const [password, setPassword] = React.useState('');
-  const [password2, setPassword2] = React.useState('');
-  const [isValidPassword, setIsValidPassword] = React.useState(false);
-  const [isValidPassword2, setIsValidPassword2] = React.useState(false);
 
-  const handlePasswordChange = (text) => {
-    setPassword(text);
-    setIsValidPassword(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,16}$/.test(text));
-    setIsValidPassword2(password2 === text);
+  const [oldPassword, setOldPassword] = React.useState('');
+  const [isValidOldPassword, setIsValidOldPassword] = useState(false);
+  const [oldPasswordError, setOldPasswordError] = useState(false);
+  const [oldHidePassword, setOldHidePassword] = useState(true);
+
+  const handleOldPasswordChange = (text) => {
+    setOldPassword(text);
+    setIsValidOldPassword(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,16}$/.test(text));
+    setOldPasswordError(false);
   };
 
-  const handleChangePassword = (text) => {
-    setPassword2(text);
-    setIsValidPassword2(password === text);
-  };
-
-  const handleRegister = () => {
-    setIsRegistered(true);
-  };
 
   return (
     <ScrollView style={styles.container}>
@@ -41,6 +35,36 @@ export default function ChangePasswdScreen({ navigation }) {
       </View>
 
       <View style={styles.formContainer}>
+
+      <Text style={styles.label}>Contraseña actual</Text>
+      <View>
+          <TextInput
+            style={[styles.input, { paddingRight: 40, flex: 1 },
+               oldPasswordError && { borderColor: 'red' }]}
+            placeholder="Introduzca su contraseña actual"
+            secureTextEntry={oldHidePassword}
+            onChangeText={handleOldPasswordChange}
+            maxLength={100}
+          />
+          <TouchableOpacity
+            onPress={() => setOldHidePassword(!oldHidePassword)}
+            style={{
+              position: 'absolute',
+              right: 20,
+              height: 40,
+              top: 0,
+              justifyContent: 'center'
+            }}
+          >
+            <Ionicons name={oldHidePassword ? 'eye-off' : 'eye'} size={24} color="black" />
+          </TouchableOpacity>
+        {!isValidOldPassword && (
+          <Text style={styles.errores}>
+            * Por favor, introduzca la contraseña actual.
+          </Text>
+        )}
+      </View>
+{/* 
         <Text style={styles.label}>Nueva contraseña</Text>
         <TextInput
           style={styles.input}
@@ -63,15 +87,24 @@ export default function ChangePasswdScreen({ navigation }) {
           secureTextEntry={true}
         />
         {!isValidPassword2 && <Text style={styles.errores}>* Las contraseñas no coinciden.</Text>}
+         */}
 
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
             handleChangePassword();
-            navigation.navigate('Login');
+            navigation.pop();
           }}
         >
           <Text style={styles.buttonText}>Continuar</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('GetEmail');
+          }}
+        >
+          <Text style={styles.forgotPassword}>He olvidado mi contraseña</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
