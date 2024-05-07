@@ -1,18 +1,23 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { FlatList, StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  ActivityIndicator,
+  Image,
+  Modal
+} from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import AuthContext from '../components/AuthContext';
+import AuthContext, { initializeSocket } from '../components/AuthContext';
 import NotRegisteredScreen from './NotRegisteredScreen';
 
 const MyRoomsScreen = () => {
   const navigation = useNavigation();
   const { authState } = useContext(AuthContext);
-
-  if(!authState.isLoggedIn || authState.token == null) {
-    return (
-        <NotRegisteredScreen />
-    );
-    }
+  const { socketState, setSocketState } = useContext(AuthContext);
+  const [viewModal, setViewModal] = useState(false);
   const token = authState.token;
   const [myRooms, setMyRooms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,7 +26,10 @@ const MyRoomsScreen = () => {
 
   useFocusEffect(
     React.useCallback(() => {
-      fetchMyRooms();
+      console.log('Fetching rooms...');
+      if (authState.isLoggedIn || authState.token != null) {
+        fetchMyRooms();
+      }
     }, [])
   );
 
@@ -45,14 +53,51 @@ const MyRoomsScreen = () => {
     }
   };
 
-  const handleRoomPress = (roomId) => {
-    // Navegar a la pantalla de la sala con el ID de la sala seleccionada
-    // navigation.navigate('RoomScreen', { roomId });
+  useEffect(() => {
+    const initializeAndProceed = async () => {
+      const { isSocketInitialized } = await initializeSocket(token, setSocketState, socketState);
+
+      // Esperar hasta que el socket esté completamente inicializado antes de continuar
+      if (isSocketInitialized) {
+        // Realizar las acciones que dependen del socket completamente inicializado
+        console.log('Socket initialized, proceeding with further actions...');
+        setTimeout(() => {
+          console.log('Navigating to Video...');
+          setViewModal(false);
+          navigation.navigate('Video');
+        }, 3000);
+
+      } else {
+        console.log('Socket is not yet initialized, waiting...');
+      }
+    };
+
+    console.log('View modal:', viewModal);
+    if (viewModal) {
+      initializeAndProceed();
+    }
+  }, [viewModal, socketState.socket]);
+
+
+
+  const handleRoomUseless = async (room) => {
+    console.log('Socket state:', socketState.socket);
+    console.log('Room:', room);
+    await setSocketState((prevState) => ({
+      ...prevState,
+      idSala: room.idsala,
+      receiverId: room.idusuariomatch,
+      idVideo: room.idvideo,
+      senderId: authState.id
+    }));
+    setViewModal(true);
   };
 
   const fetchVideoInfo = async (videoId) => {
     try {
-      const response = await fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${process.env.EXPO_PUBLIC_YT_KEY}&part=snippet`);
+      const response = await fetch(
+        `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${process.env.EXPO_PUBLIC_YT_KEY}&part=snippet`
+      );
       const data = await response.json();
       if (data.items.length > 0) {
         console.log(data.items[0].snippet.thumbnails.default.url);
@@ -69,22 +114,27 @@ const MyRoomsScreen = () => {
     }
   };
 
-    const [thumbnails, setThumbnails] = useState({});
+  const [thumbnails, setThumbnails] = useState({});
 
-    useEffect(() => {
-        const fetchThumbnails = async () => {
-          const newThumbnails = { ...thumbnails };
-          for (const room of myRooms) {
-            if (!newThumbnails[room.idvideo]) {
-              newThumbnails[room.idvideo] = await fetchVideoInfo(room.idvideo);
-            }
-          }
-          setThumbnails(newThumbnails);
-          console.log(newThumbnails);
-        };
-      
-        fetchThumbnails();
-      }, [myRooms]);
+  useEffect(() => {
+    const fetchThumbnails = async () => {
+      const newThumbnails = { ...thumbnails };
+      for (const room of myRooms) {
+        if (!newThumbnails[room.idvideo]) {
+          newThumbnails[room.idvideo] = await fetchVideoInfo(room.idvideo);
+        }
+      }
+      setThumbnails(newThumbnails);
+      console.log(newThumbnails);
+    };
+    if (myRooms.length > 0) {
+      fetchThumbnails();
+    }
+  }, [myRooms]);
+
+  if (!authState.isLoggedIn || authState.token == null) {
+    return <NotRegisteredScreen />;
+  }
 
   if (loading) {
     return (
@@ -97,16 +147,35 @@ const MyRoomsScreen = () => {
 
   return (
     <View style={styles.container}>
+      <Modal transparent={true} animationType={'none'} visible={viewModal}>
+        <View style={styles.modalBackground}>
+          <View style={styles.activityIndicatorWrapper}>
+            <ActivityIndicator animating={viewModal} size="large" color="#0000ff" />
+            <Text>Cargando Sala... </Text>
+          </View>
+        </View>
+      </Modal>
+      <TouchableOpacity
+        onPress={() => {
+          console.log(socketState);
+        }}
+      >
+        <Text>Socket state</Text>
+      </TouchableOpacity>
       <FlatList
         data={myRooms}
         keyExtractor={(item) => item.idsala.toString()}
         renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => handleRoomPress(item.idsala)}>
+          <TouchableOpacity
+            onPress={() => {
+              handleRoomUseless(item);
+            }}
+          >
             <View style={styles.roomItem}>
-                <Image
-                    source={{ uri: thumbnails[item.idvideo] }}
-                    style={[styles.thumbnail, { width: width, height: height }]}
-                />
+              <Image
+                source={{ uri: thumbnails[item.idvideo] }}
+                style={[styles.thumbnail, { width: width, height: height }]}
+              />
               <Text style={styles.roomTitle}>{item.nombre}</Text>
             </View>
           </TouchableOpacity>
@@ -141,6 +210,22 @@ const styles = StyleSheet.create({
   },
   thumbnail: {
     marginLeft: 10
+  },
+  modalBackground: {
+    flex: 1,
+    alignItems: 'center',
+    flexDirection: 'column',
+    justifyContent: 'space-around',
+    backgroundColor: '#00000040'
+  },
+  activityIndicatorWrapper: {
+    backgroundColor: '#FFFFFF',
+    height: 100,
+    width: 200,
+    borderRadius: 10,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-around'
   }
 });
 

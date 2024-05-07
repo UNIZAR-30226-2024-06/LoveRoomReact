@@ -40,24 +40,59 @@ const Video = () => {
   const playerRef = useRef(null); // Referencia al reproductor de video
   const idRoom = useRef(null);
   const [isEnabled, setIsEnabled] = useState(false);
-  const forcePause = useRef(false);  // Se activa solo para indicar que cuando llegue el play hay que pausar (necesario para sincronizar)
+  const forcePause = useRef(false); // Se activa solo para indicar que cuando llegue el play hay que pausar (necesario para sincronizar)
+  // console.log('SocketState en video Screen: ', socketState);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
       socketState.socket.emit(socketEvents.LEAVE_ROOM, socketState.idSala);
       socketState.socket.disconnect();
+      socketState.socket.off('connect');
       setSocketState((prevState) => ({
         ...prevState,
         receiverId: '',
-        idVideo: ''
+        idVideo: '',
+        idSala: '',
+        matchRecibido: false
       }));
-
       console.log('Socket disconnected');
     });
 
     // Devuelve una función de limpieza para ejecutar al desmontar el componente
     return unsubscribe;
   }, [navigation]);
+
+  useEffect(() => {
+    console.log('Vamos a cargar el chat en la sala: ', socketState.idSala);
+    if (socketState.idSala != '' && socketState.idSala != null) {
+      fetch(`${process.env.EXPO_PUBLIC_API_URL}/${socketState.idSala}/chat`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authState.token}`
+        }
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log('Success:', data);
+          // setMessages(data);
+          const transformedData = data.map((item) => {
+            return {
+              multimedia: item.multimedia,
+              message: item.texto,
+              timestamp: item.fechaHora,
+              senderId: item.idUsuario
+            };
+          });
+          // Ahora transformedData contiene los datos transformados en la estructura deseada
+          console.log('Transformed data:', transformedData);
+          setMessages(transformedData);
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+    }
+  }, [socketState.idSala]);
 
   const screenHeight = Dimensions.get('window').height;
 
@@ -84,40 +119,51 @@ const Video = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedVideoUrl, setSelectedVideoUrl] = useState('');
 
-  const handleSelectVideo =async(videoUrl) => {
+  const handleSelectVideo = async (videoUrl) => {
     console.log('Video seleccionado en la seleccion:', videoUrl);
     setSelectedVideoUrl(videoUrl);
     setModalVisible(false);
   };
-  
 
   const handleChangeVideo = () => {
-    console.log('Video seleccionado:', selectedVideoUrl); 
-    socketState.socket.emit(socketEvents.CHANGE_VIDEO, socketState.idSala, selectedVideoUrl, (message) => {
-      console.log('Respuesta del servidor:', message);
-      if(message){
-        setSocketState((prevState) => ({
-          ...prevState,
-          idVideo: selectedVideoUrl
-        }));
+    console.log('Video seleccionado:', selectedVideoUrl);
+    console.log('Emitiendo evento CHANGE_VIDEO ', socketState.idSala, selectedVideoUrl);
+    socketState.socket.emit(
+      socketEvents.CHANGE_VIDEO,
+      socketState.idSala,
+      selectedVideoUrl,
+      (message) => {
+        console.log('Respuesta del servidor:', message);
+        if (message) {
+          setSocketState((prevState) => ({
+            ...prevState,
+            idVideo: selectedVideoUrl
+          }));
+        }
       }
-    });
+    );
     setSelectedVideoUrl('');
   };
-  
+
   useEffect(() => {
     if (selectedVideoUrl !== '') {
       handleChangeVideo();
     }
   }, [selectedVideoUrl]);
 
-
   useEffect(() => {
     console.log('Efecto ejecutado. receiverId:', socketState.receiverId);
     setIsEnabled(true);
     handleInfoReceiver();
-    if (socketState.idSala != '' && socketState.idSala != null && socketState.socket != null && socketState.socket.connected == true) {
-      console.log('Emitiendo evento JOIN_ROOM');
+    console.log('ID de sala:', socketState.idSala);
+    console.log('Socket:', socketState.socket);
+    if (
+      socketState.idSala != '' &&
+      socketState.idSala != null &&
+      socketState.socket != null &&
+      socketState.socket.connected == true
+    ) {
+      console.log('Emitiendo evento JOIN_ROOM ', socketState.idSala, ' by ', authState.id);
       if (idRoom.current == null) {
         idRoom.current = socketState.idSala;
       }
@@ -134,7 +180,7 @@ const Video = () => {
   useEffect(() => {
     console.log('ID de sala:', socketState.idSala);
     if (socketState.idSala != '' && socketState.idSala != null) {
-      console.log('Emitiendo evento JOIN_ROOM by ', authState.id);
+      console.log('Emitiendo evento JOIN_ROOM ', socketState.idSala, ' by ', authState.id);
       if (idRoom.current == null) {
         idRoom.current = socketState.idSala;
       }
@@ -164,18 +210,18 @@ const Video = () => {
   };
 
   const toggleSwitch = () => {
-    setIsEnabled(previousState => {
+    setIsEnabled((previousState) => {
       if (previousState) {
         console.log(authState.id, ' enviando Sync off');
         socketState.socket.emit(socketEvents.SYNC_OFF, socketState.idSala, (boolean) => {
-          if(boolean == false) {
+          if (boolean == false) {
             return previousState;
           }
         });
       } else {
         handleSendSync();
       }
-      
+
       return !previousState;
     });
   };
@@ -189,8 +235,22 @@ const Video = () => {
     // Obtenemos el tiempo actual del video
     const timesegundos = await playerRef.current?.getCurrentTime();
     // Enviamos el evento SYNC_ON para que el otro usuario se sincronice con nosotros
-    console.log(authState.id, ' enviando Sync on con idsala:', idRoom.current, ' idvideo:', socketState.idVideo, ' timesegundos:', timesegundos);
-    socketState.socket.emit(socketEvents.SYNC_ON, idRoom.current, socketState.idVideo, timesegundos, true);
+    console.log(
+      authState.id,
+      ' enviando Sync on con idsala:',
+      idRoom.current,
+      ' idvideo:',
+      socketState.idVideo,
+      ' timesegundos:',
+      timesegundos
+    );
+    socketState.socket.emit(
+      socketEvents.SYNC_ON,
+      idRoom.current,
+      socketState.idVideo,
+      timesegundos,
+      true
+    );
     alert('¡Vídeo sincronizado con el otro usuario!');
   };
 
@@ -223,7 +283,16 @@ const Video = () => {
     if (!isEnabled) {
       setIsEnabled(true);
     }
-    console.log('Sync on received by ', authState.id, ' idVideo:', idVideo, ' timesegundos:', timesegundos, ' pausado:', pausado);
+    console.log(
+      'Sync on received by ',
+      authState.id,
+      ' idVideo:',
+      idVideo,
+      ' timesegundos:',
+      timesegundos,
+      ' pausado:',
+      pausado
+    );
 
     // Cambiamos el video actual al video que nos envia el otro usuario
     if (idVideo != null && socketState.idVideo != idVideo) {
@@ -254,15 +323,17 @@ const Video = () => {
   useEffect(() => {
     if (socketState.socket != null) {
       console.log('Eventos de socket');
-  
+
       // Desuscribirse de los eventos anteriores
+      socketState.socket.off(socketEvents.CHECK_ROOM);
+      socketState.socket.off(socketEvents.GET_SYNC);
       socketState.socket.off(socketEvents.PAUSE, handlePause);
       socketState.socket.off(socketEvents.PLAY, handlePlay);
       socketState.socket.off(socketEvents.RECEIVE_MESSAGE, handleMessage);
       socketState.socket.off(socketEvents.SYNC_ON);
       socketState.socket.off(socketEvents.SYNC_OFF);
       socketState.socket.off(socketEvents.CHANGE_VIDEO);
-  
+
       // Suscribirse a los nuevos eventos
 
       // Para que al reconectarse al socket se vuelva a hacer JOIN_ROOM
@@ -270,11 +341,14 @@ const Video = () => {
         console.log('CHECK_ROOM event received by ', authState.id);
         if (socketState.idSala != null && socketState.idSala != '') {
           // Si estabamos en una sala, al reconectarnos al socket volvemos a hacer JOIN_ROOM
-          console.log('Emitiendo evento JOIN_ROOM para reconectarse a la sala by ', authState.id);
+          console.log('Emitiendo evento JOIN_ROOM para reconectarse a la sala ', socketState.idSala, ' by ', authState.id);
           socketState.socket.emit(socketEvents.JOIN_ROOM, socketState.idSala);
         } else {
           // Aqui se deberia volver a la pantalla de búsqueda ya que el usuario ya no va a poder hacer match
-          alert('Te has desconectado del vídeo.\n Si quieres hacer match debes salir y volver a entrar.')
+          console.log('No hay sala, volviendo a la pantalla de búsqueda');
+          // alert(
+          //   'Te has desconectado del vídeo.\n Si quieres hacer match debes salir y volver a entrar.'
+          // );
           //navigation.navigate('Search');???
         }
       });
@@ -284,7 +358,7 @@ const Video = () => {
         // Llamamos a la función handleSendSync para enviar nuestro video y tiempo al otro usuario
         handleSendSync();
       });
-      
+
       socketState.socket.on(socketEvents.PAUSE, handlePause);
       socketState.socket.on(socketEvents.PLAY, handlePlay);
       socketState.socket.on(socketEvents.RECEIVE_MESSAGE, handleMessage);
@@ -295,19 +369,21 @@ const Video = () => {
           idVideo: idVideo
         }));
       });
-  
+
       socketState.socket.on(socketEvents.SYNC_ON, (idVideo, timesegundos, pausado) => {
         handleSyncOn(idVideo, timesegundos, pausado);
       });
-  
+
       socketState.socket.on(socketEvents.SYNC_OFF, () => {
-        setIsEnabled(prevState => !prevState);
+        setIsEnabled((prevState) => !prevState);
         console.log('Sync off received');
       });
-  
+
       return () => {
         console.log('Desmontando eventos de socket');
         // Desuscribirse de los eventos al desmontar el componente
+        socketState.socket.off(socketEvents.CHECK_ROOM);
+        socketState.socket.off(socketEvents.GET_SYNC);
         socketState.socket.off(socketEvents.PAUSE, handlePause);
         socketState.socket.off(socketEvents.PLAY, handlePlay);
         socketState.socket.off(socketEvents.RECEIVE_MESSAGE, handleMessage);
@@ -319,7 +395,6 @@ const Video = () => {
       console.log('Socket = null');
     }
   }, [socketState.socket]);
-  
 
   const sendMessage = () => {
     if (socketState.socket != null && socketState.socket.connected == true && newMessage != '') {
@@ -337,12 +412,14 @@ const Video = () => {
         console.log('Timestamp:', timestamp);
         data.timestamp = timestamp;
         data.senderId = socketState.senderId;
+        console.log('SocketState pal mensaje:', socketState);
+        console.log(socketState.senderId);
+        console.log('Data en el callback: ', data);
         setMessages((prevState) => [...prevState, data]);
         setNewMessage('');
       };
-      
-      socketState.socket.emit(socketEvents.CREATE_MESSAGE, idsala, texto, rutamultimedia, callback);
 
+      socketState.socket.emit(socketEvents.CREATE_MESSAGE, idsala, texto, rutamultimedia, callback);
     }
   };
 
@@ -367,11 +444,12 @@ const Video = () => {
 
   const handleStateChange = (event) => {
     if (event === 'playing') {
-      if (forcePause.current) {  // Si se requiere un pause forzado para la sincronización, lo pausamos
+      if (forcePause.current) {
+        // Si se requiere un pause forzado para la sincronización, lo pausamos
         forcePause.current = false;
         ignoreStateChange.current = true;
         setVideoPlaying(false);
-        console.log('Parando video por forcePause')
+        console.log('Parando video por forcePause');
         return;
       }
       if (ignoreStateChange.current) {
@@ -383,12 +461,13 @@ const Video = () => {
       const callback = (message) => {
         console.log('Respuesta del servidor:', message);
       };
-      if(isEnabled && idRoom.current != null) {
+      if (isEnabled && idRoom.current != null) {
         socketState.socket.emit(socketEvents.PLAY, idRoom.current, callback);
       }
       // console.log('Play event emitted by ', authState.id);
     } else if (event === 'paused') {
       if (ignoreStateChange.current) {
+        console.log('Ignorando evento de pausa');
         ignoreStateChange.current = false;
         return;
       }
@@ -397,7 +476,12 @@ const Video = () => {
       };
       console.log('Paused: videoPlaying ', videoPlaying); // Deberia ser true siempre
       setVideoPlaying(false);
-      if(isEnabled && idRoom.current != null) {
+      console.log(idRoom.current, ' enviando evento PAUSE');
+      console.log('isEnabled:', isEnabled);
+      if (isEnabled && idRoom.current != null) {
+        console.log('Emitiendo evento PAUSE');
+        console.log(socketState.socket.connected);
+        console.log(socketState.socket);
         socketState.socket.emit(socketEvents.PAUSE, idRoom.current, callback);
       }
       //console.log('Pause event emitted by ', authState.id);
@@ -407,18 +491,22 @@ const Video = () => {
   // Cuando el reproductor de youtube este listo
   const handleReady = () => {
     // Si soy el ultimo usuario en unirme a la sala, mando un GET_SYNC para que el otro usuario me mande su tiempo
-    if (socketState.idSala != '' && socketState.idSala != null && socketState.matchRecibido == false) {
-      // Antes de mandar el GET_SYNC, hay que darle a play y luego pause para que el video cargue un poco 
+    if (
+      socketState.idSala != '' &&
+      socketState.idSala != null &&
+      socketState.matchRecibido == false
+    ) {
+      // Antes de mandar el GET_SYNC, hay que darle a play y luego pause para que el video cargue un poco
       // y se quede pausado tras el seekto()
       forcePause.current = true; // Para que se pause en el handleStateChange
-      setVideoPlaying(true);  // Play
+      setVideoPlaying(true); // Play
 
-      console.log( authState.id, ' emitiendo evento GET_SYNC');
+      console.log(authState.id, ' emitiendo evento GET_SYNC');
       socketState.socket.emit(socketEvents.GET_SYNC, socketState.idSala);
     } else {
       // Si soy el primer usuario en unirme a la sala
       // Por temas de sincronización, al cargar el reproductor hay que darle a play
-      console.log('Reproductor listo, dandole a play')
+      console.log('Reproductor listo, dandole a play');
       ignoreStateChange.current = true;
       setVideoPlaying(true);
     }
@@ -440,7 +528,14 @@ const Video = () => {
               <SearchBar setVideoUrl={handleSelectVideo} />
             </View>
             <View style={[styles.button, styles.buttonClose]}>
-              <Icon name="close"  type="ionicon" color="white" onPress={()=>{setModalVisible(false)}} />
+              <Icon
+                name="close"
+                type="ionicon"
+                color="white"
+                onPress={() => {
+                  setModalVisible(false);
+                }}
+              />
             </View>
           </View>
         </View>
@@ -482,20 +577,25 @@ const Video = () => {
           <Text>Console log</Text>
         </TouchableOpacity> */}
       </View>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10, flex:0.15 }}>
-        
+      <View
+        style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10, flex: 0.15 }}
+      >
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text style={{fontSize: 12, fontWeight: 'bold', padding:10}}>¡Cambia el vídeo!</Text>
-          <Icon name="refresh-cw" type="feather" onPress={() => {
-            console.log('Emitiendo evento CHANGE_VIDEO');
-            setModalVisible(true);
-            // socketState.socket.emit(socketEvents.CHANGE_VIDEO, socketState.idSala);
-          }} />
+          <Text style={{ fontSize: 12, fontWeight: 'bold', padding: 10 }}>¡Cambia el vídeo!</Text>
+          <Icon
+            name="refresh-cw"
+            type="feather"
+            onPress={() => {
+              console.log('Modal visible CHANGE_VIDEO');
+              setModalVisible(true);
+              // socketState.socket.emit(socketEvents.CHANGE_VIDEO, socketState.idSala);
+            }}
+          />
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text style={{fontSize: 12, fontWeight: 'bold'}}>Sala Sincronizada</Text>
+          <Text style={{ fontSize: 12, fontWeight: 'bold' }}>Sala Sincronizada</Text>
           <Switch
-            trackColor={{ false: "#767577", true: "gray" }}
+            trackColor={{ false: '#767577', true: 'gray' }}
             thumbColor={'lightgray'}
             ios_backgroundColor="#3e3e3e"
             onValueChange={toggleSwitch}
@@ -506,7 +606,7 @@ const Video = () => {
       <View style={styles.chatContainer}>
         <FlatList
           data={messages}
-          keyExtractor={(item) => item.timestamp+ item.message}
+          keyExtractor={(item) => item.timestamp + item.message}
           renderItem={({ item }) => <ChatMessage data={item} />}
           ref={(ref) => (this.flatList = ref)}
           onContentSizeChange={() => this.flatList.scrollToEnd({ animated: true })}
@@ -553,7 +653,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 22,
+    marginTop: 22
   },
   modalView: {
     margin: 20,
@@ -564,7 +664,7 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 2
     },
     shadowOpacity: 0.25,
     shadowRadius: 4,
@@ -576,23 +676,23 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 10,
     elevation: 2,
-    marginTop: 10,
+    marginTop: 10
   },
   buttonClose: {
-    backgroundColor: '#2196F3',
+    backgroundColor: '#2196F3'
   },
   textStyle: {
     color: 'white',
     fontWeight: 'bold',
-    textAlign: 'center',
+    textAlign: 'center'
   },
   contentContainer: {
-    flex: 1, // Toma todo el espacio disponible
+    flex: 1 // Toma todo el espacio disponible
   },
   modalText: {
     marginBottom: 15,
-    textAlign: 'center',
-  },
+    textAlign: 'center'
+  }
 });
 
 const VideoScreen = () => {

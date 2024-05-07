@@ -88,7 +88,7 @@ export default function LoginScreen({ navigation }) {
             contrasena: data.usuario.contrasena
           });
           AsyncStorage.setItem('token', data.token);
-          navigation.navigate('Cuenta');
+          navigation.pop();
         } else {
           alert('Usuario o contraseña incorrectos', data);
           console.log(data);

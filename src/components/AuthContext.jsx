@@ -6,37 +6,49 @@ import { socketEvents } from '../constants/SocketConstants';
 const AuthContext = React.createContext();
 
 // Inicializa el socket con el token del usuario
-export const initializeSocket = async (token, setSocketState) => {
-  const newSocket = io(`${process.env.EXPO_PUBLIC_API_URL}`, {
-    auth: {
-      token: `Bearer ${token}`
-    }
-  });
+export const initializeSocket = async(token, setSocketState, socketState) => {
+  let newSocket = socketState.socket;
+  let isSocketInitialized = false; // Bandera para controlar si el socket está inicializado
 
-  await setSocketState(() => ({
-    socket: newSocket,
-    senderId: '',
-    receiverId: '',
-    idVideo: '',
-    idSala: '',
-    matchRecibido: false
-  }));
-
-  newSocket.on('connect', () => {
-    console.log('Connected to socket');
-    newSocket.on(socketEvents.MATCH, (senderId, receiverId, idSala, idVideo) => {
-      console.log('Match event received: ', receiverId, senderId, idSala, idVideo);
-      setSocketState((prevState) => ({
-        ...prevState,
-        senderId: receiverId,
-        receiverId: senderId,
-        idSala: idSala.toString(),
-        idVideo: idVideo,
-        matchRecibido: true
-      }));
-      alert('Has hecho match con alguien, ¡disfruta la sala!');
+  if (newSocket == null) {
+    console.log('Initializing socket');
+    newSocket = io(`${process.env.EXPO_PUBLIC_API_URL}`, {
+      auth: {
+        token: `Bearer ${token}`
+      }
     });
-  });
+
+    await setSocketState((prevState) => ({
+      ...prevState,
+      socket: newSocket,
+    }));
+
+    newSocket.on('connect', () => {
+      console.log('Connected to socket');
+      isSocketInitialized = true;
+      newSocket.on(socketEvents.MATCH, (senderId, receiverId, idSala, idVideo) => {
+        console.log('Match event received: ', receiverId, senderId, idSala, idVideo);
+        setSocketState((prevState) => ({
+          ...prevState,
+          senderId: receiverId,
+          receiverId: senderId,
+          idSala: idSala.toString(),
+          idVideo: idVideo,
+          matchRecibido: true
+        }));
+        alert('Has hecho match con alguien, ¡disfruta la sala!');
+      });
+    });
+  } else if (!newSocket.connected) {
+    console.log('Socket already initialized but not connected, reconnecting...');
+    await newSocket.connect();
+    isSocketInitialized = true; // Establecer la bandera en true cuando el socket esté completamente inicializado
+  } else {
+    console.log('Socket already initialized and connected');
+    isSocketInitialized = true; // Establecer la bandera en true cuando el socket esté completamente inicializado
+  }
+
+  return { isSocketInitialized }; // Devolver el socket y la bandera
 };
 
 export const AuthProvider = ({ children }) => {
@@ -61,6 +73,7 @@ export const AuthProvider = ({ children }) => {
     tipousuario: null,
     baneado: false
   });
+  console.log(authState);
 
   const [socketState, setSocketState] = useState({
     socket: null,

@@ -13,4 +13,4 @@ export const socketEvents = {
   SYNC_OFF: 'sync-off',
   CHECK_ROOM: 'check-room',
   GET_SYNC: 'get-sync'
-}
+};
