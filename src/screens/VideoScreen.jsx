@@ -278,14 +278,15 @@ const Video = () => {
     setVideoPlaying(true);
   };
 
-  const handleMessage = (senderId, texto, rutamultimedia) => {
+  const handleMessage = (senderId, texto, rutamultimedia, fechaHora) => {
     console.log('Mensaje recibido de: ', senderId);
     console.log('Texto del mensaje: ', texto);
     console.log('Ruta multimedia: ', rutamultimedia);
+    console.log('Fecha y hora: ', fechaHora);
     const data = {
       senderId: senderId,
       message: texto,
-      timestamp: Date.now()
+      timestamp: fechaHora
     };
 
     setMessages((prevState) => [...prevState, data]);
@@ -363,7 +364,7 @@ const Video = () => {
       socketState.socket.off(socketEvents.PAUSE, handlePause);
       socketState.socket.off(socketEvents.PLAY, handlePlay);
       socketState.socket.off(socketEvents.RECEIVE_MESSAGE, handleMessage);
-      socketState.socket.off(socketEvents.SYNC_ON);
+      socketState.socket.off(socketEvents.SYNC_ON, handleSyncOn);
       socketState.socket.off(socketEvents.SYNC_OFF);
       socketState.socket.off(socketEvents.CHANGE_VIDEO);
 
@@ -403,9 +404,7 @@ const Video = () => {
         }));
       });
 
-      socketState.socket.on(socketEvents.SYNC_ON, (idVideo, timesegundos, pausado, otroUsuarioOnline) => {
-        handleSyncOn(idVideo, timesegundos, pausado, otroUsuarioOnline);
-      });
+      socketState.socket.on(socketEvents.SYNC_ON, handleSyncOn);
 
       socketState.socket.on(socketEvents.SYNC_OFF, () => {
         setIsEnabled(false);
@@ -420,7 +419,7 @@ const Video = () => {
         socketState.socket.off(socketEvents.PAUSE, handlePause);
         socketState.socket.off(socketEvents.PLAY, handlePlay);
         socketState.socket.off(socketEvents.RECEIVE_MESSAGE, handleMessage);
-        socketState.socket.off(socketEvents.SYNC_ON);
+        socketState.socket.off(socketEvents.SYNC_ON, handleSyncOn);
         socketState.socket.off(socketEvents.SYNC_OFF);
         socketState.socket.off(socketEvents.CHANGE_VIDEO);
       };
