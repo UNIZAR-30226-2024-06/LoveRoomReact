@@ -127,6 +127,7 @@ const Video = () => {
 
   const handleChangeVideo = () => {
     console.log('Video seleccionado:', selectedVideoUrl);
+    console.log('Emitiendo evento CHANGE_VIDEO ', socketState.idSala, selectedVideoUrl);
     socketState.socket.emit(
       socketEvents.CHANGE_VIDEO,
       socketState.idSala,
@@ -162,7 +163,7 @@ const Video = () => {
       socketState.socket != null &&
       socketState.socket.connected == true
     ) {
-      console.log('Emitiendo evento JOIN_ROOM');
+      console.log('Emitiendo evento JOIN_ROOM ', socketState.idSala, ' by ', authState.id);
       if (idRoom.current == null) {
         idRoom.current = socketState.idSala;
       }
@@ -179,7 +180,7 @@ const Video = () => {
   useEffect(() => {
     console.log('ID de sala:', socketState.idSala);
     if (socketState.idSala != '' && socketState.idSala != null) {
-      console.log('Emitiendo evento JOIN_ROOM by ', authState.id);
+      console.log('Emitiendo evento JOIN_ROOM ', socketState.idSala, ' by ', authState.id);
       if (idRoom.current == null) {
         idRoom.current = socketState.idSala;
       }
@@ -324,6 +325,8 @@ const Video = () => {
       console.log('Eventos de socket');
 
       // Desuscribirse de los eventos anteriores
+      socketState.socket.off(socketEvents.CHECK_ROOM);
+      socketState.socket.off(socketEvents.GET_SYNC);
       socketState.socket.off(socketEvents.PAUSE, handlePause);
       socketState.socket.off(socketEvents.PLAY, handlePlay);
       socketState.socket.off(socketEvents.RECEIVE_MESSAGE, handleMessage);
@@ -338,7 +341,7 @@ const Video = () => {
         console.log('CHECK_ROOM event received by ', authState.id);
         if (socketState.idSala != null && socketState.idSala != '') {
           // Si estabamos en una sala, al reconectarnos al socket volvemos a hacer JOIN_ROOM
-          console.log('Emitiendo evento JOIN_ROOM para reconectarse a la sala by ', authState.id);
+          console.log('Emitiendo evento JOIN_ROOM para reconectarse a la sala ', socketState.idSala, ' by ', authState.id);
           socketState.socket.emit(socketEvents.JOIN_ROOM, socketState.idSala);
         } else {
           // Aqui se deberia volver a la pantalla de búsqueda ya que el usuario ya no va a poder hacer match
@@ -379,6 +382,8 @@ const Video = () => {
       return () => {
         console.log('Desmontando eventos de socket');
         // Desuscribirse de los eventos al desmontar el componente
+        socketState.socket.off(socketEvents.CHECK_ROOM);
+        socketState.socket.off(socketEvents.GET_SYNC);
         socketState.socket.off(socketEvents.PAUSE, handlePause);
         socketState.socket.off(socketEvents.PLAY, handlePlay);
         socketState.socket.off(socketEvents.RECEIVE_MESSAGE, handleMessage);
@@ -581,7 +586,7 @@ const Video = () => {
             name="refresh-cw"
             type="feather"
             onPress={() => {
-              console.log('Emitiendo evento CHANGE_VIDEO');
+              console.log('Modal visible CHANGE_VIDEO');
               setModalVisible(true);
               // socketState.socket.emit(socketEvents.CHANGE_VIDEO, socketState.idSala);
             }}
