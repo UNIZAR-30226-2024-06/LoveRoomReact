@@ -21,10 +21,25 @@ export default function ChangePasswdScreen({ navigation }) {
   const [oldPasswordError, setOldPasswordError] = useState(false);
   const [oldHidePassword, setOldHidePassword] = useState(true);
 
+  const [new1Password, setNew1Password] = React.useState('');
+  const [isValidNew1Password, setIsValidNew1Password] = useState(false);
+  const [new1PasswordError, setNew1PasswordError] = useState(false);
+  const [new1HidePassword, setNew1HidePassword] = useState(true);
+
   const handleOldPasswordChange = (text) => {
     setOldPassword(text);
     setIsValidOldPassword(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,16}$/.test(text));
     setOldPasswordError(false);
+  };
+
+  const handleNew1PasswordChange = (text) => {
+    setNew1Password(text);
+    setIsValidNew1Password(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,16}$/.test(text));
+    setNew1PasswordError(false);
+  };
+
+  const handlePasswordUpdate = (text) => {
+
   };
 
 
@@ -58,27 +73,43 @@ export default function ChangePasswdScreen({ navigation }) {
           >
             <Ionicons name={oldHidePassword ? 'eye-off' : 'eye'} size={24} color="black" />
           </TouchableOpacity>
-        {!isValidOldPassword && (
-          <Text style={styles.errores}>
+        {oldPasswordError && (
+          <Text style={styles.errorText}>
             * Por favor, introduzca la contraseña actual.
           </Text>
         )}
       </View>
-{/* 
-        <Text style={styles.label}>Nueva contraseña</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Introduzca la nueva contraseña"
-          onChangeText={handlePasswordChange}
-          secureTextEntry={true}
-        />
-        {!isValidPassword && (
-          <Text style={styles.errores}>
-            * La contraseña debe tener entre 8 y 16 caracteres, incluyendo al menos una mayúscula,
-            una minúscula y un número.
-          </Text>
-        )}
 
+        <Text style={styles.label}>Nueva contraseña</Text>
+        <View>
+          <TextInput
+            style={[styles.input, { paddingRight: 40, flex: 1 },
+              new1PasswordError && { borderColor: 'red' }]}
+            placeholder="Introduzca la nueva contraseña"
+            secureTextEntry={new1HidePassword}
+            onChangeText={handleNew1PasswordChange}
+            maxLength={100}
+          />
+          <TouchableOpacity
+              onPress={() => setNew1HidePassword(!new1HidePassword)}
+              style={{
+                position: 'absolute',
+                right: 20,
+                height: 40,
+                top: 0,
+                justifyContent: 'center'
+              }}
+            >
+              <Ionicons name={new1HidePassword ? 'eye-off' : 'eye'} size={24} color="black" />
+            </TouchableOpacity>
+          {new1PasswordError && (
+            <Text style={styles.errorText}>
+              * La nueva contraseña debe tener entre 8 y 16 caracteres, incluyendo al menos una mayúscula,
+              una minúscula y un número.
+            </Text>
+          )}
+        </View>
+{/* 
         <Text style={styles.label}>Introduce de nuevo la contraseña</Text>
         <TextInput
           style={styles.input}
@@ -92,8 +123,22 @@ export default function ChangePasswdScreen({ navigation }) {
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
-            handleChangePassword();
-            navigation.pop();
+            let isFormValid = true;
+
+            if (!isValidOldPassword) {
+              setOldPasswordError(true);
+              isFormValid = false;
+            }
+
+            if (!isValidNew1Password) {
+              setNew1PasswordError(true);
+              isFormValid = false;
+            }
+
+            if (isFormValid) {
+              handlePasswordUpdate();
+              navigation.navigate('GetEmail');
+            }
           }}
         >
           <Text style={styles.buttonText}>Continuar</Text>
@@ -124,6 +169,11 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     resizeMode: 'contain'
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginBottom: 5
   },
   logoText: {
     fontSize: 24,

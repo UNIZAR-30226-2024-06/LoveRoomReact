@@ -18,12 +18,6 @@ import AuthContext from '../components/AuthContext';
 import RegisterScreen from './RegisterScreen';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Orientation, { 
-    useDeviceOrientationChange,
-    useLockListener,
-    useOrientationChange,
-} from 'react-native-orientation-locker'; 
-import { OrientationLocker, PORTRAIT, LANDSCAPE } from "react-native-orientation-locker";
 
 export default function LoginScreen({ navigation }) {
   const { authState, setAuthState } = React.useContext(AuthContext);
@@ -100,15 +94,6 @@ export default function LoginScreen({ navigation }) {
       });
   };
 
-  //   React.useEffect(() => {
-  //     // Bloquea la orientación en modo retrato (portrait)
-  //     Orientation.lockToPortrait();
-
-  //     // Restablece la orientación cuando se sale de la pantalla
-  //     return () => {
-  //         Orientation.unlockAllOrientations();
-  //     };
-  // }, []);
 
   const { height, width } = Dimensions.get('window');
 
