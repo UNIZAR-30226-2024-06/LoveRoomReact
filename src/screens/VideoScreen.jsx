@@ -36,16 +36,20 @@ const Video = () => {
   const [user, setUser] = useState({});
   const statusBarHeight = StatusBar.currentHeight;
   const ignoreStateChange = useRef(false);
+  const ignorePlay = useRef(false);
+  const ignorePause = useRef(false);
+  const ignorarBugPause = useRef(false); // Para ignorar el bug de que se manden dos eventos de pause seguidos
   const [videoPlaying, setVideoPlaying] = useState(false);
   const playerRef = useRef(null); // Referencia al reproductor de video
   const idRoom = useRef(null);
-  const [isEnabled, setIsEnabled] = useState(false);
-  const forcePause = useRef(false); // Se activa solo para indicar que cuando llegue el play hay que pausar (necesario para sincronizar)
+  const [isEnabled, setIsEnabled] = useState(true); // Sincronización activada al principio por defecto
+  const emitirGetSync = useRef(false); // Se activa solo para indicar que cuando llegue el play hay que pausar (necesario para sincronizar)
+  const currentTime = useRef(0); // Tiempo actual del video
   // console.log('SocketState en video Screen: ', socketState);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
-      socketState.socket.emit(socketEvents.LEAVE_ROOM, socketState.idSala);
+      //socketState.socket.emit(socketEvents.LEAVE_ROOM, socketState.idSala);
       socketState.socket.disconnect();
       socketState.socket.off('connect');
       setSocketState((prevState) => ({
@@ -126,18 +130,19 @@ const Video = () => {
   };
 
   const handleChangeVideo = () => {
-    console.log('Video seleccionado:', selectedVideoUrl);
-    console.log('Emitiendo evento CHANGE_VIDEO ', socketState.idSala, selectedVideoUrl);
+    const nuevoVideo = selectedVideoUrl;
+    console.log('Video seleccionado:', nuevoVideo);
+    console.log('Emitiendo evento CHANGE_VIDEO ', socketState.idSala, nuevoVideo);
     socketState.socket.emit(
       socketEvents.CHANGE_VIDEO,
       socketState.idSala,
-      selectedVideoUrl,
+      nuevoVideo,
       (message) => {
         console.log('Respuesta del servidor:', message);
         if (message) {
           setSocketState((prevState) => ({
             ...prevState,
-            idVideo: selectedVideoUrl
+            idVideo: nuevoVideo
           }));
         }
       }
@@ -156,7 +161,7 @@ const Video = () => {
     setIsEnabled(true);
     handleInfoReceiver();
     console.log('ID de sala:', socketState.idSala);
-    console.log('Socket:', socketState.socket);
+    //console.log('Socket:', socketState.socket);
     if (
       socketState.idSala != '' &&
       socketState.idSala != null &&
@@ -218,8 +223,8 @@ const Video = () => {
             return previousState;
           }
         });
-      } else {
-        handleSendSync();
+      } else {  // Si se activa la sincronización, se envía un evento SYNC_ON
+        handleSendSync(true); // da igual true o false, no se va a tener en cuenta en este caso
       }
 
       return !previousState;
@@ -228,12 +233,13 @@ const Video = () => {
 
   // USO IDROOM.CURRENT PORQUE idSala va mal
   // De momento por defecto, el video se pausa al sincronizar
-  const handleSendSync = async () => {
+  const handleSendSync = async (pausado) => {
     // Pausamos el video
-    ignoreStateChange.current = true;
+    ignorePause.current = true;
     setVideoPlaying(false);
     // Obtenemos el tiempo actual del video
     const timesegundos = await playerRef.current?.getCurrentTime();
+    currentTime.current = timesegundos; // Guardamos el tiempo actual por haber pausado
     // Enviamos el evento SYNC_ON para que el otro usuario se sincronice con nosotros
     console.log(
       authState.id,
@@ -242,27 +248,33 @@ const Video = () => {
       ' idvideo:',
       socketState.idVideo,
       ' timesegundos:',
-      timesegundos
+      timesegundos,
+      ' pausado:',
+      pausado
     );
     socketState.socket.emit(
       socketEvents.SYNC_ON,
       idRoom.current,
       socketState.idVideo,
       timesegundos,
-      true
+      pausado
     );
     alert('¡Vídeo sincronizado con el otro usuario!');
   };
 
   const handlePause = () => {
     console.log('Pause event received by ', authState.id);
-    ignoreStateChange.current = true;
+    ignorePause.current = true;
     setVideoPlaying(false);
+    // Leemos y guardamos el tiempo actual del video por haber pausado
+    playerRef.current?.getCurrentTime().then((time) => {
+      currentTime.current = time;
+    });
   };
 
   const handlePlay = () => {
     console.log('Play event received by ', authState.id);
-    ignoreStateChange.current = true;
+    ignorePlay.current = true;
     setVideoPlaying(true);
   };
 
@@ -280,8 +292,11 @@ const Video = () => {
   };
 
   const handleSyncOn = async (idVideo, timesegundos, pausado) => {
+    console.log('handleSyncOn ', authState.id, ' isEnabled:', isEnabled);
+    let estabaDesactivada = false;
     if (!isEnabled) {
       setIsEnabled(true);
+      estabaDesactivada = true;
     }
     console.log(
       'Sync on received by ',
@@ -291,7 +306,9 @@ const Video = () => {
       ' timesegundos:',
       timesegundos,
       ' pausado:',
-      pausado
+      pausado,
+      ' estabaDesactivada:',
+      estabaDesactivada
     );
 
     // Cambiamos el video actual al video que nos envia el otro usuario
@@ -303,18 +320,30 @@ const Video = () => {
       }));
     }
 
-    // Pausamos o reproducimos el video según el estado que nos envia el otro usuario
-    // if (pausado) {
-    //   ignoreStateChange.current = true;
-    //   setVideoPlaying(false);
-    // } else {
-    //   ignoreStateChange.current = true;
-    //   setVideoPlaying(true);
-    // }
+    // Si la sincronización estaba desactivada, hay que asegurarse de que el video se pausa al sincronizar
+    if (estabaDesactivada) {
+      console.log('Estaba desactivada by ', authState.id , ' videoPlaying:', videoPlaying);
+      if (videoPlaying) {
+        console.log('Pausando video al activar la sincronización');
+        ignorePause.current = true;
+        setVideoPlaying(false);
+      }
+    } else {  // Si la sincronización estaba activada
+      // El video se debe quedar pausado al sincronizar
+      if (pausado) { // Si antes del SYNC_ON ya se habia mandado un PAUSE, no hace falta pausar el video
+        console.log('No hace falta pausar el video en handleSyncOn');
+      } else {  // Si se habia mandado un PLAY, hay que pausar el video
+        console.log('Pausando video al sincronizar by ', authState.id);
+        ignoreStateChange.current = true; // Sin esto no funciona
+        setVideoPlaying(false);
+      }
+    }    
 
     if (timesegundos != null) {
       console.log('Cambiando tiempo a: ', timesegundos);
       playerRef.current?.seekTo(timesegundos, true);
+      currentTime.current = timesegundos; // Guardamos el tiempo actual por haber pausado
+      alert('¡Vídeo sincronizado con el otro usuario!');
     } else {
       console.log('No se ha recibido tiempo');
     }
@@ -354,9 +383,9 @@ const Video = () => {
       });
 
       socketState.socket.on(socketEvents.GET_SYNC, () => {
-        console.log('GET_SYNC event received by ', authState.id);
+        console.log('GET_SYNC event received by ', authState.id, ' mi video es ', socketState.idVideo);
         // Llamamos a la función handleSendSync para enviar nuestro video y tiempo al otro usuario
-        handleSendSync();
+        handleSendSync(false); // false para indicar que no se ha pausado el video
       });
 
       socketState.socket.on(socketEvents.PAUSE, handlePause);
@@ -375,7 +404,7 @@ const Video = () => {
       });
 
       socketState.socket.on(socketEvents.SYNC_OFF, () => {
-        setIsEnabled((prevState) => !prevState);
+        setIsEnabled(false);
         console.log('Sync off received');
       });
 
@@ -434,7 +463,8 @@ const Video = () => {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log('Success:', data);
+        console.log('Success');
+        //console.log('Success:', data);
         setUser(data);
       })
       .catch((error) => {
@@ -442,49 +472,98 @@ const Video = () => {
       });
   };
 
-  const handleStateChange = (event) => {
+  const handleStateChange = async (event) => {
+    console.log('Evento:', event, ' by ', authState.id, 'ignoreStateChange:', ignoreStateChange.current, ' ignorePlay:', ignorePlay.current, ' ignorePause:', ignorePause.current, ' isEnabled:', isEnabled);
     if (event === 'playing') {
-      if (forcePause.current) {
-        // Si se requiere un pause forzado para la sincronización, lo pausamos
-        forcePause.current = false;
-        ignoreStateChange.current = true;
-        setVideoPlaying(false);
-        console.log('Parando video por forcePause');
+      // CASO ESPECIAL 1: Ya ha cargado el video y se requiere emitir un GET_SYNC para la sincronización
+      if (emitirGetSync.current) {
+        emitirGetSync.current = false;
+        // Emitimos un evento GET_SYNC para que el otro usuario nos mande su tiempo
+        console.log(authState.id, ' emitiendo evento GET_SYNC');
+        socketState.socket.emit(socketEvents.GET_SYNC, socketState.idSala);
         return;
       }
-      if (ignoreStateChange.current) {
+      ignorarBugPause.current = false;  // Cuando se pone a play, ya no hay que tener en cuenta el bug de que se manden dos eventos de pause seguidos
+      // CASO ESPECIAL 2: Ignorar play porque no lo ha hecho el usuario manualmente
+      if (ignorePlay.current) {
+        console.log('Ignorando evento de play by ', authState.id);
+        ignorePlay.current = false;
+        return;
+      } else if (ignoreStateChange.current) { // Creo que no deberia darse nunca este caso
+        console.log('\n\nALERTA Ignorando evento de PLAY IGNORESTATECHANGE by ', authState.id);
         ignoreStateChange.current = false;
         return;
       }
+      // CASO NORMAL: El usuario ha dado al play manualmente o avanzado/retrocedido el video
       console.log('Playing: videoPlaying ', videoPlaying); // Deberia ser false siempre
       setVideoPlaying(true);
-      const callback = (message) => {
-        console.log('Respuesta del servidor:', message);
-      };
+      // Si estamos en una sala y la sincronización está activada
       if (isEnabled && idRoom.current != null) {
+        console.log('Emitiendo evento PLAY by ', authState.id);
+        const callback = (message) => {
+          console.log('Respuesta del servidor:', message);
+        };
         socketState.socket.emit(socketEvents.PLAY, idRoom.current, callback);
+
+        // Comprobamos si el usuario ha avanzado o retrocedido el video, y si lo ha hecho, enviamos un evento SYNC_ON
+        const time = await playerRef.current?.getCurrentTime();
+        const diff = Math.abs(time - currentTime.current);
+        console.log('Tiempo actual:', time, ' Tiempo guardado:', currentTime.current, ' Diferencia:', diff);
+        if (diff > 1) {
+          console.log('Diferencia mayor a 1 segundo, enviando evento SYNC_ON');
+          handleSendSync(false); // false para indicar que no se ha pausado el video
+        }
       }
-      // console.log('Play event emitted by ', authState.id);
     } else if (event === 'paused') {
-      if (ignoreStateChange.current) {
-        console.log('Ignorando evento de pausa');
+      // CASO ESPECIAL 1: Ignorar pause porque no lo ha hecho el usuario manualmente
+      if (ignorePause.current) {
+        console.log('Ignorando evento de pause by ', authState.id);
+        ignorePause.current = false;
+        return;
+      } else if (ignoreStateChange.current) {
+        console.log('Ignorando evento de PAUSE IGNORESTATECHANGE by ', authState.id);
         ignoreStateChange.current = false;
+        ignorePlay.current = false;
+        ignorarBugPause.current = true; // Para ignorar el bug de que se manden dos eventos de pause seguidos hasta que se ponga a play
         return;
       }
-      const callback = (message) => {
-        console.log('Respuesta del servidor:', message);
-      };
-      console.log('Paused: videoPlaying ', videoPlaying); // Deberia ser true siempre
-      setVideoPlaying(false);
-      console.log(idRoom.current, ' enviando evento PAUSE');
-      console.log('isEnabled:', isEnabled);
-      if (isEnabled && idRoom.current != null) {
-        console.log('Emitiendo evento PAUSE');
-        console.log(socketState.socket.connected);
-        console.log(socketState.socket);
-        socketState.socket.emit(socketEvents.PAUSE, idRoom.current, callback);
+      // CASO ESPECIAL 2: Han llegado dos eventos de pause seguidos porque el usuario ha avanzado o retrocedido con un clic
+      console.log('Paused: videoPlaying ', videoPlaying); // Es true siempre menos cuando se ha avanzado o retrocedido con un clic
+      if (!videoPlaying) {  // Si me llega un pause pero el video ya estaba pausado, significa que el usuario a avanzado o retrocedido
+        if (isEnabled && idRoom.current != null && !ignorarBugPause.current) {
+          // Mandamos un evento SYNC_ON para sincronizar
+          // Obtenemos el tiempo actual del video
+          const timesegundos = await playerRef.current?.getCurrentTime();
+          // Enviamos el evento SYNC_ON para que el otro usuario se sincronice con nosotros
+          console.log(' PAUSE: ', authState.id, ' enviando Sync on con idsala:', idRoom.current, ' idvideo:', socketState.idVideo, ' timesegundos:', timesegundos);
+          socketState.socket.emit(
+            socketEvents.SYNC_ON,
+            idRoom.current,
+            socketState.idVideo,
+            timesegundos,
+            true  // true porque ya se ha mandado un evento de pause antes
+          );
+          alert('¡Vídeo sincronizado con el otro usuario!');
+        } else {
+          console.log('Bug evitado o sincronizacion desactivada')
+        }
+        return;
       }
-      //console.log('Pause event emitted by ', authState.id);
+      // CASO NORMAL: El usuario ha pausado el video manualmente
+      setVideoPlaying(false);
+      // Si estamos en una sala y la sincronización está activada
+      if (isEnabled && idRoom.current != null) {
+        console.log('Emitiendo evento PAUSE by ', authState.id);
+        const callback = (message) => {
+          console.log('Respuesta del servidor:', message);
+        };
+        socketState.socket.emit(socketEvents.PAUSE, idRoom.current, callback);
+
+        // Guardamos el tiempo actual (servirá para detectar si el usuario ha avanzado o retrocedido el video)
+        const time = await playerRef.current?.getCurrentTime();
+        currentTime.current = time;
+        console.log('Pause tiempo leido:', time);
+      }
     }
   };
 
@@ -498,16 +577,14 @@ const Video = () => {
     ) {
       // Antes de mandar el GET_SYNC, hay que darle a play y luego pause para que el video cargue un poco
       // y se quede pausado tras el seekto()
-      forcePause.current = true; // Para que se pause en el handleStateChange
+      emitirGetSync.current = true; // Para que se emita en el handleStateChange
       setVideoPlaying(true); // Play
-
-      console.log(authState.id, ' emitiendo evento GET_SYNC');
-      socketState.socket.emit(socketEvents.GET_SYNC, socketState.idSala);
+      // NOTA: el evento GET_SYNC se manda en el handleStateChange cuando nos hayamos asegurado de que ya se ha puesto a play el video
     } else {
       // Si soy el primer usuario en unirme a la sala
       // Por temas de sincronización, al cargar el reproductor hay que darle a play
       console.log('Reproductor listo, dandole a play');
-      ignoreStateChange.current = true;
+      ignorePlay.current = true;
       setVideoPlaying(true);
     }
   };
