@@ -291,7 +291,7 @@ const Video = () => {
     setMessages((prevState) => [...prevState, data]);
   };
 
-  const handleSyncOn = async (idVideo, timesegundos, pausado) => {
+  const handleSyncOn = async (idVideo, timesegundos, pausado, otroUsuarioOnline) => {
     console.log('handleSyncOn ', authState.id, ' isEnabled:', isEnabled);
     let estabaDesactivada = false;
     if (!isEnabled) {
@@ -343,7 +343,11 @@ const Video = () => {
       console.log('Cambiando tiempo a: ', timesegundos);
       playerRef.current?.seekTo(timesegundos, true);
       currentTime.current = timesegundos; // Guardamos el tiempo actual por haber pausado
-      alert('¡Vídeo sincronizado con el otro usuario!');
+      if (otroUsuarioOnline) {
+        alert('¡Vídeo sincronizado con el otro usuario!');
+      } else {
+        alert('¡El otro usuario no está conectado. Último punto de vídeo recuperado!');
+      }
     } else {
       console.log('No se ha recibido tiempo');
     }
@@ -399,8 +403,8 @@ const Video = () => {
         }));
       });
 
-      socketState.socket.on(socketEvents.SYNC_ON, (idVideo, timesegundos, pausado) => {
-        handleSyncOn(idVideo, timesegundos, pausado);
+      socketState.socket.on(socketEvents.SYNC_ON, (idVideo, timesegundos, pausado, otroUsuarioOnline) => {
+        handleSyncOn(idVideo, timesegundos, pausado, otroUsuarioOnline);
       });
 
       socketState.socket.on(socketEvents.SYNC_OFF, () => {
