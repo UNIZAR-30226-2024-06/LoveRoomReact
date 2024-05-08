@@ -52,6 +52,7 @@ const Video = () => {
   const idRoom = useRef(null);
   const myVideoPlaying = useRef(false);
   const myIsEnabled = useRef(true);
+  const myIdVideo = useRef('');
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
@@ -65,6 +66,7 @@ const Video = () => {
         idSala: '',
         matchRecibido: false
       }));
+      myIdVideo.current = '';
       console.log('Socket disconnected');
     });
 
@@ -158,6 +160,7 @@ const Video = () => {
               ...prevState,
               idVideo: nuevoVideo
             }));
+            myIdVideo.current = nuevoVideo;
           }
         }
       );
@@ -167,6 +170,7 @@ const Video = () => {
         ...prevState,
         idVideo: nuevoVideo
       }));
+      myIdVideo.current = nuevoVideo;
     }
     setSelectedVideoUrl('');
   };
@@ -277,7 +281,7 @@ const Video = () => {
       ' enviando Sync on con idsala:',
       idRoom.current,
       ' idvideo:',
-      socketState.idVideo,
+      myIdVideo.current,
       ' timesegundos:',
       timesegundos,
       ' pausado:',
@@ -286,7 +290,7 @@ const Video = () => {
     socketState.socket.emit(
       socketEvents.SYNC_ON,
       idRoom.current,
-      socketState.idVideo,
+      myIdVideo.current,
       timesegundos,
       pausado
     );
@@ -342,12 +346,13 @@ const Video = () => {
     );
 
     // Cambiamos el video actual al video que nos envia el otro usuario
-    if (idVideo != null && socketState.idVideo != idVideo) {
+    if (idVideo != null && myIdVideo.current != idVideo) {
       console.log('Cambiando video a: ', idVideo);
       setSocketState((prevState) => ({
         ...prevState,
         idVideo: idVideo
       }));
+      myIdVideo.current = idVideo;
     }
 
     // Si la sincronización estaba desactivada, hay que asegurarse de que el video se pausa al sincronizar
@@ -389,7 +394,7 @@ const Video = () => {
   };
 
   const handleGetSync = () => {
-    console.log('GET_SYNC event received by ', authState.id, ' mi video es ', socketState.idVideo);
+    console.log('GET_SYNC event received by ', authState.id, ' myidvideo es ', myIdVideo.current);
     console.log('Inside GET_SYNC -> MYisEnabled:', myIsEnabled.current, ' user id:', authState.id);
     if (myIsEnabled.current) {  // Si la sincronización está activada, mandamos un SYNC_ON
       // Llamamos a la función handleSendSync para enviar nuestro video y tiempo al otro usuario
@@ -418,6 +423,7 @@ const Video = () => {
       ...prevState,
       idVideo: idVideo
     }));
+    myIdVideo.current = idVideo;
   };
 
   const handleCheckRoom = () => {
@@ -594,11 +600,11 @@ const Video = () => {
           // Obtenemos el tiempo actual del video
           const timesegundos = await playerRef.current?.getCurrentTime();
           // Enviamos el evento SYNC_ON para que el otro usuario se sincronice con nosotros
-          console.log(' PAUSE: ', authState.id, ' enviando Sync on con idsala:', idRoom.current, ' idvideo:', socketState.idVideo, ' timesegundos:', timesegundos);
+          console.log(' PAUSE: ', authState.id, ' enviando Sync on con idsala:', idRoom.current, ' idvideo:', myIdVideo.current, ' timesegundos:', timesegundos);
           socketState.socket.emit(
             socketEvents.SYNC_ON,
             idRoom.current,
-            socketState.idVideo,
+            myIdVideo.current,
             timesegundos,
             true  // true porque ya se ha mandado un evento de pause antes
           );
