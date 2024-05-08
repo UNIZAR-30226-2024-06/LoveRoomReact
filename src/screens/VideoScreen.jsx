@@ -82,10 +82,11 @@ const Video = () => {
           // setMessages(data);
           const transformedData = data.map((item) => {
             return {
-              multimedia: item.multimedia,
+              id: item.id,
+              multimedia: item.rutamultimedia,
               message: item.texto,
               timestamp: item.fechaHora,
-              senderId: item.idUsuario
+              senderId: item.idusuario
             };
           });
           // Ahora transformedData contiene los datos transformados en la estructura deseada
@@ -278,12 +279,14 @@ const Video = () => {
     setVideoPlaying(true);
   };
 
-  const handleMessage = (senderId, texto, rutamultimedia, fechaHora) => {
+  const handleMessage = (idMsg, senderId, texto, rutamultimedia, fechaHora) => {
     console.log('Mensaje recibido de: ', senderId);
+    console.log('ID del mensaje: ', idMsg);
     console.log('Texto del mensaje: ', texto);
     console.log('Ruta multimedia: ', rutamultimedia);
     console.log('Fecha y hora: ', fechaHora);
     const data = {
+      id: idMsg,
       senderId: senderId,
       message: texto,
       timestamp: fechaHora
@@ -354,74 +357,88 @@ const Video = () => {
     }
   };
 
+  const handleGetSync = () => {
+    console.log('GET_SYNC event received by ', authState.id, ' mi video es ', socketState.idVideo);
+    console.log('Inside GET_SYNC -> isEnabled:', isEnabled, ' user id:', authState.id);
+    if (isEnabled) {  // Si la sincronización está activada, mandamos un SYNC_ON
+      // Llamamos a la función handleSendSync para enviar nuestro video y tiempo al otro usuario
+      handleSendSync(false); // false para indicar que no se ha pausado el video
+    }
+    else {  
+      // Si esta la sincronización desactivada, mandamos un SYNC_OFF para que el otro usuario la desactive tambien
+      console.log('GET_SYNC: Sincronización desactivada, enviando SYNC_OFF');
+      socketState.socket.emit(socketEvents.SYNC_OFF, socketState.idSala, (success) => {
+        if (!success) {
+          console.log('Error al enviar SYNC_OFF');
+        }
+      });
+    }
+  };
+
+  const handleSyncOff = () => {
+    setIsEnabled(false);
+    console.log('Sync off received');
+  };
+
+  const handleEventoChangeVideo = (idVideo) => {
+    console.log('Change video event received');
+    setSocketState((prevState) => ({
+      ...prevState,
+      idVideo: idVideo
+    }));
+  };
+
+  const handleCheckRoom = () => {
+    console.log('CHECK_ROOM event received by ', authState.id);
+    if (socketState.idSala != null && socketState.idSala != '') {
+      // Si estabamos en una sala, al reconectarnos al socket volvemos a hacer JOIN_ROOM
+      console.log('Emitiendo evento JOIN_ROOM para reconectarse a la sala ', socketState.idSala, ' by ', authState.id);
+      socketState.socket.emit(socketEvents.JOIN_ROOM, socketState.idSala);
+    } else {
+      // Aqui se deberia volver a la pantalla de búsqueda ya que el usuario ya no va a poder hacer match
+      console.log('No hay sala, volviendo a la pantalla de búsqueda');
+      alert(
+        'Te has desconectado del vídeo.\n Si quieres hacer match debes salir y volver a entrar.'
+      );
+      //navigation.navigate('Search');???
+    }
+  };
+
   useEffect(() => {
     if (socketState.socket != null) {
       console.log('Eventos de socket');
 
-      // Desuscribirse de los eventos anteriores
-      socketState.socket.off(socketEvents.CHECK_ROOM);
-      socketState.socket.off(socketEvents.GET_SYNC);
+      // Desuscribirse de los eventos anteriores (no necesario?)
+      socketState.socket.off(socketEvents.CHECK_ROOM, handleCheckRoom);
+      socketState.socket.off(socketEvents.GET_SYNC, handleGetSync);
       socketState.socket.off(socketEvents.PAUSE, handlePause);
       socketState.socket.off(socketEvents.PLAY, handlePlay);
       socketState.socket.off(socketEvents.RECEIVE_MESSAGE, handleMessage);
       socketState.socket.off(socketEvents.SYNC_ON, handleSyncOn);
-      socketState.socket.off(socketEvents.SYNC_OFF);
-      socketState.socket.off(socketEvents.CHANGE_VIDEO);
+      socketState.socket.off(socketEvents.SYNC_OFF, handleSyncOff);
+      socketState.socket.off(socketEvents.CHANGE_VIDEO, handleEventoChangeVideo);
 
       // Suscribirse a los nuevos eventos
-
-      // Para que al reconectarse al socket se vuelva a hacer JOIN_ROOM
-      socketState.socket.on(socketEvents.CHECK_ROOM, () => {
-        console.log('CHECK_ROOM event received by ', authState.id);
-        if (socketState.idSala != null && socketState.idSala != '') {
-          // Si estabamos en una sala, al reconectarnos al socket volvemos a hacer JOIN_ROOM
-          console.log('Emitiendo evento JOIN_ROOM para reconectarse a la sala ', socketState.idSala, ' by ', authState.id);
-          socketState.socket.emit(socketEvents.JOIN_ROOM, socketState.idSala);
-        } else {
-          // Aqui se deberia volver a la pantalla de búsqueda ya que el usuario ya no va a poder hacer match
-          console.log('No hay sala, volviendo a la pantalla de búsqueda');
-          // alert(
-          //   'Te has desconectado del vídeo.\n Si quieres hacer match debes salir y volver a entrar.'
-          // );
-          //navigation.navigate('Search');???
-        }
-      });
-
-      socketState.socket.on(socketEvents.GET_SYNC, () => {
-        console.log('GET_SYNC event received by ', authState.id, ' mi video es ', socketState.idVideo);
-        // Llamamos a la función handleSendSync para enviar nuestro video y tiempo al otro usuario
-        handleSendSync(false); // false para indicar que no se ha pausado el video
-      });
-
+      socketState.socket.on(socketEvents.CHECK_ROOM, handleCheckRoom); // Para que al reconectarse al socket se vuelva a hacer JOIN_ROOM
+      socketState.socket.on(socketEvents.GET_SYNC, handleGetSync);
       socketState.socket.on(socketEvents.PAUSE, handlePause);
       socketState.socket.on(socketEvents.PLAY, handlePlay);
       socketState.socket.on(socketEvents.RECEIVE_MESSAGE, handleMessage);
-      socketState.socket.on(socketEvents.CHANGE_VIDEO, (idVideo) => {
-        console.log('Change video event received');
-        setSocketState((prevState) => ({
-          ...prevState,
-          idVideo: idVideo
-        }));
-      });
-
       socketState.socket.on(socketEvents.SYNC_ON, handleSyncOn);
-
-      socketState.socket.on(socketEvents.SYNC_OFF, () => {
-        setIsEnabled(false);
-        console.log('Sync off received');
-      });
+      socketState.socket.on(socketEvents.SYNC_OFF, handleSyncOff);
+      socketState.socket.on(socketEvents.CHANGE_VIDEO, handleEventoChangeVideo);
 
       return () => {
         console.log('Desmontando eventos de socket');
         // Desuscribirse de los eventos al desmontar el componente
-        socketState.socket.off(socketEvents.CHECK_ROOM);
-        socketState.socket.off(socketEvents.GET_SYNC);
+        socketState.socket.off(socketEvents.CHECK_ROOM, handleCheckRoom);
+        socketState.socket.off(socketEvents.GET_SYNC, handleGetSync);
         socketState.socket.off(socketEvents.PAUSE, handlePause);
         socketState.socket.off(socketEvents.PLAY, handlePlay);
         socketState.socket.off(socketEvents.RECEIVE_MESSAGE, handleMessage);
         socketState.socket.off(socketEvents.SYNC_ON, handleSyncOn);
-        socketState.socket.off(socketEvents.SYNC_OFF);
-        socketState.socket.off(socketEvents.CHANGE_VIDEO);
+        socketState.socket.off(socketEvents.SYNC_OFF, handleSyncOff);
+        socketState.socket.off(socketEvents.CHANGE_VIDEO, handleEventoChangeVideo);
       };
     } else {
       console.log('Socket = null');
@@ -431,20 +448,23 @@ const Video = () => {
   const sendMessage = () => {
     if (socketState.socket != null && socketState.socket.connected == true && newMessage != '') {
       const data = {
+        id: null,
         senderId: null,
         message: newMessage,
         timestamp: null
       };
-      console.log('Enviando mensaje: ', data);
+      console.log('Enviando mensaje: ', data.message);
       const idsala = socketState.idSala;
       const texto = data.message;
       const rutamultimedia = null;
-      const callback = (message, timestamp) => {
+      const callback = (message, idMsg, timestamp) => {
         console.log('Respuesta del servidor:', message);
+        console.log('ID del mensaje:', idMsg);
         console.log('Timestamp:', timestamp);
+        data.id = idMsg;
         data.timestamp = timestamp;
         data.senderId = socketState.senderId;
-        console.log('SocketState pal mensaje:', socketState);
+        console.log('SocketState para mensaje:', socketState);
         console.log(socketState.senderId);
         console.log('Data en el callback: ', data);
         setMessages((prevState) => [...prevState, data]);
@@ -476,7 +496,7 @@ const Video = () => {
   };
 
   const handleStateChange = async (event) => {
-    console.log('Evento:', event, ' by ', authState.id, 'ignoreStateChange:', ignoreStateChange.current, ' ignorePlay:', ignorePlay.current, ' ignorePause:', ignorePause.current, ' isEnabled:', isEnabled);
+    //console.log('Evento:', event, ' by ', authState.id, 'ignoreStateChange:', ignoreStateChange.current, ' ignorePlay:', ignorePlay.current, ' ignorePause:', ignorePause.current, ' isEnabled:', isEnabled);
     if (event === 'playing') {
       // CASO ESPECIAL 1: Ya ha cargado el video y se requiere emitir un GET_SYNC para la sincronización
       if (emitirGetSync.current) {
