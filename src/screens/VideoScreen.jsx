@@ -51,6 +51,7 @@ const Video = () => {
   // Copias de useStates para evitar errores
   const idRoom = useRef(null);
   const myVideoPlaying = useRef(false);
+  const myIsEnabled = useRef(true);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
@@ -144,21 +145,29 @@ const Video = () => {
   const handleChangeVideo = () => {
     const nuevoVideo = selectedVideoUrl;
     console.log('Video seleccionado:', nuevoVideo);
-    console.log('Emitiendo evento CHANGE_VIDEO ', socketState.idSala, nuevoVideo);
-    socketState.socket.emit(
-      socketEvents.CHANGE_VIDEO,
-      socketState.idSala,
-      nuevoVideo,
-      (message) => {
-        console.log('Respuesta del servidor:', message);
-        if (message) {
-          setSocketState((prevState) => ({
-            ...prevState,
-            idVideo: nuevoVideo
-          }));
+    if (myIsEnabled.current) { // Solo se envia el evento si la sincronización está activada
+      console.log('Emitiendo evento CHANGE_VIDEO ', socketState.idSala, nuevoVideo);
+      socketState.socket.emit(
+        socketEvents.CHANGE_VIDEO,
+        socketState.idSala,
+        nuevoVideo,
+        (message) => {
+          console.log('Respuesta del servidor:', message);
+          if (message) {
+            setSocketState((prevState) => ({
+              ...prevState,
+              idVideo: nuevoVideo
+            }));
+          }
         }
-      }
-    );
+      );
+    } else {
+      console.log('Sincronización desactivada, no se envía el evento CHANGE_VIDEO');
+      setSocketState((prevState) => ({
+        ...prevState,
+        idVideo: nuevoVideo
+      }));
+    }
     setSelectedVideoUrl('');
   };
 
@@ -170,7 +179,7 @@ const Video = () => {
 
   useEffect(() => {
     console.log('Efecto ejecutado. receiverId:', socketState.receiverId);
-    setIsEnabled(true);
+    //setIsEnabled(true);
     handleInfoReceiver();
     console.log('ID de sala:', socketState.idSala);
     //console.log('Socket:', socketState.socket);
@@ -232,10 +241,14 @@ const Video = () => {
         console.log(authState.id, ' enviando Sync off');
         socketState.socket.emit(socketEvents.SYNC_OFF, socketState.idSala, (boolean) => {
           if (boolean == false) {
+            myIsEnabled.current = true;
             return previousState;
+          } else {
+            myIsEnabled.current = false;
           }
         });
       } else {  // Si se activa la sincronización, se envía un evento SYNC_ON
+        myIsEnabled.current = true;
         handleSendSync(true); // da igual true o false, no se va a tener en cuenta en este caso
       }
 
@@ -279,6 +292,7 @@ const Video = () => {
     );
     alert('¡Vídeo sincronizado con el otro usuario!');
     setIsEnabled(true);
+    myIsEnabled.current = true;
   };
 
   const handlePause = () => {
@@ -316,12 +330,6 @@ const Video = () => {
   };
 
   const handleSyncOn = async (idVideo, timesegundos, pausado, otroUsuarioOnline) => {
-    console.log('handleSyncOn ', authState.id, ' isEnabled:', isEnabled);
-    let estabaDesactivada = false;
-    if (!isEnabled) {
-      setIsEnabled(true);
-      estabaDesactivada = true;
-    }
     console.log(
       'Sync on received by ',
       authState.id,
@@ -330,9 +338,7 @@ const Video = () => {
       ' timesegundos:',
       timesegundos,
       ' pausado:',
-      pausado,
-      ' estabaDesactivada:',
-      estabaDesactivada
+      pausado
     );
 
     // Cambiamos el video actual al video que nos envia el otro usuario
@@ -345,11 +351,12 @@ const Video = () => {
     }
 
     // Si la sincronización estaba desactivada, hay que asegurarse de que el video se pausa al sincronizar
-    if (estabaDesactivada) {
-      console.log('Estaba desactivada by ', authState.id , ' videoPlaying:', videoPlaying);
-      if (videoPlaying) {
+    if (myIsEnabled.current == false) {
+      console.log('Estaba desactivada by ', authState.id , ' MYvideoPlaying:', myVideoPlaying.current);
+      if (myVideoPlaying.current) {
         console.log('Pausando video al activar la sincronización');
         ignorePause.current = true;
+        ignorarBugPause.current = true; // Aqui tambien se buguea el reproductor
         setVideoPlaying(false);
         myVideoPlaying.current = false;
       }
@@ -372,6 +379,7 @@ const Video = () => {
       if (otroUsuarioOnline) {
         alert('¡Vídeo sincronizado con el otro usuario!');
         setIsEnabled(true);
+        myIsEnabled.current = true;
       } else {
         alert('¡El otro usuario no está conectado. Último punto de vídeo recuperado!');
       }
@@ -382,8 +390,8 @@ const Video = () => {
 
   const handleGetSync = () => {
     console.log('GET_SYNC event received by ', authState.id, ' mi video es ', socketState.idVideo);
-    console.log('Inside GET_SYNC -> isEnabled:', isEnabled, ' user id:', authState.id);
-    if (isEnabled) {  // Si la sincronización está activada, mandamos un SYNC_ON
+    console.log('Inside GET_SYNC -> MYisEnabled:', myIsEnabled.current, ' user id:', authState.id);
+    if (myIsEnabled.current) {  // Si la sincronización está activada, mandamos un SYNC_ON
       // Llamamos a la función handleSendSync para enviar nuestro video y tiempo al otro usuario
       handleSendSync(false); // false para indicar que no se ha pausado el video
     }
@@ -400,6 +408,7 @@ const Video = () => {
 
   const handleSyncOff = () => {
     setIsEnabled(false);
+    myIsEnabled.current = false;
     console.log('Sync off received');
   };
 
@@ -519,6 +528,9 @@ const Video = () => {
   };
 
   const handleStateChange = async (event) => {
+    if (authState.id == 366) {
+      console.log('Evento:', event, ' by ', authState.id, 'ignoreStateChange:', ignoreStateChange.current, ' ignorePlay:', ignorePlay.current, ' ignorePause:', ignorePause.current, ' isEnabled:', isEnabled);
+    }
     //console.log('Evento:', event, ' by ', authState.id, 'ignoreStateChange:', ignoreStateChange.current, ' ignorePlay:', ignorePlay.current, ' ignorePause:', ignorePause.current, ' isEnabled:', isEnabled);
     if (event === 'playing') {
       // CASO ESPECIAL 1: Ya ha cargado el video y se requiere emitir un GET_SYNC para la sincronización
@@ -592,6 +604,7 @@ const Video = () => {
           );
           alert('¡Vídeo sincronizado con el otro usuario!');
           setIsEnabled(true);
+          myIsEnabled.current = true;
         } else {
           console.log('Bug evitado o sincronizacion desactivada')
         }
