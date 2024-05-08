@@ -50,7 +50,7 @@ const MyRoomsScreen = () => {
     console.log('Deleting room:', roomId);
     Alert.alert(
       "Eliminar sala",
-      "¿Estás seguro de que quieres eliminar esta sala?",
+      "¿Seguro que quieres eliminar esta sala?\n¡Perderás tu match!",
       [
         {
           text: "Cancelar",

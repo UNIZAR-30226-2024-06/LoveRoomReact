@@ -598,6 +598,9 @@ const Video = () => {
         const time = await playerRef.current?.getCurrentTime();
         currentTime.current = time;
         console.log('Pause tiempo leido:', time);
+        // Emitimos un evento para que el tiempo de la sala se actualice cada vez que se pause el video
+        console.log('Emitiendo evento STORE_TIME by ', authState.id);
+        socketState.socket.emit(socketEvents.STORE_TIME, idRoom.current, time);
       }
     }
   };
