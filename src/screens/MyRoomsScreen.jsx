@@ -9,9 +9,11 @@ import {
   Image,
   Modal
 } from 'react-native';
+import { SwipeListView } from 'react-native-swipe-list-view';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import AuthContext, { initializeSocket } from '../components/AuthContext';
 import NotRegisteredScreen from './NotRegisteredScreen';
+import { Icon } from 'react-native-elements';
 
 const MyRoomsScreen = () => {
   const navigation = useNavigation();
@@ -32,6 +34,28 @@ const MyRoomsScreen = () => {
       }
     }, [])
   );
+
+  const handleDeleteRoom = async (roomId) => {
+    // try {
+    //   // Realizar la petición para eliminar la sala utilizando roomId
+    //   await fetch(`${process.env.EXPO_PUBLIC_API_URL}/rooms/${roomId}`, {
+    //     method: 'DELETE',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //       Authorization: `Bearer ${authState.token}`
+    //     }
+    //   });
+  
+    //   // Eliminar la sala de la lista
+    //   const updatedRooms = myRooms.filter(room => room.idsala !== roomId);
+    //   setMyRooms(updatedRooms);
+    // } catch (error) {
+    //   console.error('Error al eliminar la sala:', error);
+    // }
+    console.log('Eliminando sala:', roomId);
+  };
+
+  
 
   const fetchMyRooms = async () => {
     setLoading(true);
@@ -155,18 +179,12 @@ const MyRoomsScreen = () => {
           </View>
         </View>
       </Modal>
-      <TouchableOpacity
-        onPress={() => {
-          console.log(socketState);
-        }}
-      >
-        <Text>Socket state</Text>
-      </TouchableOpacity>
-      <FlatList
+      <SwipeListView
         data={myRooms}
         keyExtractor={(item) => item.idsala.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
+            activeOpacity={1}
             onPress={() => {
               handleRoomUseless(item);
             }}
@@ -174,12 +192,24 @@ const MyRoomsScreen = () => {
             <View style={styles.roomItem}>
               <Image
                 source={{ uri: thumbnails[item.idvideo] }}
-                style={[styles.thumbnail, { width: width, height: height }]}
+                style={[styles.thumbnail, { width: width || 120, height: height || 90 }]}
               />
               <Text style={styles.roomTitle}>{item.nombre}</Text>
             </View>
           </TouchableOpacity>
         )}
+        renderHiddenItem={({ item }) => (
+          <View style={styles.rowBack}>
+            <TouchableOpacity style={[styles.backRightBtn, styles.backRightBtnRight]} onPress={()=>{console.log("Elemento borrado");}}>
+              <Icon name="trash" size={30} type="font-awesome" color="#FFF"/>
+            </TouchableOpacity>
+        </View>
+        )}
+        rightOpenValue={-75}
+        leftOpenValue={-75}
+        previewRowKey={'0'}
+        previewOpenValue={-40}
+        previewOpenDelay={3000}
       />
     </View>
   );
@@ -202,7 +232,9 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 20,
   },
   roomTitle: {
     fontSize: 16,
@@ -226,7 +258,40 @@ const styles = StyleSheet.create({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-around'
-  }
+  },
+  backTextWhite: {
+    color: '#FFF',
+  },
+  rowFront: {
+      alignItems: 'center',
+      borderBottomColor: 'black',
+      borderBottomWidth: 4,
+      justifyContent: 'flex-end',
+      height: 50,
+      borderRadius: 20,
+  },
+  rowBack: {
+      alignItems: 'center',
+      flex: 1,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      paddingLeft: 15,
+      borderRadius: 20,
+      backgroundColor: '#F89F9F',
+  },
+  backRightBtn: {
+      flex:1,
+      alignItems: 'center',
+      bottom: 0,
+      justifyContent: 'center',
+      position: 'absolute',
+      top: 0,
+      width: 90,
+      borderTopRightRadius: 20,
+      borderBottomRightRadius: 20,
+      right: 0,
+  },
+
 });
 
 export default MyRoomsScreen;
