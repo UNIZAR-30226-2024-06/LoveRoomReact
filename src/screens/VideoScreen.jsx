@@ -10,13 +10,14 @@ import {
   Modal,
   Image,
   StatusBar,
-  Switch
+  Switch,
+  Alert
 } from 'react-native';
 import YoutubePlayer from 'react-native-youtube-iframe';
 import AuthContext from '../components/AuthContext';
 import { useEffect } from 'react';
 import { socketEvents } from '../constants/SocketConstants';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
 import ChatMessage from '../components/ChatMessage';
 import { Icon } from 'react-native-elements';
@@ -25,6 +26,7 @@ import { ActionSheetProvider, useActionSheet } from '@expo/react-native-action-s
 import { Dimensions } from 'react-native';
 import defaultProfilePicture from '../img/perfil-vacio.png';
 import SearchBar from '../components/SearchBarYt';
+import OtherProfile from './OtherProfileScreen';
 
 const Video = () => {
   const navigation = useNavigation();
@@ -46,6 +48,7 @@ const Video = () => {
   const emitirGetSync = useRef(false); // Se activa solo para indicar que cuando llegue el play hay que pausar (necesario para sincronizar)
   const currentTime = useRef(0); // Tiempo actual del video
   // console.log('SocketState en video Screen: ', socketState);
+  const [modalUserVisible, setModalUserVisible] = useState(false);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
@@ -80,18 +83,24 @@ const Video = () => {
         .then((data) => {
           console.log('Success:', data);
           // setMessages(data);
-          const transformedData = data.map((item) => {
-            return {
-              id: item.id,
-              multimedia: item.rutamultimedia,
-              message: item.texto,
-              timestamp: item.fechaHora,
-              senderId: item.idusuario
-            };
-          });
-          // Ahora transformedData contiene los datos transformados en la estructura deseada
-          console.log('Transformed data:', transformedData);
-          setMessages(transformedData);
+          if(data.error == null){
+            const transformedData = data.map((item) => {
+              return {
+                id: item.id,
+                multimedia: item.rutamultimedia,
+                message: item.texto,
+                timestamp: item.fechaHora,
+                senderId: item.idusuario
+              };
+            });
+            // Ahora transformedData contiene los datos transformados en la estructura deseada
+            console.log('Transformed data:', transformedData);
+            setMessages(transformedData);
+          } else {
+            console.log('Error:', data.error);
+            alert('Ha habido un error al cargar el chat. Por favor, vuelva a cargar la sala de nuevo.');
+            navigation.goBack();
+          }
         })
         .catch((error) => {
           console.error('Error:', error);
@@ -261,6 +270,7 @@ const Video = () => {
       pausado
     );
     alert('¡Vídeo sincronizado con el otro usuario!');
+    setIsEnabled(true);
   };
 
   const handlePause = () => {
@@ -349,6 +359,7 @@ const Video = () => {
       currentTime.current = timesegundos; // Guardamos el tiempo actual por haber pausado
       if (otroUsuarioOnline) {
         alert('¡Vídeo sincronizado con el otro usuario!');
+        setIsEnabled(true);
       } else {
         alert('¡El otro usuario no está conectado. Último punto de vídeo recuperado!');
       }
@@ -567,6 +578,7 @@ const Video = () => {
             true  // true porque ya se ha mandado un evento de pause antes
           );
           alert('¡Vídeo sincronizado con el otro usuario!');
+          setIsEnabled(true);
         } else {
           console.log('Bug evitado o sincronizacion desactivada')
         }
@@ -641,26 +653,62 @@ const Video = () => {
         </View>
       </Modal>
       {socketState.receiverId != '' && (
-        <TouchableOpacity
-          style={{ flexDirection: 'row', alignItems: 'center', padding: 15 }}
-          onPress={() => {
-            navigation.navigate('OtherProfile', { user: user });
-          }}
-        >
-          <View style={{ flex: 1, alignItems: 'center', flexDirection: 'row' }}>
-            <Image
-              source={
-                user.fotoperfil === 'null.jpg' ? defaultProfilePicture : { uri: user.fotoperfil }
-              }
-              style={{ width: 50, height: 50 }}
-            />
-            <Text style={{ padding: 15 }}>
-              {user.nombre}, Edad: {user.edad}
-            </Text>
-          </View>
-          <Text style={{ padding: 5 }}>Ver perfil</Text>
-          <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage} />
-        </TouchableOpacity>
+        <>
+          <TouchableOpacity
+            style={{ flexDirection: 'row', alignItems: 'center', padding: 15, backgroundColor: '#F89F9F', borderRadius: 30, marginBottom: 10}}
+            onPress={() => {
+              console.log('Ver perfil');
+              setModalUserVisible(true);
+            }}
+          >
+            <View style={{ flex: 1, alignItems: 'center', flexDirection: 'row' }}>
+              <Image
+                source={
+                  user.fotoperfil === 'null.jpg' ? defaultProfilePicture : { uri: user.fotoperfil }
+                }
+                style={{ width: 50, height: 50, backgroundColor: 'white', borderRadius: 60}}
+              />
+              <Text style={{ padding: 15 }}>
+                {user.nombre}, Edad: {user.edad}
+              </Text>
+            </View>
+            <Text style={{ padding: 5 }}>Ver perfil</Text>
+            <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage} />
+          </TouchableOpacity>
+            <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalUserVisible}
+            onRequestClose={() => {
+              setModalUserVisible(false);
+            }}
+            style={{ flex: 1, justifyContent: 'center', alignItems: 'center'}}
+          >
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <ScrollView 
+                style={{ 
+                  backgroundColor: 'white', 
+                  borderRadius: 10, 
+                  width: '90%', 
+                  maxHeight: '70%',  
+                }}
+              >
+                <OtherProfile user={user}/>
+              </ScrollView>
+              <View style={[styles.button, styles.buttonClose]}>
+              <Icon
+                name="close"
+                type="ionicon"
+                color="white"
+                onPress={() => {
+                  setModalUserVisible(false);
+                }}
+              />
+            </View>
+            </View>
+
+          </Modal>
+        </>
       )}
       <View style={{ alignItems: 'center', flex: 0.7 }}>
         <YoutubePlayer
@@ -673,9 +721,6 @@ const Video = () => {
           onChangeState={handleStateChange}
           onReady={handleReady}
         />
-        {/* <TouchableOpacity onPress={console.log("SocketState en video Screen: ", socketState)}>
-          <Text>Console log</Text>
-        </TouchableOpacity> */}
       </View>
       <View
         style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10, flex: 0.15 }}
@@ -779,7 +824,7 @@ const styles = StyleSheet.create({
     marginTop: 10
   },
   buttonClose: {
-    backgroundColor: '#2196F3'
+    backgroundColor: 'red'
   },
   textStyle: {
     color: 'white',
