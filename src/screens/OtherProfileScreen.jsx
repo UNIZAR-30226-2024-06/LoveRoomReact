@@ -56,11 +56,8 @@ const provinciasDeEspana = [
   'Zaragoza'
 ];
 
-const OtherProfile = ({ route }) => {
+const OtherProfile = ({ user }) => {
   // Obtener el usuario desde los parámetros de navegación
-  const { user } = route.params;
-
-  const statusBarHeight = StatusBar.currentHeight;
 
   return (
     <View style={styles.container}>

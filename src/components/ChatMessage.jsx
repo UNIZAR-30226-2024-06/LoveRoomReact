@@ -1,12 +1,33 @@
-// ChatMessage.jsx
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useRef } from 'react';
+import { View, Text, StyleSheet, Alert } from 'react-native';
 import { useContext } from 'react';
 import AuthContext from '../components/AuthContext';
+import { Swipeable } from 'react-native-gesture-handler';
 
 const ChatMessage = ({ data }) => {
   const { authState } = useContext(AuthContext);
-  return (
+  const swipeableRef = useRef(null);
+
+  const handleReport = () => {
+    Alert.alert(
+      "Reportar mensaje",
+      "¿Estás seguro de que quieres reportar este mensaje?",
+      [
+        {
+          text: "Cancelar",
+          onPress: () => console.log("Cancelado"),
+          style: "cancel"
+        },
+        { text: "Reportar", onPress: () => handleFetchReport() }
+      ]
+    );
+  };
+
+  const handleFetchReport = async () => {
+    console.log('Reportando mensaje:', data);
+  }
+
+  const MessageContent = () => (
     <View
       style={[
         styles.messageContainer,
@@ -22,6 +43,33 @@ const ChatMessage = ({ data }) => {
       <Text style={styles.messageText}>{data.message}</Text>
     </View>
   );
+
+  if (data.senderId == authState.id) {
+    return <MessageContent />;
+  } else {
+    return (
+      <Swipeable
+        ref={swipeableRef}
+        onSwipeableOpen={()=>{
+          swipeableRef.current.close();
+          handleReport();
+        }}
+        renderLeftActions={(progress, dragX) => {
+          const scale = dragX.interpolate({
+            inputRange: [0, 100],
+            outputRange: [0, 1],
+            extrapolate: 'clamp',
+          });
+          return (
+            <View style={{ backgroundColor: 'transparent', justifyContent: 'center', padding: 20 }}>
+            </View>
+          );
+        }}
+      >
+        <MessageContent />
+      </Swipeable>
+    );
+  }
 };
 
 const styles = StyleSheet.create({

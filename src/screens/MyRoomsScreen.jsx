@@ -7,7 +7,9 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Image,
-  Modal
+  Modal, 
+  Alert, 
+  Dimensions
 } from 'react-native';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -35,23 +37,58 @@ const MyRoomsScreen = () => {
     }, [])
   );
 
-  const handleDeleteRoom = async (roomId) => {
-    // try {
-    //   // Realizar la petición para eliminar la sala utilizando roomId
-    //   await fetch(`${process.env.EXPO_PUBLIC_API_URL}/rooms/${roomId}`, {
-    //     method: 'DELETE',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //       Authorization: `Bearer ${authState.token}`
-    //     }
-    //   });
+  useEffect(() => {
+    const onChange = () => {
+      fetchMyRooms();
+    };
   
-    //   // Eliminar la sala de la lista
-    //   const updatedRooms = myRooms.filter(room => room.idsala !== roomId);
-    //   setMyRooms(updatedRooms);
-    // } catch (error) {
-    //   console.error('Error al eliminar la sala:', error);
-    // }
+    const func = Dimensions.addEventListener('change', onChange);
+    return () => func?.remove();
+  }, []);
+
+  const handleDeleteRoom = async (roomId) => {
+    console.log('Deleting room:', roomId);
+    Alert.alert(
+      "Eliminar sala",
+      "¿Estás seguro de que quieres eliminar esta sala?",
+      [
+        {
+          text: "Cancelar",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel"
+        },
+        { text: "OK", onPress: () => deleteRoom(roomId) }
+      ],
+      { cancelable: false }
+    );
+  };
+
+  const deleteRoom = async (roomId) => {
+    try {
+      // Realizar la petición para eliminar la sala utilizando roomId
+      console.log('Token:', authState.token);
+      console.log('Room ID:', roomId);
+      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/rooms/${roomId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authState.token}`
+        }
+      });
+  
+      // Eliminar la sala de la lista
+      const data = await response.json();
+      console.log(data);
+      if(data.message === "Sala eliminada correctamente"){
+        const updatedRooms = myRooms.filter(room => room.idsala !== roomId);
+        setMyRooms(updatedRooms);
+      } else {
+        alert('Ha habido un error al eliminar la sala. Por favor, inténtelo de nuevo.');
+      }
+    } catch (error) {
+      console.error('Error al eliminar la sala:', error);
+      alert('Ha habido un error al eliminar la sala. Por favor, inténtelo de nuevo.');
+    }
     console.log('Eliminando sala:', roomId);
   };
 
@@ -60,6 +97,7 @@ const MyRoomsScreen = () => {
   const fetchMyRooms = async () => {
     setLoading(true);
     try {
+      console.log('Token:', authState.token);
       const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/rooms`, {
         method: 'GET',
         headers: {
@@ -200,16 +238,13 @@ const MyRoomsScreen = () => {
         )}
         renderHiddenItem={({ item }) => (
           <View style={styles.rowBack}>
-            <TouchableOpacity style={[styles.backRightBtn, styles.backRightBtnRight]} onPress={()=>{console.log("Elemento borrado");}}>
+            <TouchableOpacity style={[styles.backRightBtn, styles.backRightBtnRight]} onPress={()=>{console.log(item);handleDeleteRoom(item.idsala);}}>
               <Icon name="trash" size={30} type="font-awesome" color="#FFF"/>
             </TouchableOpacity>
         </View>
         )}
         rightOpenValue={-75}
         leftOpenValue={-75}
-        previewRowKey={'0'}
-        previewOpenValue={-40}
-        previewOpenDelay={3000}
       />
     </View>
   );
@@ -271,25 +306,20 @@ const styles = StyleSheet.create({
       borderRadius: 20,
   },
   rowBack: {
-      alignItems: 'center',
+      alignItems: 'flex-end',
       flex: 1,
-      flexDirection: 'row',
-      justifyContent: 'space-between',
       paddingLeft: 15,
       borderRadius: 20,
       backgroundColor: '#F89F9F',
+      width: '100%',
   },
   backRightBtn: {
       flex:1,
-      alignItems: 'center',
-      bottom: 0,
+      alignItems: 'flex-end',
       justifyContent: 'center',
-      position: 'absolute',
-      top: 0,
-      width: 90,
+      paddingRight: 30,
       borderTopRightRadius: 20,
       borderBottomRightRadius: 20,
-      right: 0,
   },
 
 });
