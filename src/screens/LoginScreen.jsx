@@ -94,7 +94,6 @@ export default function LoginScreen({ navigation }) {
       });
   };
 
-
   const { height, width } = Dimensions.get('window');
 
   // Al calcular la menor dimensión (minDimension) entre la altura (height) y el ancho (width), estás obteniendo el valor más pequeño entre los dos,
@@ -109,7 +108,6 @@ export default function LoginScreen({ navigation }) {
       style={styles.container}
       contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }}
     >
-      
       <View style={[styles.logoContainer, { marginBottom: -90 }]}>
         <Image style={styles.logo} source={require('../img/logoTexto.png')} />
       </View>

@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Image,
-  Modal, 
-  Alert, 
+  Modal,
+  Alert,
   Dimensions
 } from 'react-native';
 import { SwipeListView } from 'react-native-swipe-list-view';
@@ -41,7 +41,7 @@ const MyRoomsScreen = () => {
     const onChange = () => {
       fetchMyRooms();
     };
-  
+
     const func = Dimensions.addEventListener('change', onChange);
     return () => func?.remove();
   }, []);
@@ -49,15 +49,15 @@ const MyRoomsScreen = () => {
   const handleDeleteRoom = async (roomId) => {
     console.log('Deleting room:', roomId);
     Alert.alert(
-      "Eliminar sala",
-      "¿Estás seguro de que quieres eliminar esta sala?",
+      'Eliminar sala',
+      '¿Seguro que quieres eliminar esta sala?\n¡Perderás tu match!',
       [
         {
-          text: "Cancelar",
-          onPress: () => console.log("Cancel Pressed"),
-          style: "cancel"
+          text: 'Cancelar',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel'
         },
-        { text: "OK", onPress: () => deleteRoom(roomId) }
+        { text: 'OK', onPress: () => deleteRoom(roomId) }
       ],
       { cancelable: false }
     );
@@ -75,12 +75,12 @@ const MyRoomsScreen = () => {
           Authorization: `Bearer ${authState.token}`
         }
       });
-  
+
       // Eliminar la sala de la lista
       const data = await response.json();
       console.log(data);
-      if(data.message === "Sala eliminada correctamente"){
-        const updatedRooms = myRooms.filter(room => room.idsala !== roomId);
+      if (data.message === 'Sala eliminada correctamente') {
+        const updatedRooms = myRooms.filter((room) => room.idsala !== roomId);
         setMyRooms(updatedRooms);
       } else {
         alert('Ha habido un error al eliminar la sala. Por favor, inténtelo de nuevo.');
@@ -91,8 +91,6 @@ const MyRoomsScreen = () => {
     }
     console.log('Eliminando sala:', roomId);
   };
-
-  
 
   const fetchMyRooms = async () => {
     setLoading(true);
@@ -128,7 +126,6 @@ const MyRoomsScreen = () => {
           setViewModal(false);
           navigation.navigate('Video');
         }, 3000);
-
       } else {
         console.log('Socket is not yet initialized, waiting...');
       }
@@ -139,8 +136,6 @@ const MyRoomsScreen = () => {
       initializeAndProceed();
     }
   }, [viewModal, socketState.socket]);
-
-
 
   const handleRoomUseless = async (room) => {
     console.log('Socket state:', socketState.socket);
@@ -238,10 +233,16 @@ const MyRoomsScreen = () => {
         )}
         renderHiddenItem={({ item }) => (
           <View style={styles.rowBack}>
-            <TouchableOpacity style={[styles.backRightBtn, styles.backRightBtnRight]} onPress={()=>{console.log(item);handleDeleteRoom(item.idsala);}}>
-              <Icon name="trash" size={30} type="font-awesome" color="#FFF"/>
+            <TouchableOpacity
+              style={[styles.backRightBtn, styles.backRightBtnRight]}
+              onPress={() => {
+                console.log(item);
+                handleDeleteRoom(item.idsala);
+              }}
+            >
+              <Icon name="trash" size={30} type="font-awesome" color="#FFF" />
             </TouchableOpacity>
-        </View>
+          </View>
         )}
         rightOpenValue={-75}
         leftOpenValue={-75}
@@ -269,7 +270,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: '#fff',
-    borderRadius: 20,
+    borderRadius: 20
   },
   roomTitle: {
     fontSize: 16,
@@ -295,33 +296,32 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around'
   },
   backTextWhite: {
-    color: '#FFF',
+    color: '#FFF'
   },
   rowFront: {
-      alignItems: 'center',
-      borderBottomColor: 'black',
-      borderBottomWidth: 4,
-      justifyContent: 'flex-end',
-      height: 50,
-      borderRadius: 20,
+    alignItems: 'center',
+    borderBottomColor: 'black',
+    borderBottomWidth: 4,
+    justifyContent: 'flex-end',
+    height: 50,
+    borderRadius: 20
   },
   rowBack: {
-      alignItems: 'flex-end',
-      flex: 1,
-      paddingLeft: 15,
-      borderRadius: 20,
-      backgroundColor: '#F89F9F',
-      width: '100%',
+    alignItems: 'flex-end',
+    flex: 1,
+    paddingLeft: 15,
+    borderRadius: 20,
+    backgroundColor: '#F89F9F',
+    width: '100%'
   },
   backRightBtn: {
-      flex:1,
-      alignItems: 'flex-end',
-      justifyContent: 'center',
-      paddingRight: 30,
-      borderTopRightRadius: 20,
-      borderBottomRightRadius: 20,
-  },
-
+    flex: 1,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    paddingRight: 30,
+    borderTopRightRadius: 20,
+    borderBottomRightRadius: 20
+  }
 });
 
 export default MyRoomsScreen;

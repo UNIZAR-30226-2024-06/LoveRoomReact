@@ -72,7 +72,7 @@ const provinciasDeEspana = [
   'Vizcaya',
   'Zamora',
   'Zaragoza'
-]; 
+];
 
 export default function RegisterPreferencesScreen({ navigation }) {
   console.log(authState);
@@ -236,7 +236,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} keyboardShouldPersistTaps={'handled'}>
       <View style={styles.header} />
       <View style={styles.profileInfo}>
         <Text style={styles.profileText}>Editar perfil</Text>

@@ -51,10 +51,14 @@ const SearchFilter = ({
       .then((data) => {
         console.log(data);
         if (data.esSalaUnitaria == true) {
-          setMensaje('No hay nadie en la sala, ¡espera a que alguien entre!');
-          setSocketState((prevState) => ({ ...prevState, idVideo: videoId, senderId: authState.id}));
+          setMensaje('No hay nadie viendo este vídeo, ¡espera a que alguien entre!');
+          setSocketState((prevState) => ({
+            ...prevState,
+            idVideo: videoId,
+            senderId: authState.id
+          }));
           setShowModal(false);
-          alert('No hay nadie en la sala, ¡espera a que alguien entre!');
+          alert('No hay nadie viendo este vídeo, ¡espera a que alguien entre!');
         } else if (data.esSalaUnitaria == false) {
           // console.log("Sala con persona, ¡he hecho match!");
           setMensaje('Has hecho match con alguien, ¡disfruta la sala!');
@@ -139,7 +143,7 @@ const SearchFilter = ({
   return (
     <View
       style={{
-        marginTop: 10
+        padding: 10
       }}
     >
       <Modal transparent={true} animationType={'none'} visible={showModal}>
@@ -151,7 +155,9 @@ const SearchFilter = ({
         </View>
       </Modal>
       <FlatList
-        data={data}
+        data={data.filter((item) =>
+          item.snippet.title.toLowerCase().includes(search.toLowerCase())
+        )}
         keyExtractor={(item, index) => item.id.videoId + index}
         renderItem={({ item }) => {
           // if(item.snippet.title.toLowerCase().includes(search.toLowerCase())){

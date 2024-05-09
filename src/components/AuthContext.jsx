@@ -6,7 +6,7 @@ import { socketEvents } from '../constants/SocketConstants';
 const AuthContext = React.createContext();
 
 // Inicializa el socket con el token del usuario
-export const initializeSocket = async(token, setSocketState, socketState) => {
+export const initializeSocket = async (token, setSocketState, socketState) => {
   let newSocket = socketState.socket;
   let isSocketInitialized = false; // Bandera para controlar si el socket está inicializado
 
@@ -20,7 +20,7 @@ export const initializeSocket = async(token, setSocketState, socketState) => {
 
     await setSocketState((prevState) => ({
       ...prevState,
-      socket: newSocket,
+      socket: newSocket
     }));
 
     newSocket.on('connect', () => {

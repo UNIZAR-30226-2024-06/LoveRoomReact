@@ -73,6 +73,7 @@ export default function F() {
   return (
     <View style={styles.container}>
       <ScrollView
+        keyboardShouldPersistTaps={'handled'}
         style={styles.scrollContainer}
         ref={scrollViewRef}
         scrollEventThrottle={16} // Controla con qué frecuencia se llamará al evento onScroll
