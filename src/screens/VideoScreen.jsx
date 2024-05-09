@@ -120,7 +120,7 @@ const Video = () => {
 
   const showMediaOptions = () => {
     console.log('showMediaOptions');
-    const options = ['Photo', 'Video'];
+    const options = ['Foto', 'Video'];
     const cancelButtonIndex = 2;
 
     showActionSheetWithOptions(
@@ -130,7 +130,7 @@ const Video = () => {
       },
       (buttonIndex) => {
         if (buttonIndex === 0) {
-          handleImagePicker('photo');
+          handleImagePicker('foto');
         } else if (buttonIndex === 1) {
           handleImagePicker('video');
         }
@@ -239,7 +239,7 @@ const Video = () => {
     } else {
       let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes:
-          mediaType === 'photo'
+          mediaType === 'foto'
             ? ImagePicker.MediaTypeOptions.Images
             : ImagePicker.MediaTypeOptions.Videos
       });
@@ -248,8 +248,60 @@ const Video = () => {
 
       if (!result.cancelled) {
         // Handle the selected image or video
-        console.log(result.uri);
+        console.log(result.assets[0].uri);
+        // TODO: enviar al servidor la imagen
+        await uploadMedia(result.assets[0].uri, mediaType);
       }
+    }
+  };
+
+  // TODO:
+  const uploadMedia = async (uri, mediaType) => {
+    const uriParts = uri.split('.');
+    const fileType = uriParts[uriParts.length - 1];
+    const formData = new FormData();
+    const multimedia = await fetch(uri);
+
+    if (multimedia.ok) {
+      formData.append('file', multimedia);
+
+      console.log('Subiendo media:', uri);
+      const url = `${process.env.EXPO_PUBLIC_API_URL}/upload/${mediaType}/${authState.id}`;
+      console.log('URL:', url);
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          // 'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${authState.token}`
+        },
+        body: formData
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log('Success:', data);
+          if (data.error == null) {
+            const mediaUrl = data.url;
+            console.log('URL de la imagen:', mediaUrl);
+            const data = {
+              id: null,
+              senderId: authState.id,
+              message: mediaUrl,
+              timestamp: null,
+              rutamultimedia: mediaUrl
+            };
+            setMessages((prevState) => [...prevState, data]);
+            sendMessage();
+          } else {
+            console.log('Error:', data.error);
+            alert('Ha habido un error al subir la imagen. Vuelva a intentarlo.');
+          }
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+          alert('Ha habido un error al subir la imagen. Vuelva a intentarlo.');
+        });
+    } else {
+      alert('Error al subir la imagen, not ok');
     }
   };
 
@@ -734,8 +786,7 @@ const Video = () => {
         visible={modalVisible}
         onRequestClose={() => {
           setModalVisible(false);
-        }}
-      >
+        }}>
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <View style={styles.contentContainer}>
@@ -768,8 +819,7 @@ const Video = () => {
             onPress={() => {
               console.log('Ver perfil');
               setModalUserVisible(true);
-            }}
-          >
+            }}>
             <View style={{ flex: 1, alignItems: 'center', flexDirection: 'row' }}>
               <Image
                 source={
@@ -791,8 +841,7 @@ const Video = () => {
             onRequestClose={() => {
               setModalUserVisible(false);
             }}
-            style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-          >
+            style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
               <ScrollView
                 keyboardShouldPersistTaps={'handled'}
@@ -801,8 +850,7 @@ const Video = () => {
                   borderRadius: 10,
                   width: '90%',
                   maxHeight: '70%'
-                }}
-              >
+                }}>
                 <OtherProfile user={user} />
               </ScrollView>
               <View style={[styles.button, styles.buttonClose]}>
@@ -832,8 +880,7 @@ const Video = () => {
         />
       </View>
       <View
-        style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10, flex: 0.15 }}
-      >
+        style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10, flex: 0.15 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Text style={{ fontSize: 12, fontWeight: 'bold', padding: 10 }}>¡Cambia el vídeo!</Text>
           <Icon
@@ -908,7 +955,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 22,
+    marginTop: 22
   },
   modalView: {
     width: '90%',

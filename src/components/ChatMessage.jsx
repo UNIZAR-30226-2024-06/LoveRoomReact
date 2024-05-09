@@ -58,21 +58,30 @@ const ChatMessage = ({ data }) => {
     }, 500);
   };
 
+  // const handleMultimedia = async (uri) => {
+  //   console.log('uri: ', uri);
+
   const MessageContent = () => (
     <>
       <View
         style={[
           styles.messageContainer,
           data.senderId == authState.id ? styles.currentUserMessage : styles.otherUserMessage
-        ]}
-      >
+        ]}>
         <View
           style={[
             styles.triangle,
             data.senderId == authState.id ? styles.currentUserTriangle : styles.otherUserTriangle
           ]}
         />
-        <Text style={styles.messageText}>{data.message}</Text>
+        <View>
+          {/* TODO: así se llama a la ruta del backend o hay que hacer un fetch */}
+          {data.imageUri ? (
+            <Image source={{ uri: data.multimedia }} style={{ width: 100, height: 100 }} />
+          ) : (
+            <Text style={styles.messageText}>{data.message}</Text>
+          )}
+        </View>
       </View>
     </>
   );
@@ -83,8 +92,7 @@ const ChatMessage = ({ data }) => {
         animationType="fade"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={handleCancel}
-      >
+        onRequestClose={handleCancel}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Reportar mensaje</Text>
@@ -119,11 +127,13 @@ const ChatMessage = ({ data }) => {
           });
           return (
             <View
-              style={{ backgroundColor: 'transparent', justifyContent: 'center', padding: 20 }}
-            ></View>
+              style={{
+                backgroundColor: 'transparent',
+                justifyContent: 'center',
+                padding: 20
+              }}></View>
           );
-        }}
-      >
+        }}>
         <MessageContent />
       </Swipeable>
     </>
