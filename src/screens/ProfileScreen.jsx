@@ -98,8 +98,7 @@ export default function ProfileScreen({ navigation }) {
           onPress={() => {
             console.log(authState);
             navigation.navigate('EditProfile');
-          }}
-        >
+          }}>
           <Text style={styles.editButtonText}>Editar perfil</Text>
         </TouchableOpacity>
 
@@ -111,8 +110,7 @@ export default function ProfileScreen({ navigation }) {
             style={styles.faqButton}
             onPress={() => {
               console.log(authState);
-            }}
-          >
+            }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Image source={require('../img/premium.png')} style={styles.faqIcon} />
               <Text style={styles.faqText}>¡Hazte premium!</Text>
@@ -126,7 +124,11 @@ export default function ProfileScreen({ navigation }) {
             <Text style={styles.headlineText}>Acerca de</Text>
           </View>
           <View>
-            <TouchableOpacity style={styles.faqButton} onPress={() => {navigation.navigate('FAQ');}}>
+            <TouchableOpacity
+              style={styles.faqButton}
+              onPress={() => {
+                navigation.navigate('FAQ');
+              }}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Image source={require('../img/ayudar.png')} style={styles.faqIcon} />
                 <Text style={styles.faqText}>Preguntas frecuentes</Text>
@@ -202,8 +204,7 @@ export default function ProfileScreen({ navigation }) {
                 ],
                 { cancelable: false }
               );
-            }}
-          >
+            }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Image source={require('../img/salida.png')} style={styles.faqIcon} />
               <Text style={styles.faqText}>Cerrar sesión</Text>

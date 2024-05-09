@@ -58,7 +58,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
     console.log(url);
     const token = await AsyncStorage.getItem('token');
     console.log('token ' + token);
-
+    console.log('profileImage ' + profileImage);
     // Create a new FormData instance
     let formData = new FormData();
 
@@ -67,22 +67,23 @@ export default function RegisterPreferencesScreen({ navigation }) {
 
     // Convert the fetched image to blob
     let blob = await image.blob();
-
+    console.log('ok ' + image.ok);
     // // Append the image blob to the form data
-    // formData.append('file', blob, 'userProfileImage.jpeg');
+    formData.append('file', image);
 
     fetch(url, {
       method: 'POST',
-      body: blob,
+      body: formData,
       // 👇 Set headers manually for single profileImage upload
       headers: {
-        'content-type': profileImage.type,
-        'content-length': `${profileImage.size}`, // 👈 Headers need to be a string
+        // 'content-type': blob.type,
+        // 'Content-Type': 'multipart/form-data',
+        // 'content-length': `${blob.size}`, // 👈 Headers need to be a string
         authorization: `Bearer ${token}`
       }
     })
       .then((res) => res.json())
-      .then((data) => console.log(' data ' + data))
+      .then((data) => console.log(' data response from server ' + JSON.stringify(data)))
       .catch((err) => console.error(err));
   };
 
