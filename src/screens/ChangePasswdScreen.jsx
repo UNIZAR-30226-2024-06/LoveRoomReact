@@ -58,7 +58,7 @@ export default function ChangePasswdScreen({ navigation }) {
       },
       body: JSON.stringify({nuevaContrasena: new1Password, antiguaContrasena: oldPassword})
     })
-      .then((response) => {
+      .then((response) => {})
   };
 
 

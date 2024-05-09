@@ -12,7 +12,8 @@ import {
   StatusBar,
   Switch,
   Alert,
-  ActivityIndicator
+  ActivityIndicator, 
+  AppState
 } from 'react-native';
 import YoutubePlayer from 'react-native-youtube-iframe';
 import AuthContext from '../components/AuthContext';
@@ -58,8 +59,36 @@ const Video = () => {
   const myIdVideo = useRef('');
 
   useEffect(() => {
+    const appstateList = AppState.addEventListener('change', handleAppStateChange);
+  
+    return () => {
+      appstateList?.remove();
+    };
+  }, []);
+  
+  const handleAppStateChange = (nextAppState) => {
+    if (nextAppState === 'background') {
+      // La aplicación ha pasado al fondo, desconecta el socket
+      socketState.socket.emit(socketEvents.LEAVE_ROOM, socketState.idSala);
+      socketState.socket.disconnect();
+      socketState.socket.off('connect');
+      setSocketState((prevState) => ({
+        ...prevState,
+        receiverId: '',
+        idVideo: '',
+        idSala: '',
+        matchRecibido: false
+      }));
+      myIdVideo.current = '';
+      console.log('Socket disconnected');
+      ignorePause.current = true; // Para evitar bug emitir pause al salir de sala si estaba playing
+      navigation.goBack();
+    }
+  };
+
+  useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
-      //socketState.socket.emit(socketEvents.LEAVE_ROOM, socketState.idSala);
+      socketState.socket.emit(socketEvents.LEAVE_ROOM, socketState.idSala);
       socketState.socket.disconnect();
       socketState.socket.off('connect');
       setSocketState((prevState) => ({
