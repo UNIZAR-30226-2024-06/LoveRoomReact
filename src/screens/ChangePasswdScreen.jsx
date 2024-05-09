@@ -38,24 +38,23 @@ export default function ChangePasswdScreen({ navigation }) {
     setNew1PasswordError(false);
   };
 
-  const handlePasswordUpdate = (text) => {
-
-  };
-
+  const handlePasswordUpdate = (text) => {};
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} keyboardShouldPersistTaps={'handled'}>
       <View style={[styles.logoContainer, { marginBottom: -90 }]}>
         <Image style={styles.logo} source={require('../img/logoTexto.png')} />
       </View>
 
       <View style={styles.formContainer}>
-
-      <Text style={styles.label}>Contraseña actual</Text>
-      <View>
+        <Text style={styles.label}>Contraseña actual</Text>
+        <View>
           <TextInput
-            style={[styles.input, { paddingRight: 40, flex: 1 },
-               oldPasswordError && { borderColor: 'red' }]}
+            style={[
+              styles.input,
+              { paddingRight: 40, flex: 1 },
+              oldPasswordError && { borderColor: 'red' }
+            ]}
             placeholder="Introduzca su contraseña actual"
             secureTextEntry={oldHidePassword}
             onChangeText={handleOldPasswordChange}
@@ -73,43 +72,44 @@ export default function ChangePasswdScreen({ navigation }) {
           >
             <Ionicons name={oldHidePassword ? 'eye-off' : 'eye'} size={24} color="black" />
           </TouchableOpacity>
-        {oldPasswordError && (
-          <Text style={styles.errorText}>
-            * Por favor, introduzca la contraseña actual.
-          </Text>
-        )}
-      </View>
+          {oldPasswordError && (
+            <Text style={styles.errorText}>* Por favor, introduzca la contraseña actual.</Text>
+          )}
+        </View>
 
         <Text style={styles.label}>Nueva contraseña</Text>
         <View>
           <TextInput
-            style={[styles.input, { paddingRight: 40, flex: 1 },
-              new1PasswordError && { borderColor: 'red' }]}
+            style={[
+              styles.input,
+              { paddingRight: 40, flex: 1 },
+              new1PasswordError && { borderColor: 'red' }
+            ]}
             placeholder="Introduzca la nueva contraseña"
             secureTextEntry={new1HidePassword}
             onChangeText={handleNew1PasswordChange}
             maxLength={100}
           />
           <TouchableOpacity
-              onPress={() => setNew1HidePassword(!new1HidePassword)}
-              style={{
-                position: 'absolute',
-                right: 20,
-                height: 40,
-                top: 0,
-                justifyContent: 'center'
-              }}
-            >
-              <Ionicons name={new1HidePassword ? 'eye-off' : 'eye'} size={24} color="black" />
-            </TouchableOpacity>
+            onPress={() => setNew1HidePassword(!new1HidePassword)}
+            style={{
+              position: 'absolute',
+              right: 20,
+              height: 40,
+              top: 0,
+              justifyContent: 'center'
+            }}
+          >
+            <Ionicons name={new1HidePassword ? 'eye-off' : 'eye'} size={24} color="black" />
+          </TouchableOpacity>
           {new1PasswordError && (
             <Text style={styles.errorText}>
-              * La nueva contraseña debe tener entre 8 y 16 caracteres, incluyendo al menos una mayúscula,
-              una minúscula y un número.
+              * La nueva contraseña debe tener entre 8 y 16 caracteres, incluyendo al menos una
+              mayúscula, una minúscula y un número.
             </Text>
           )}
         </View>
-{/* 
+        {/* 
         <Text style={styles.label}>Introduce de nuevo la contraseña</Text>
         <TextInput
           style={styles.input}

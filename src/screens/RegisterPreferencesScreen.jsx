@@ -92,7 +92,6 @@ export default function RegisterPreferencesScreen({ navigation }) {
   const isDataSaved = useRef(false);
   const [descriptionLength, setDescriptionLength] = useState(0);
 
-
   const [genderError, setGenderError] = useState(false);
   const [idlocalidadError, setIdLocalidadError] = useState(false);
   const [sexualPreferenceError, setSexualPreferenceError] = useState(false);
@@ -108,7 +107,6 @@ export default function RegisterPreferencesScreen({ navigation }) {
       }
     };
   }, []);
-
 
   const handleSave = () => {
     console.log(`${process.env.EXPO_PUBLIC_API_URL}/user/update`);
@@ -185,13 +183,13 @@ export default function RegisterPreferencesScreen({ navigation }) {
   };
 
   // Función para verificar si un año es bisiesto
-const isLeapYear = (year) => {
-  return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
-};
+  const isLeapYear = (year) => {
+    return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+  };
 
-// Función para obtener el número de días en un mes específico
-const getDaysInMonth = (month, year) => {
-  const daysInMonths = {
+  // Función para obtener el número de días en un mes específico
+  const getDaysInMonth = (month, year) => {
+    const daysInMonths = {
       1: 31,
       2: isLeapYear(year) ? 29 : 28, // febrero tiene 28 días o 29 si es bisiesto
       3: 31,
@@ -204,26 +202,26 @@ const getDaysInMonth = (month, year) => {
       10: 31,
       11: 30,
       12: 31
+    };
+    return daysInMonths[month];
   };
-  return daysInMonths[month];
-};
 
-// Función para verificar si una fecha es válida considerando los años bisiestos y días en cada mes
-const checkDate = (day, month, year) => {
-  if (year < 1900 || year > new Date().getFullYear()) {
+  // Función para verificar si una fecha es válida considerando los años bisiestos y días en cada mes
+  const checkDate = (day, month, year) => {
+    if (year < 1900 || year > new Date().getFullYear()) {
       return false;
-  }
+    }
 
-  if (month < 1 || month > 12) {
+    if (month < 1 || month > 12) {
       return false;
-  }
+    }
 
-  const daysInMonth = getDaysInMonth(month, year);
+    const daysInMonth = getDaysInMonth(month, year);
 
-  return day >= 1 && day <= daysInMonth;
-};
+    return day >= 1 && day <= daysInMonth;
+  };
 
-const handleDateChange = (text) => {
+  const handleDateChange = (text) => {
     // Elimina todos los caracteres que no sean números
     const cleanedText = text.replace(/[^0-9]/g, '');
 
@@ -232,18 +230,18 @@ const handleDateChange = (text) => {
     let formattedCursorPosition = cursorPosition;
 
     for (let i = 0; i < cleanedText.length; i++) {
-        if (i === 2 || i === 4) {
-            formattedText += '/';
-            if (i < cursorPosition) {
-                formattedCursorPosition++;
-            }
+      if (i === 2 || i === 4) {
+        formattedText += '/';
+        if (i < cursorPosition) {
+          formattedCursorPosition++;
         }
-        formattedText += cleanedText[i];
+      }
+      formattedText += cleanedText[i];
     }
 
     // Asegúrate de que el texto formateado no exceda los 10 caracteres
     if (formattedText.length > 10) {
-        formattedText = formattedText.slice(0, 10);
+      formattedText = formattedText.slice(0, 10);
     }
 
     setFechaNacimiento(formattedText);
@@ -254,9 +252,7 @@ const handleDateChange = (text) => {
     const valid = checkDate(day, month, year);
     setIsValidDate(valid);
     setFechaNacimientoError(false);
-
-    
-};
+  };
 
   const fileName = FileSystem.documentDirectory + 'userProfileImage.jpeg';
   const checkProfileImage = async () => {
@@ -299,9 +295,8 @@ const handleDateChange = (text) => {
     }
   };
 
-
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} keyboardShouldPersistTaps={'handled'}>
       <View style={styles.header} />
       <View style={styles.profileInfo}>
         <Text style={styles.profileText}>Completar perfil</Text>
@@ -325,24 +320,20 @@ const handleDateChange = (text) => {
       <View style={styles.formContainer}>
         <Text style={styles.label}>Género</Text>
         <View style={[styles.input, genderError && styles.inputError]}>
-        <Picker
-          selectedValue={gender}
-          onValueChange={(itemValue) => {
+          <Picker
+            selectedValue={gender}
+            onValueChange={(itemValue) => {
               setGender(itemValue);
               setGenderError(false);
-          }}
-        >
+            }}
+          >
             <Picker.Item label="-- Seleccione su género --" value="" />
             <Picker.Item label="Masculino" value="H" />
             <Picker.Item label="Femenino" value="M" />
             <Picker.Item label="Otro" value="O" />
           </Picker>
         </View>
-        {genderError && (
-                <Text style={styles.errorText}>
-                    * Por favor, seleccione un género.
-                </Text>
-            )}
+        {genderError && <Text style={styles.errorText}>* Por favor, seleccione un género.</Text>}
 
         <Text style={styles.label}>Localidad</Text>
         <View style={[styles.input, idlocalidadError && styles.inputError]}>
@@ -371,25 +362,27 @@ const handleDateChange = (text) => {
           placeholder="DD/MM/AAAA"
           maxLength={10}
           keyboardType="numeric"
-          onSelectionChange={(event) => { 
+          onSelectionChange={(event) => {
             // Captura la posición actual del cursor
             setCursorPosition(event.nativeEvent.selection.start);
           }}
         />
         {fechaNacimientoError && (
-          <Text style={styles.errorText}>* Por favor, introduzca una fecha de nacimiento válida.</Text>
+          <Text style={styles.errorText}>
+            * Por favor, introduzca una fecha de nacimiento válida.
+          </Text>
         )}
 
         <Text style={styles.label}>Preferencia Sexual</Text>
         <View style={[styles.input, sexualPreferenceError && styles.inputError]}>
-        <Picker
+          <Picker
             selectedValue={sexualPreference}
             onValueChange={(itemValue) => {
-                // Utiliza llaves para encapsular ambas instrucciones
-                setSexualPreference(itemValue);
-                setSexualPreferenceError(false);
+              // Utiliza llaves para encapsular ambas instrucciones
+              setSexualPreference(itemValue);
+              setSexualPreferenceError(false);
             }}
-        >
+          >
             <Picker.Item label="-- Seleccione su preferencia sexual --" value="" />
             <Picker.Item label="Hombres" value="H" />
             <Picker.Item label="Mujeres" value="M" />
@@ -431,29 +424,27 @@ const handleDateChange = (text) => {
 
         <Text style={styles.label}>Descripción</Text>
         <View style={styles.descriptionInputContainer}>
-            <TextInput
-                style={styles.description}
-                placeholder="Cuéntanos un poco sobre ti..."
-                multiline={true}
-                numberOfLines={4}
-                maxLength={500}
-                onChangeText={(text) => {
-                    setDescription(text);
-                    setDescriptionLength(text.length); 
-                }}
-                value={description}
-            />
-            <Text style={styles.characterCount}>{descriptionLength}/500</Text>
+          <TextInput
+            style={styles.description}
+            placeholder="Cuéntanos un poco sobre ti..."
+            multiline={true}
+            numberOfLines={4}
+            maxLength={500}
+            onChangeText={(text) => {
+              setDescription(text);
+              setDescriptionLength(text.length);
+            }}
+            value={description}
+          />
+          <Text style={styles.characterCount}>{descriptionLength}/500</Text>
         </View>
-
-
 
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
-            let isFormValid = true; 
+            let isFormValid = true;
             if (gender === '') {
-              setGenderError(true); 
+              setGenderError(true);
               isFormValid = false;
             }
             if (idlocalidad === 0) {
@@ -488,24 +479,24 @@ const styles = StyleSheet.create({
   },
 
   descriptionInputContainer: {
-    position: 'relative',
-},
-description: {
-    height: 100, 
+    position: 'relative'
+  },
+  description: {
+    height: 100,
     borderColor: '#cccccc',
     borderWidth: 1,
     borderRadius: 5,
     padding: 10,
     paddingRight: 40,
-    marginBottom: 10,
-},
-characterCount: {
+    marginBottom: 10
+  },
+  characterCount: {
     position: 'absolute',
-    bottom: 15, 
+    bottom: 15,
     right: 8,
     color: '#666',
-    fontSize: 12, 
-},
+    fontSize: 12
+  },
 
   editIconContainer: {
     position: 'absolute',
@@ -619,8 +610,6 @@ characterCount: {
     borderRadius: 10,
     justifyContent: 'center'
   },
-
-
 
   description: {
     height: 240,

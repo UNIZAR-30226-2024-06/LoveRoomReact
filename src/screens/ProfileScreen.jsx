@@ -84,6 +84,7 @@ export default function ProfileScreen({ navigation }) {
 
   return (
     <ScrollView
+      keyboardShouldPersistTaps={'handled'}
       style={styles.container}
       ref={scrollViewRef}
       scrollEventThrottle={16}
@@ -152,12 +153,12 @@ export default function ProfileScreen({ navigation }) {
               <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage} />
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.faqButton}
               onPress={() => {
-                Alert.alert('¡Contáctanos!', 'Correo: loveroomapp@gmail.com', [ { text: 'OK' } ]);
+                Alert.alert('¡Contáctanos!', 'Correo: loveroomapp@gmail.com', [{ text: 'OK' }]);
               }}
-              >
+            >
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Image source={require('../img/llamada.png')} style={styles.faqIcon} />
                 <Text style={styles.faqText}>Contáctanos</Text>
@@ -165,13 +166,12 @@ export default function ProfileScreen({ navigation }) {
               <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage} />
             </TouchableOpacity>
 
-
-
-            <TouchableOpacity 
-            style={styles.faqButton}
-            onPress ={() => {
-              navigation.navigate('ChangePassword')
-            }}>
+            <TouchableOpacity
+              style={styles.faqButton}
+              onPress={() => {
+                navigation.navigate('ChangePassword');
+              }}
+            >
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Image source={require('../img/verificado.png')} style={styles.faqIcon} />
                 <Text style={styles.faqText}>Gestión de credenciales</Text>

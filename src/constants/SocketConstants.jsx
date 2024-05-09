@@ -14,4 +14,4 @@ export const socketEvents = {
   GET_SYNC: 'get-sync',
   STORE_TIME: 'store-time',
   UNMATCH: 'unmatch'
-}
+};

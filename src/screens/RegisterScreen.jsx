@@ -19,13 +19,15 @@ export default function Login({ navigation }) {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
 
-  const [isValidName, setIsValidName] = useState(false); 
+  const [isValidName, setIsValidName] = useState(false);
   const [nameError, setNameError] = useState(false);
   const [nameErrorMessage, setNameErrorMessage] = useState('');
 
   const [isValidEmail, setIsValidEmail] = useState(false);
   const [emailError, setEmailError] = useState(false);
-  const [emailErrorMessage, setEmailErrorMessage] = useState('* Por favor, introduzca un correo electrónico válido.'); 
+  const [emailErrorMessage, setEmailErrorMessage] = useState(
+    '* Por favor, introduzca un correo electrónico válido.'
+  );
 
   const [password, setPassword] = useState('');
   const [isValidPassword, setIsValidPassword] = useState(false);
@@ -35,8 +37,8 @@ export default function Login({ navigation }) {
 
   const handleNameChange = (text) => {
     setName(text);
-    setIsValidName(text.trim().length > 0); 
-    setNameError(false); 
+    setIsValidName(text.trim().length > 0);
+    setNameError(false);
   };
 
   const handleEmailChange = (text) => {
@@ -108,7 +110,7 @@ export default function Login({ navigation }) {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} keyboardShouldPersistTaps={'handled'}>
       <View style={[styles.logoContainer, { marginBottom: -90 }]}>
         <Image style={styles.logo} source={require('../img/logoTexto.png')} />
       </View>
@@ -146,9 +148,7 @@ export default function Login({ navigation }) {
           autoCapitalize="none"
           maxLength={254}
         />
-        {emailError && (
-          <Text style={styles.errorText}>{emailErrorMessage}</Text> 
-        )}
+        {emailError && <Text style={styles.errorText}>{emailErrorMessage}</Text>}
 
         <Text style={styles.label}>Contraseña</Text>
         <View>
@@ -156,7 +156,7 @@ export default function Login({ navigation }) {
             style={[
               styles.input,
               { paddingRight: 40, flex: 1 },
-              passwordError && styles.inputError 
+              passwordError && styles.inputError
             ]}
             placeholder="Introduzca una contraseña"
             secureTextEntry={hidePassword}
@@ -186,30 +186,30 @@ export default function Login({ navigation }) {
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
-              let isFormValid = true; 
+            let isFormValid = true;
 
-              if (!isValidName) {
-                  setNameError(true); 
-                  isFormValid = false; 
-              }
+            if (!isValidName) {
+              setNameError(true);
+              isFormValid = false;
+            }
 
-              if (!isValidEmail) {
-                  setEmailError(true); 
-                  isFormValid = false;
-              }
+            if (!isValidEmail) {
+              setEmailError(true);
+              isFormValid = false;
+            }
 
-              if (!isValidPassword) {
-                  setPasswordError(true); 
-                  isFormValid = false; 
-              }
+            if (!isValidPassword) {
+              setPasswordError(true);
+              isFormValid = false;
+            }
 
-              if (isFormValid) {
-                  handleRegister();
-              }
+            if (isFormValid) {
+              handleRegister();
+            }
           }}
-      >
+        >
           <Text style={styles.buttonText}>Registrarse</Text>
-      </TouchableOpacity>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold'
   },
   inputError: {
-    borderColor: 'red' 
+    borderColor: 'red'
   },
   errorText: {
     color: 'red',

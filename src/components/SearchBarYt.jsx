@@ -16,7 +16,6 @@ const SearchBar = ({ setVideoUrl }) => {
       part: 'id, snippet',
       q: search,
       type: 'video',
-      pageToken: nextPageToken,
       maxResults: 50
     });
     console.log(params);
@@ -61,6 +60,7 @@ const SearchBar = ({ setVideoUrl }) => {
         <TextInput
           value={search}
           onChangeText={(text) => setSearch(text)}
+          onSubmitEditing={handlePeticion}
           placeholder="Search"
           style={{ fontSize: 15, width: '100%', padding: 0 }}
         />
