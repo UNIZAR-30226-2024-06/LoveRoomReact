@@ -188,13 +188,23 @@ const Video = () => {
         setModalCargaMatch(false);
         if (success) {
           myIdVideo.current = nuevoVideo; // Guardamos el id del video
-          if (data.esSalaUnitaria == true) {    // No hay match
+          if (myVideoPlaying.current) {
+            ignorePause.current = true; // Para evitar bug emitir pause al cambiar de video
+          }
+
+          setVideoPlaying(true); // Play
+          myVideoPlaying.current = true;
+
+          if (data.esSalaUnitaria == true) {  // NO HAY MATCH
             setSocketState((prevState) => ({
               ...prevState,
               idVideo: nuevoVideo
             }));
             alert('No hay nadie viendo este vídeo, ¡espera a que alguien entre!');
-          } else if (data.esSalaUnitaria == false) {  // Hay match
+          }   
+          else if (data.esSalaUnitaria == false) {  // HAY MATCH
+            // Para emitir un GET_SYNC al cambiar de video
+            emitirGetSync.current = true; // Para que se emita en el handleStateChange
             console.log("Sala con persona, ¡he hecho match! by ", authState.id);
             setSocketState((prevState) => ({
               ...prevState,
@@ -669,14 +679,14 @@ const Video = () => {
   };
 
   const handleStateChange = async (event) => {
-    //console.log('Evento:', event, ' by ', authState.id, 'ignoreStateChange:', ignoreStateChange.current, ' ignorePlay:', ignorePlay.current, ' ignorePause:', ignorePause.current, ' isEnabled:', isEnabled);
+    console.log('Evento:', event, ' by ', authState.id, 'ignoreStateChange:', ignoreStateChange.current, ' ignorePlay:', ignorePlay.current, ' ignorePause:', ignorePause.current, ' isEnabled:', isEnabled);
     if (event === 'playing') {
       // CASO ESPECIAL 1: Ya ha cargado el video y se requiere emitir un GET_SYNC para la sincronización
-      if (emitirGetSync.current) {
+      if (emitirGetSync.current && idRoom.current != null) {
         emitirGetSync.current = false;
         // Emitimos un evento GET_SYNC para que el otro usuario nos mande su tiempo
-        console.log(authState.id, ' emitiendo evento GET_SYNC');
-        socketState.socket.emit(socketEvents.GET_SYNC, socketState.idSala);
+        console.log(authState.id, ' emitiendo evento GET_SYNC in room ', idRoom.current);
+        socketState.socket.emit(socketEvents.GET_SYNC, idRoom.current);
         return;
       }
       ignorarBugPause.current = false; // Cuando se pone a play, ya no hay que tener en cuenta el bug de que se manden dos eventos de pause seguidos
