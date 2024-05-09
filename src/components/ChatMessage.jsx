@@ -18,44 +18,44 @@ const ChatMessage = ({ data }) => {
 
   const handleReport = () => {
     console.log('Reportando mensaje:', data.id);
-    console.log('Reportado por: ', reportReason);
     handleFetchReport();
   };
 
   const handleFetchReport = async () => {
     console.log('mensaje a reportar: ', data);
     console.log('Reportando mensaje:', data.id);
+    console.log('Reportado por: ', reportReason);
     const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/reports/${data.id}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${authState.token}`
       },
-      body: {
-        motivo: reportReason.toString()
-      }
+      body: JSON.stringify({ motivo: reportReason.toString() })
     });
     const info = await response.json();
     console.log(info);
     setModalVisible(false);
-    if (info.error == null) {
-      Toast.show({
-        type: 'success',
-        position: 'bottom',
-        text1: 'Mensaje reportado',
-        text2: 'El mensaje ha sido reportado correctamente',
-        visibilityTime: 1000
-      });
-    } else {
-      Toast.show({
-        type: 'error',
-        position: 'bottom',
-        text1: 'Ha habido un error',
-        text2: 'Vuelva a intentarlo',
-        visibilityTime: 1000
-      });
-    }
     setReportReason('');
+    setTimeout(() => {
+      if (info.error == null) {
+        Toast.show({
+          type: 'success',
+          position: 'bottom',
+          text1: 'Mensaje reportado',
+          text2: 'El mensaje ha sido reportado correctamente',
+          visibilityTime: 1000
+        });
+      } else {
+        Toast.show({
+          type: 'error',
+          position: 'bottom',
+          text1: 'Ha habido un error',
+          text2: 'Vuelva a intentarlo',
+          visibilityTime: 1000
+        });
+      }
+    }, 500);
   };
 
   const MessageContent = () => (

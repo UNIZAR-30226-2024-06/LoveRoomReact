@@ -143,7 +143,7 @@ const SearchFilter = ({
   return (
     <View
       style={{
-        marginTop: 10
+        padding: 10
       }}
     >
       <Modal transparent={true} animationType={'none'} visible={showModal}>
