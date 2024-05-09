@@ -461,7 +461,7 @@ const Video = () => {
       timesegundos,
       pausado
     );
-    alert('¡Vídeo sincronizado con el otro usuario!');
+    alert('¡Vídeo sincronizado!');
     setIsEnabled(true);
     myIsEnabled.current = true;
   };
@@ -558,7 +558,7 @@ const Video = () => {
       playerRef.current?.seekTo(timesegundos, true);
       currentTime.current = timesegundos; // Guardamos el tiempo actual por haber pausado
       if (otroUsuarioOnline) {
-        alert('¡Vídeo sincronizado con el otro usuario!');
+        alert('¡Vídeo sincronizado!');
         setIsEnabled(true);
         myIsEnabled.current = true;
       } else {
@@ -837,7 +837,7 @@ const Video = () => {
             timesegundos,
             true // true porque ya se ha mandado un evento de pause antes
           );
-          alert('¡Vídeo sincronizado con el otro usuario!');
+          alert('¡Vídeo sincronizado!');
           setIsEnabled(true);
           myIsEnabled.current = true;
         } else {
