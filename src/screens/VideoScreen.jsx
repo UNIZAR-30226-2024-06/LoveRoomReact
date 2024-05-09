@@ -194,11 +194,19 @@ const Video = () => {
           (message) => {
             console.log('Respuesta del servidor:', message);
             if (message) {
+              if (myVideoPlaying.current) {
+                ignorePause.current = true; // Para evitar bug emitir pause al cambiar de video
+              }
+    
+              setVideoPlaying(true); // Play
+              myVideoPlaying.current = true;
+
               setSocketState((prevState) => ({
                 ...prevState,
                 idVideo: nuevoVideo
               }));
               myIdVideo.current = nuevoVideo;
+              currentTime.current = 0; // Reseteamos el tiempo actual
             }
           }
         );
@@ -595,11 +603,19 @@ const Video = () => {
 
   const handleEventoChangeVideo = (idVideo) => {
     console.log('Change video event received');
+    if (myVideoPlaying.current) {
+      ignorePause.current = true; // Para evitar bug emitir pause al cambiar de video
+    }
+
+    setVideoPlaying(true); // Play
+    myVideoPlaying.current = true;
+
     setSocketState((prevState) => ({
       ...prevState,
       idVideo: idVideo
     }));
     myIdVideo.current = idVideo;
+    currentTime.current = 0; // Reseteamos el tiempo actual
   };
 
   const handleCheckRoom = () => {
@@ -733,6 +749,7 @@ const Video = () => {
   };
 
   const handleStateChange = async (event) => {
+    console.log('Evento:', event, ' by ', authState.id);
     // console.log(
     //   'Evento:',
     //   event,
