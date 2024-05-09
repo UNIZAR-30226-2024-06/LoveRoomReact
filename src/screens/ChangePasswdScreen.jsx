@@ -26,6 +26,11 @@ export default function ChangePasswdScreen({ navigation }) {
   const [new1PasswordError, setNew1PasswordError] = useState(false);
   const [new1HidePassword, setNew1HidePassword] = useState(true);
 
+  const [new2Password, setNew2Password] = React.useState('');
+  const [isValidNew2Password, setIsValidNew2Password] = useState(false);
+  const [new2PasswordError, setNew2PasswordError] = useState(false);
+  const [new2HidePassword, setNew2HidePassword] = useState(true);
+
   const handleOldPasswordChange = (text) => {
     setOldPassword(text);
     setIsValidOldPassword(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,16}$/.test(text));
@@ -38,8 +43,22 @@ export default function ChangePasswdScreen({ navigation }) {
     setNew1PasswordError(false);
   };
 
-  const handlePasswordUpdate = (text) => {
+  const handleNew2PasswordChange = (text) => {
+    setNew2Password(text);
+    setIsValidNew2Password(new1Password === text);
+    setNew2PasswordError(false);
+  };
 
+  const handlePasswordUpdate = (text) => {
+    console.log('Contraseña actual:', oldPassword, 'Nueva contraseña:', new1Password, 'Repetir nueva contraseña:', new2Password);
+    fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/update/password`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({nuevaContrasena: new1Password, antiguaContrasena: oldPassword})
+    })
+      .then((response) => {
   };
 
 
@@ -51,7 +70,7 @@ export default function ChangePasswdScreen({ navigation }) {
 
       <View style={styles.formContainer}>
 
-      <Text style={styles.label}>Contraseña actual</Text>
+      <Text style={styles.label}>Contraseña existente</Text>
       <View>
           <TextInput
             style={[styles.input, { paddingRight: 40, flex: 1 },
@@ -75,7 +94,7 @@ export default function ChangePasswdScreen({ navigation }) {
           </TouchableOpacity>
         {oldPasswordError && (
           <Text style={styles.errorText}>
-            * Por favor, introduzca la contraseña actual.
+            * La contraseña es incorrecta.
           </Text>
         )}
       </View>
@@ -109,16 +128,35 @@ export default function ChangePasswdScreen({ navigation }) {
             </Text>
           )}
         </View>
-{/* 
-        <Text style={styles.label}>Introduce de nuevo la contraseña</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Introduzca la nueva contraseña otra vez"
-          onChangeText={handleChangePassword}
-          secureTextEntry={true}
-        />
-        {!isValidPassword2 && <Text style={styles.errores}>* Las contraseñas no coinciden.</Text>}
-         */}
+
+        <Text style={styles.label}>Repite nueva contraseña</Text>
+        <View>
+          <TextInput
+            style={[styles.input, { paddingRight: 40, flex: 1 },
+              new2PasswordError && { borderColor: 'red' }]}
+            placeholder="Introduzca la nueva contraseña"
+            secureTextEntry={new2HidePassword}
+            onChangeText={handleNew2PasswordChange}
+            maxLength={100}
+          />
+          <TouchableOpacity
+              onPress={() => setNew2HidePassword(!new2HidePassword)}
+              style={{
+                position: 'absolute',
+                right: 20,
+                height: 40,
+                top: 0,
+                justifyContent: 'center'
+              }}
+            >
+              <Ionicons name={new2HidePassword ? 'eye-off' : 'eye'} size={24} color="black" />
+            </TouchableOpacity>
+          {new2PasswordError && (
+            <Text style={styles.errorText}>
+              * Las contraseñas no coindicen.
+            </Text>
+          )}
+        </View>
 
         <TouchableOpacity
           style={styles.button}
@@ -135,6 +173,11 @@ export default function ChangePasswdScreen({ navigation }) {
               isFormValid = false;
             }
 
+            if (!isValidNew2Password) {
+              setNew2PasswordError(true);
+              isFormValid = false;
+            }
+            
             if (isFormValid) {
               handlePasswordUpdate();
               navigation.navigate('GetEmail');
