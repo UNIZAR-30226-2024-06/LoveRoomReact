@@ -11,7 +11,8 @@ import {
   Image,
   StatusBar,
   Switch,
-  Alert
+  Alert,
+  ActivityIndicator
 } from 'react-native';
 import YoutubePlayer from 'react-native-youtube-iframe';
 import AuthContext from '../components/AuthContext';
@@ -48,6 +49,7 @@ const Video = () => {
   const currentTime = useRef(0); // Tiempo actual del video
   // console.log('SocketState en video Screen: ', socketState);
   const [modalUserVisible, setModalUserVisible] = useState(false);
+  const [modalCargaMatch, setModalCargaMatch] = useState(false);
   // Copias de useStates para evitar errores
   const idRoom = useRef(null);
   const myVideoPlaying = useRef(false);
@@ -150,31 +152,63 @@ const Video = () => {
   const handleChangeVideo = () => {
     const nuevoVideo = selectedVideoUrl;
     console.log('Video seleccionado:', nuevoVideo);
-    if (myIsEnabled.current) {
-      // Solo se envia el evento si la sincronización está activada
-      console.log('Emitiendo evento CHANGE_VIDEO ', socketState.idSala, nuevoVideo);
-      socketState.socket.emit(
-        socketEvents.CHANGE_VIDEO,
-        socketState.idSala,
-        nuevoVideo,
-        (message) => {
-          console.log('Respuesta del servidor:', message);
-          if (message) {
+    // Si estoy en una sala
+    if (idRoom.current == null && socketState.idSala != null && socketState.idSala != '') {
+      if (myIsEnabled.current) {
+        // Solo se envia el evento si la sincronización está activada
+        console.log('Emitiendo evento CHANGE_VIDEO ', socketState.idSala, nuevoVideo);
+        socketState.socket.emit(
+          socketEvents.CHANGE_VIDEO,
+          socketState.idSala,
+          nuevoVideo,
+          (message) => {
+            console.log('Respuesta del servidor:', message);
+            if (message) {
+              setSocketState((prevState) => ({
+                ...prevState,
+                idVideo: nuevoVideo
+              }));
+              myIdVideo.current = nuevoVideo;
+            }
+          }
+        );
+      } else {
+        console.log('Sincronización desactivada, no se envía el evento CHANGE_VIDEO');
+        setSocketState((prevState) => ({
+          ...prevState,
+          idVideo: nuevoVideo
+        }));
+        myIdVideo.current = nuevoVideo;
+      }
+    } else {  // Si estoy en una sala unitaria, al cambiar de vídeo tengo que comprobar si hay match otra vez
+      console.log('Emitiendo evento CHANGE_VIDEO_UNITARIA by ', authState.id, nuevoVideo);
+      setModalCargaMatch(true);
+      socketState.socket.emit(socketEvents.CHANGE_VIDEO_UNITARIA, nuevoVideo, (success, data) => {
+        console.log('Respuesta del servidor:', success);
+        setModalCargaMatch(false);
+        if (success) {
+          myIdVideo.current = nuevoVideo; // Guardamos el id del video
+          if (data.esSalaUnitaria == true) {    // No hay match
             setSocketState((prevState) => ({
               ...prevState,
               idVideo: nuevoVideo
             }));
-            myIdVideo.current = nuevoVideo;
+            alert('No hay nadie viendo este vídeo, ¡espera a que alguien entre!');
+          } else if (data.esSalaUnitaria == false) {  // Hay match
+            console.log("Sala con persona, ¡he hecho match! by ", authState.id);
+            setSocketState((prevState) => ({
+              ...prevState,
+              idVideo: nuevoVideo,
+              receiverId: data.idusuario,
+              idSala: data.idsala.toString()
+            }));
+            alert('Has hecho match con alguien, ¡disfruta la sala!');
           }
+        } else {
+          console.log('Error al cambiar de video en sala unitaria');
+          alert('Error al cambiar de video. Inténtalo de nuevo.');
         }
-      );
-    } else {
-      console.log('Sincronización desactivada, no se envía el evento CHANGE_VIDEO');
-      setSocketState((prevState) => ({
-        ...prevState,
-        idVideo: nuevoVideo
-      }));
-      myIdVideo.current = nuevoVideo;
+      });
     }
     setSelectedVideoUrl('');
   };
@@ -728,6 +762,14 @@ const Video = () => {
 
   return (
     <View style={{ flex: 1, padding: 10 }}>
+      <Modal transparent={true} animationType={'none'} visible={modalCargaMatch}>
+        <View style={styles.modalBackground}>
+          <View style={styles.activityIndicatorWrapper}>
+            <ActivityIndicator animating={modalCargaMatch} size="large" color="#0000ff" />
+            <Text>Buscando match... </Text>
+          </View>
+        </View>
+      </Modal>
       <Modal
         animationType="slide"
         transparent={true}
@@ -882,6 +924,22 @@ const Video = () => {
 };
 
 const styles = StyleSheet.create({
+  modalBackground: {
+    flex: 1,
+    alignItems: 'center',
+    flexDirection: 'column',
+    justifyContent: 'space-around',
+    backgroundColor: '#00000040'
+  },
+  activityIndicatorWrapper: {
+    backgroundColor: '#FFFFFF',
+    height: 100,
+    width: 200,
+    borderRadius: 10,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-around'
+  },
   Video: {
     padding: 10
   },

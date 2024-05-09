@@ -51,14 +51,14 @@ const SearchFilter = ({
       .then((data) => {
         console.log(data);
         if (data.esSalaUnitaria == true) {
-          setMensaje('No hay nadie en la sala, ¡espera a que alguien entre!');
+          setMensaje('No hay nadie viendo este vídeo, ¡espera a que alguien entre!');
           setSocketState((prevState) => ({
             ...prevState,
             idVideo: videoId,
             senderId: authState.id
           }));
           setShowModal(false);
-          alert('No hay nadie en la sala, ¡espera a que alguien entre!');
+          alert('No hay nadie viendo este vídeo, ¡espera a que alguien entre!');
         } else if (data.esSalaUnitaria == false) {
           // console.log("Sala con persona, ¡he hecho match!");
           setMensaje('Has hecho match con alguien, ¡disfruta la sala!');
