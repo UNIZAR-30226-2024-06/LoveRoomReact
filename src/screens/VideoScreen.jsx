@@ -68,6 +68,7 @@ const Video = () => {
       }));
       myIdVideo.current = '';
       console.log('Socket disconnected');
+      ignorePause.current = true; // Para evitar bug emitir pause al salir de sala si estaba playing
     });
 
     // Devuelve una función de limpieza para ejecutar al desmontar el componente
@@ -86,7 +87,7 @@ const Video = () => {
       })
         .then((response) => response.json())
         .then((data) => {
-          console.log('Success:', data);
+          console.log('Success chat:', data);
           // setMessages(data);
           if(data.error == null){
             const transformedData = data.map((item) => {
@@ -194,8 +195,11 @@ const Video = () => {
       socketState.socket.connected == true
     ) {
       console.log('Emitiendo evento JOIN_ROOM ', socketState.idSala, ' by ', authState.id);
-      if (idRoom.current == null) {
+      if (idRoom.current == null) { // Guardamos el id de la sala
         idRoom.current = socketState.idSala;
+      }
+      if (myIdVideo.current  == '' && socketState.idVideo != null && socketState.idVideo != '') { // Guardamos el id del video
+        myIdVideo.current = socketState.idVideo;
       }
       socketState.socket.emit(socketEvents.JOIN_ROOM, socketState.idSala); // Necesario que idSala sea un string
     }
@@ -211,8 +215,11 @@ const Video = () => {
     console.log('ID de sala:', socketState.idSala);
     if (socketState.idSala != '' && socketState.idSala != null) {
       console.log('Emitiendo evento JOIN_ROOM ', socketState.idSala, ' by ', authState.id);
-      if (idRoom.current == null) {
+      if (idRoom.current == null) { // Guardamos el id de la sala
         idRoom.current = socketState.idSala;
+      }
+      if (myIdVideo.current  == '' && socketState.idVideo != null && socketState.idVideo != '') { // Guardamos el id del video
+        myIdVideo.current = socketState.idVideo;
       }
       socketState.socket.emit(socketEvents.JOIN_ROOM, socketState.idSala); // Necesario que idSala sea un string
     }
@@ -280,8 +287,10 @@ const Video = () => {
       authState.id,
       ' enviando Sync on con idsala:',
       idRoom.current,
-      ' idvideo:',
+      ' myidvideo:',
       myIdVideo.current,
+      'idvideo socket: ',
+      socketState.idVideo,
       ' timesegundos:',
       timesegundos,
       ' pausado:',
@@ -432,13 +441,22 @@ const Video = () => {
       // Si estabamos en una sala, al reconectarnos al socket volvemos a hacer JOIN_ROOM
       console.log('Emitiendo evento JOIN_ROOM para reconectarse a la sala ', socketState.idSala, ' by ', authState.id);
       socketState.socket.emit(socketEvents.JOIN_ROOM, socketState.idSala);
-    } else {
-      // Aqui se deberia volver a la pantalla de búsqueda ya que el usuario ya no va a poder hacer match
-      console.log('No hay sala, volviendo a la pantalla de búsqueda');
-      alert(
-        'Te has desconectado del vídeo.\n Si quieres hacer match debes salir y volver a entrar.'
-      );
-      //navigation.navigate('Search');???
+    }
+    // } else {
+    //   // Aqui se deberia volver a la pantalla de búsqueda ya que el usuario ya no va a poder hacer match
+    //   console.log('No hay sala, volviendo a la pantalla de búsqueda');
+    //   // alert(
+    //   //   'Te has desconectado del vídeo.\n Si quieres hacer match debes salir y volver a entrar.'
+    //   // );
+    //   //navigation.navigate('Search');???
+    // }
+  };
+
+  const handleUnmatch = (idSala) => {
+    console.log('UNMATCH event received by ', authState.id);
+    if (idSala == idRoom.current) {
+      alert('El otro usuario ha hecho unmatch. Lo sentimos.');
+      navigation.goBack();
     }
   };
 
@@ -447,14 +465,15 @@ const Video = () => {
       console.log('Eventos de socket');
 
       // Desuscribirse de los eventos anteriores (no necesario?)
-      socketState.socket.off(socketEvents.CHECK_ROOM, handleCheckRoom);
-      socketState.socket.off(socketEvents.GET_SYNC, handleGetSync);
-      socketState.socket.off(socketEvents.PAUSE, handlePause);
-      socketState.socket.off(socketEvents.PLAY, handlePlay);
-      socketState.socket.off(socketEvents.RECEIVE_MESSAGE, handleMessage);
-      socketState.socket.off(socketEvents.SYNC_ON, handleSyncOn);
-      socketState.socket.off(socketEvents.SYNC_OFF, handleSyncOff);
-      socketState.socket.off(socketEvents.CHANGE_VIDEO, handleEventoChangeVideo);
+      // socketState.socket.off(socketEvents.CHECK_ROOM, handleCheckRoom);
+      // socketState.socket.off(socketEvents.GET_SYNC, handleGetSync);
+      // socketState.socket.off(socketEvents.PAUSE, handlePause);
+      // socketState.socket.off(socketEvents.PLAY, handlePlay);
+      // socketState.socket.off(socketEvents.RECEIVE_MESSAGE, handleMessage);
+      // socketState.socket.off(socketEvents.SYNC_ON, handleSyncOn);
+      // socketState.socket.off(socketEvents.SYNC_OFF, handleSyncOff);
+      // socketState.socket.off(socketEvents.CHANGE_VIDEO, handleEventoChangeVideo);
+      // socketState.socket.off(socketEvents.UNMATCH, handleUnmatch);
 
       // Suscribirse a los nuevos eventos
       socketState.socket.on(socketEvents.CHECK_ROOM, handleCheckRoom); // Para que al reconectarse al socket se vuelva a hacer JOIN_ROOM
@@ -465,6 +484,7 @@ const Video = () => {
       socketState.socket.on(socketEvents.SYNC_ON, handleSyncOn);
       socketState.socket.on(socketEvents.SYNC_OFF, handleSyncOff);
       socketState.socket.on(socketEvents.CHANGE_VIDEO, handleEventoChangeVideo);
+      socketState.socket.on(socketEvents.UNMATCH, handleUnmatch);
 
       return () => {
         console.log('Desmontando eventos de socket');
@@ -477,6 +497,7 @@ const Video = () => {
         socketState.socket.off(socketEvents.SYNC_ON, handleSyncOn);
         socketState.socket.off(socketEvents.SYNC_OFF, handleSyncOff);
         socketState.socket.off(socketEvents.CHANGE_VIDEO, handleEventoChangeVideo);
+        socketState.socket.off(socketEvents.UNMATCH, handleUnmatch);
       };
     } else {
       console.log('Socket = null');
@@ -514,29 +535,30 @@ const Video = () => {
   };
 
   const handleInfoReceiver = () => {
-    console.log(`${process.env.EXPO_PUBLIC_API_URL}/user/${socketState.receiverId}`);
-    fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/${socketState.receiverId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${authState.token}`
-      }
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log('Success');
-        //console.log('Success:', data);
-        setUser(data);
+    if (socketState.receiverId != null && socketState.receiverId != '') {
+      console.log(`${process.env.EXPO_PUBLIC_API_URL}/user/${socketState.receiverId}`);
+      fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/${socketState.receiverId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authState.token}`
+        }
       })
-      .catch((error) => {
-        console.error('Error:', error);
-      });
+        .then((response) => response.json())
+        .then((data) => {
+          console.log('Success info receiver');
+          console.log('Success:', data);
+          setUser(data);
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+    } else {
+      console.log('No hay receiverId');
+    }
   };
 
   const handleStateChange = async (event) => {
-    if (authState.id == 366) {
-      console.log('Evento:', event, ' by ', authState.id, 'ignoreStateChange:', ignoreStateChange.current, ' ignorePlay:', ignorePlay.current, ' ignorePause:', ignorePause.current, ' isEnabled:', isEnabled);
-    }
     //console.log('Evento:', event, ' by ', authState.id, 'ignoreStateChange:', ignoreStateChange.current, ' ignorePlay:', ignorePlay.current, ' ignorePause:', ignorePause.current, ' isEnabled:', isEnabled);
     if (event === 'playing') {
       // CASO ESPECIAL 1: Ya ha cargado el video y se requiere emitir un GET_SYNC para la sincronización
