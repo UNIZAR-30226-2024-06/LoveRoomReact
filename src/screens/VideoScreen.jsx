@@ -183,7 +183,7 @@ const Video = () => {
     const nuevoVideo = selectedVideoUrl;
     console.log('Video seleccionado:', nuevoVideo);
     // Si estoy en una sala
-    if (idRoom.current == null && socketState.idSala != null && socketState.idSala != '') {
+    if (idRoom.current != null && socketState.idSala != null && socketState.idSala != '') {
       if (myIsEnabled.current) {
         // Solo se envia el evento si la sincronización está activada
         console.log('Emitiendo evento CHANGE_VIDEO ', socketState.idSala, nuevoVideo);
@@ -733,20 +733,22 @@ const Video = () => {
   };
 
   const handleStateChange = async (event) => {
-    console.log(
-      'Evento:',
-      event,
-      ' by ',
-      authState.id,
-      'ignoreStateChange:',
-      ignoreStateChange.current,
-      ' ignorePlay:',
-      ignorePlay.current,
-      ' ignorePause:',
-      ignorePause.current,
-      ' isEnabled:',
-      isEnabled
-    );
+    // console.log(
+    //   'Evento:',
+    //   event,
+    //   ' by ',
+    //   authState.id,
+    //   'ignoreStateChange:',
+    //   ignoreStateChange.current,
+    //   ' ignorePlay:',
+    //   ignorePlay.current,
+    //   ' ignorePause:',
+    //   ignorePause.current,
+    //   ' isEnabled:',
+    //   isEnabled,
+    //   'receiverId:',
+    //   socketState.receiverId
+    // );
     if (event === 'playing') {
       // CASO ESPECIAL 1: Ya ha cargado el video y se requiere emitir un GET_SYNC para la sincronización
       if (emitirGetSync.current && idRoom.current != null) {
@@ -986,7 +988,7 @@ const Video = () => {
           </Modal>
         </>
       )}
-      <View style={{ alignItems: 'center', flex: 0.7 }}>
+      <View style={{ alignItems: 'center', flex: 1 }}>
         <YoutubePlayer
           ref={playerRef}
           videoId={socketState.idVideo}
@@ -999,7 +1001,7 @@ const Video = () => {
         />
       </View>
       <View
-        style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10, flex: 0.15 }}>
+        style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10, flex: 0.2}}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Text style={{ fontSize: 12, fontWeight: 'bold', padding: 10 }}>¡Cambia el vídeo!</Text>
           <Icon
