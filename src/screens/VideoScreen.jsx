@@ -28,6 +28,7 @@ import { Dimensions } from 'react-native';
 import defaultProfilePicture from '../img/perfil-vacio.png';
 import SearchBar from '../components/SearchBarYt';
 import OtherProfile from './OtherProfileScreen';
+import mime from 'mime';
 
 const Video = () => {
   const navigation = useNavigation();
@@ -180,7 +181,8 @@ const Video = () => {
         }));
         myIdVideo.current = nuevoVideo;
       }
-    } else {  // Si estoy en una sala unitaria, al cambiar de vídeo tengo que comprobar si hay match otra vez
+    } else {
+      // Si estoy en una sala unitaria, al cambiar de vídeo tengo que comprobar si hay match otra vez
       console.log('Emitiendo evento CHANGE_VIDEO_UNITARIA by ', authState.id, nuevoVideo);
       setModalCargaMatch(true);
       socketState.socket.emit(socketEvents.CHANGE_VIDEO_UNITARIA, nuevoVideo, (success, data) => {
@@ -195,17 +197,18 @@ const Video = () => {
           setVideoPlaying(true); // Play
           myVideoPlaying.current = true;
 
-          if (data.esSalaUnitaria == true) {  // NO HAY MATCH
+          if (data.esSalaUnitaria == true) {
+            // NO HAY MATCH
             setSocketState((prevState) => ({
               ...prevState,
               idVideo: nuevoVideo
             }));
             alert('No hay nadie viendo este vídeo, ¡espera a que alguien entre!');
-          }   
-          else if (data.esSalaUnitaria == false) {  // HAY MATCH
+          } else if (data.esSalaUnitaria == false) {
+            // HAY MATCH
             // Para emitir un GET_SYNC al cambiar de video
             emitirGetSync.current = true; // Para que se emita en el handleStateChange
-            console.log("Sala con persona, ¡he hecho match! by ", authState.id);
+            console.log('Sala con persona, ¡he hecho match! by ', authState.id);
             setSocketState((prevState) => ({
               ...prevState,
               idVideo: nuevoVideo,
@@ -301,52 +304,74 @@ const Video = () => {
 
   // TODO:
   const uploadMedia = async (uri, mediaType) => {
+    // const uriParts = uri.split('.');
+    // const fileType = uriParts[uriParts.length - 1];
+    // const formData = new FormData();
+    // const multimedia = await fetch(uri);
+
+    console.log('Subiendo media:', uri);
+
+    // const newImageUri = 'file:///' + uri.split('file:/').join('');
+    // console.log('newImageUri:', newImageUri);
+    // const formData = new FormData();
+    // formData.append('image', {
+    //   uri: uri,
+    //   type: mime.getType(uri),
+    //   name: uri.split('/').pop()
+    // });
+
+    const data = new FormData();
     const uriParts = uri.split('.');
     const fileType = uriParts[uriParts.length - 1];
-    const formData = new FormData();
-    const multimedia = await fetch(uri);
 
-    if (multimedia.ok) {
-      formData.append('file', multimedia);
+    data.append('image', {
+      name: 'image',
+      type: `image/${fileType}`,
+      uri: Platform.OS === 'ios' ? uri.replace('file://', '') : uri
+    });
 
-      console.log('Subiendo media:', uri);
-      const url = `${process.env.EXPO_PUBLIC_API_URL}/upload/${mediaType}/${authState.id}`;
-      console.log('URL:', url);
-      fetch(url, {
-        method: 'POST',
-        headers: {
-          // 'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${authState.token}`
-        },
-        body: formData
+    // if (multimedia.ok) {
+    //   formData.append('file', multimedia);
+    console.log('formdata');
+    console.log(formData);
+    console.log('Subiendo media:', uri);
+    const url = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/upload/${mediaType}/${authState.id}`;
+    console.log('URL:', url);
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        // 'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${authState.token}`
+      },
+      body: formData
+    })
+      .then((response) => console.log(response))
+      .then((data) => {
+        console.log('Success:', data);
+        if (data.error == null) {
+          const mediaUrl = data.url;
+          console.log('URL de la imagen:', mediaUrl);
+          const data = {
+            id: null,
+            senderId: authState.id,
+            message: mediaUrl,
+            timestamp: null,
+            rutamultimedia: mediaUrl
+          };
+          setMessages((prevState) => [...prevState, data]);
+          sendMessage();
+        } else {
+          console.log('Error:', data.error);
+          alert('Ha habido un error en los datos de la imagen. Vuelva a intentarlo.');
+        }
       })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log('Success:', data);
-          if (data.error == null) {
-            const mediaUrl = data.url;
-            console.log('URL de la imagen:', mediaUrl);
-            const data = {
-              id: null,
-              senderId: authState.id,
-              message: mediaUrl,
-              timestamp: null,
-              rutamultimedia: mediaUrl
-            };
-            setMessages((prevState) => [...prevState, data]);
-            sendMessage();
-          } else {
-            console.log('Error:', data.error);
-            alert('Ha habido un error al subir la imagen. Vuelva a intentarlo.');
-          }
-        })
-        .catch((error) => {
-          console.error('Error:', error);
-          alert('Ha habido un error al subir la imagen. Vuelva a intentarlo.');
-        });
-    } else {
-      alert('Error al subir la imagen, not ok');
-    }
+      .catch((error) => {
+        console.error('Error:', error);
+        alert('Ha habido un error al subir la imagen. Vuelva a intentarlo.');
+      });
+    // } else {
+    //   alert('Error al subir la imagen, not ok');
+    // }
   };
 
   const toggleSwitch = () => {
@@ -679,7 +704,20 @@ const Video = () => {
   };
 
   const handleStateChange = async (event) => {
-    console.log('Evento:', event, ' by ', authState.id, 'ignoreStateChange:', ignoreStateChange.current, ' ignorePlay:', ignorePlay.current, ' ignorePause:', ignorePause.current, ' isEnabled:', isEnabled);
+    console.log(
+      'Evento:',
+      event,
+      ' by ',
+      authState.id,
+      'ignoreStateChange:',
+      ignoreStateChange.current,
+      ' ignorePlay:',
+      ignorePlay.current,
+      ' ignorePause:',
+      ignorePause.current,
+      ' isEnabled:',
+      isEnabled
+    );
     if (event === 'playing') {
       // CASO ESPECIAL 1: Ya ha cargado el video y se requiere emitir un GET_SYNC para la sincronización
       if (emitirGetSync.current && idRoom.current != null) {
