@@ -22,19 +22,20 @@ const MyRoomsScreen = () => {
   const { authState } = useContext(AuthContext);
   const { socketState, setSocketState } = useContext(AuthContext);
   const [viewModal, setViewModal] = useState(false);
-  const token = authState.token;
   const [myRooms, setMyRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
 
+
   useFocusEffect(
     React.useCallback(() => {
       console.log('Fetching rooms...');
+      console.log('Auth state token:', authState.token);
       if (authState.isLoggedIn || authState.token != null) {
         fetchMyRooms();
       }
-    }, [])
+    }, [authState])
   );
 
   useEffect(() => {
@@ -44,7 +45,7 @@ const MyRoomsScreen = () => {
 
     const func = Dimensions.addEventListener('change', onChange);
     return () => func?.remove();
-  }, []);
+  }, [authState]);
 
   const handleDeleteRoom = async (roomId) => {
     console.log('Deleting room:', roomId);
@@ -115,7 +116,7 @@ const MyRoomsScreen = () => {
 
   useEffect(() => {
     const initializeAndProceed = async () => {
-      const { isSocketInitialized } = await initializeSocket(token, setSocketState, socketState);
+      const { isSocketInitialized } = await initializeSocket(authState.token, setSocketState, socketState);
 
       // Esperar hasta que el socket esté completamente inicializado antes de continuar
       if (isSocketInitialized) {

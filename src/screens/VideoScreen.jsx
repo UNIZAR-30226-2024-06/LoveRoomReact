@@ -12,7 +12,8 @@ import {
   StatusBar,
   Switch,
   Alert,
-  ActivityIndicator
+  ActivityIndicator, 
+  AppState
 } from 'react-native';
 import YoutubePlayer from 'react-native-youtube-iframe';
 import AuthContext from '../components/AuthContext';
@@ -28,6 +29,7 @@ import { Dimensions } from 'react-native';
 import defaultProfilePicture from '../img/perfil-vacio.png';
 import SearchBar from '../components/SearchBarYt';
 import OtherProfile from './OtherProfileScreen';
+import mime from 'mime';
 
 const Video = () => {
   const navigation = useNavigation();
@@ -57,8 +59,36 @@ const Video = () => {
   const myIdVideo = useRef('');
 
   useEffect(() => {
+    const appstateList = AppState.addEventListener('change', handleAppStateChange);
+  
+    return () => {
+      appstateList?.remove();
+    };
+  }, []);
+  
+  const handleAppStateChange = (nextAppState) => {
+    if (nextAppState === 'background') {
+      // La aplicación ha pasado al fondo, desconecta el socket
+      socketState.socket.emit(socketEvents.LEAVE_ROOM, socketState.idSala);
+      socketState.socket.disconnect();
+      socketState.socket.off('connect');
+      setSocketState((prevState) => ({
+        ...prevState,
+        receiverId: '',
+        idVideo: '',
+        idSala: '',
+        matchRecibido: false
+      }));
+      myIdVideo.current = '';
+      console.log('Socket disconnected');
+      ignorePause.current = true; // Para evitar bug emitir pause al salir de sala si estaba playing
+      navigation.goBack();
+    }
+  };
+
+  useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
-      //socketState.socket.emit(socketEvents.LEAVE_ROOM, socketState.idSala);
+      socketState.socket.emit(socketEvents.LEAVE_ROOM, socketState.idSala);
       socketState.socket.disconnect();
       socketState.socket.off('connect');
       setSocketState((prevState) => ({
@@ -153,7 +183,7 @@ const Video = () => {
     const nuevoVideo = selectedVideoUrl;
     console.log('Video seleccionado:', nuevoVideo);
     // Si estoy en una sala
-    if (idRoom.current == null && socketState.idSala != null && socketState.idSala != '') {
+    if (idRoom.current != null && socketState.idSala != null && socketState.idSala != '') {
       if (myIsEnabled.current) {
         // Solo se envia el evento si la sincronización está activada
         console.log('Emitiendo evento CHANGE_VIDEO ', socketState.idSala, nuevoVideo);
@@ -164,11 +194,19 @@ const Video = () => {
           (message) => {
             console.log('Respuesta del servidor:', message);
             if (message) {
+              if (myVideoPlaying.current) {
+                ignorePause.current = true; // Para evitar bug emitir pause al cambiar de video
+              }
+    
+              setVideoPlaying(true); // Play
+              myVideoPlaying.current = true;
+
               setSocketState((prevState) => ({
                 ...prevState,
                 idVideo: nuevoVideo
               }));
               myIdVideo.current = nuevoVideo;
+              currentTime.current = 0; // Reseteamos el tiempo actual
             }
           }
         );
@@ -180,7 +218,8 @@ const Video = () => {
         }));
         myIdVideo.current = nuevoVideo;
       }
-    } else {  // Si estoy en una sala unitaria, al cambiar de vídeo tengo que comprobar si hay match otra vez
+    } else {
+      // Si estoy en una sala unitaria, al cambiar de vídeo tengo que comprobar si hay match otra vez
       console.log('Emitiendo evento CHANGE_VIDEO_UNITARIA by ', authState.id, nuevoVideo);
       setModalCargaMatch(true);
       socketState.socket.emit(socketEvents.CHANGE_VIDEO_UNITARIA, nuevoVideo, (success, data) => {
@@ -195,17 +234,18 @@ const Video = () => {
           setVideoPlaying(true); // Play
           myVideoPlaying.current = true;
 
-          if (data.esSalaUnitaria == true) {  // NO HAY MATCH
+          if (data.esSalaUnitaria == true) {
+            // NO HAY MATCH
             setSocketState((prevState) => ({
               ...prevState,
               idVideo: nuevoVideo
             }));
             alert('No hay nadie viendo este vídeo, ¡espera a que alguien entre!');
-          }   
-          else if (data.esSalaUnitaria == false) {  // HAY MATCH
+          } else if (data.esSalaUnitaria == false) {
+            // HAY MATCH
             // Para emitir un GET_SYNC al cambiar de video
             emitirGetSync.current = true; // Para que se emita en el handleStateChange
-            console.log("Sala con persona, ¡he hecho match! by ", authState.id);
+            console.log('Sala con persona, ¡he hecho match! by ', authState.id);
             setSocketState((prevState) => ({
               ...prevState,
               idVideo: nuevoVideo,
@@ -301,52 +341,74 @@ const Video = () => {
 
   // TODO:
   const uploadMedia = async (uri, mediaType) => {
+    // const uriParts = uri.split('.');
+    // const fileType = uriParts[uriParts.length - 1];
+    // const formData = new FormData();
+    // const multimedia = await fetch(uri);
+
+    console.log('Subiendo media:', uri);
+
+    // const newImageUri = 'file:///' + uri.split('file:/').join('');
+    // console.log('newImageUri:', newImageUri);
+    // const formData = new FormData();
+    // formData.append('image', {
+    //   uri: uri,
+    //   type: mime.getType(uri),
+    //   name: uri.split('/').pop()
+    // });
+
+    const data = new FormData();
     const uriParts = uri.split('.');
     const fileType = uriParts[uriParts.length - 1];
-    const formData = new FormData();
-    const multimedia = await fetch(uri);
 
-    if (multimedia.ok) {
-      formData.append('file', multimedia);
+    data.append('image', {
+      name: 'image',
+      type: `image/${fileType}`,
+      uri: Platform.OS === 'ios' ? uri.replace('file://', '') : uri
+    });
 
-      console.log('Subiendo media:', uri);
-      const url = `${process.env.EXPO_PUBLIC_API_URL}/upload/${mediaType}/${authState.id}`;
-      console.log('URL:', url);
-      fetch(url, {
-        method: 'POST',
-        headers: {
-          // 'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${authState.token}`
-        },
-        body: formData
+    // if (multimedia.ok) {
+    //   formData.append('file', multimedia);
+    console.log('formdata');
+    console.log(formData);
+    console.log('Subiendo media:', uri);
+    const url = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/upload/${mediaType}/${authState.id}`;
+    console.log('URL:', url);
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        // 'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${authState.token}`
+      },
+      body: formData
+    })
+      .then((response) => console.log(response))
+      .then((data) => {
+        console.log('Success:', data);
+        if (data.error == null) {
+          const mediaUrl = data.url;
+          console.log('URL de la imagen:', mediaUrl);
+          const data = {
+            id: null,
+            senderId: authState.id,
+            message: mediaUrl,
+            timestamp: null,
+            rutamultimedia: mediaUrl
+          };
+          setMessages((prevState) => [...prevState, data]);
+          sendMessage();
+        } else {
+          console.log('Error:', data.error);
+          alert('Ha habido un error en los datos de la imagen. Vuelva a intentarlo.');
+        }
       })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log('Success:', data);
-          if (data.error == null) {
-            const mediaUrl = data.url;
-            console.log('URL de la imagen:', mediaUrl);
-            const data = {
-              id: null,
-              senderId: authState.id,
-              message: mediaUrl,
-              timestamp: null,
-              rutamultimedia: mediaUrl
-            };
-            setMessages((prevState) => [...prevState, data]);
-            sendMessage();
-          } else {
-            console.log('Error:', data.error);
-            alert('Ha habido un error al subir la imagen. Vuelva a intentarlo.');
-          }
-        })
-        .catch((error) => {
-          console.error('Error:', error);
-          alert('Ha habido un error al subir la imagen. Vuelva a intentarlo.');
-        });
-    } else {
-      alert('Error al subir la imagen, not ok');
-    }
+      .catch((error) => {
+        console.error('Error:', error);
+        alert('Ha habido un error al subir la imagen. Vuelva a intentarlo.');
+      });
+    // } else {
+    //   alert('Error al subir la imagen, not ok');
+    // }
   };
 
   const toggleSwitch = () => {
@@ -407,7 +469,7 @@ const Video = () => {
       timesegundos,
       pausado
     );
-    alert('¡Vídeo sincronizado con el otro usuario!');
+    alert('¡Vídeo sincronizado!');
     setIsEnabled(true);
     myIsEnabled.current = true;
   };
@@ -504,7 +566,7 @@ const Video = () => {
       playerRef.current?.seekTo(timesegundos, true);
       currentTime.current = timesegundos; // Guardamos el tiempo actual por haber pausado
       if (otroUsuarioOnline) {
-        alert('¡Vídeo sincronizado con el otro usuario!');
+        alert('¡Vídeo sincronizado!');
         setIsEnabled(true);
         myIsEnabled.current = true;
       } else {
@@ -541,11 +603,19 @@ const Video = () => {
 
   const handleEventoChangeVideo = (idVideo) => {
     console.log('Change video event received');
+    if (myVideoPlaying.current) {
+      ignorePause.current = true; // Para evitar bug emitir pause al cambiar de video
+    }
+
+    setVideoPlaying(true); // Play
+    myVideoPlaying.current = true;
+
     setSocketState((prevState) => ({
       ...prevState,
       idVideo: idVideo
     }));
     myIdVideo.current = idVideo;
+    currentTime.current = 0; // Reseteamos el tiempo actual
   };
 
   const handleCheckRoom = () => {
@@ -679,7 +749,23 @@ const Video = () => {
   };
 
   const handleStateChange = async (event) => {
-    console.log('Evento:', event, ' by ', authState.id, 'ignoreStateChange:', ignoreStateChange.current, ' ignorePlay:', ignorePlay.current, ' ignorePause:', ignorePause.current, ' isEnabled:', isEnabled);
+    console.log('Evento:', event, ' by ', authState.id);
+    // console.log(
+    //   'Evento:',
+    //   event,
+    //   ' by ',
+    //   authState.id,
+    //   'ignoreStateChange:',
+    //   ignoreStateChange.current,
+    //   ' ignorePlay:',
+    //   ignorePlay.current,
+    //   ' ignorePause:',
+    //   ignorePause.current,
+    //   ' isEnabled:',
+    //   isEnabled,
+    //   'receiverId:',
+    //   socketState.receiverId
+    // );
     if (event === 'playing') {
       // CASO ESPECIAL 1: Ya ha cargado el video y se requiere emitir un GET_SYNC para la sincronización
       if (emitirGetSync.current && idRoom.current != null) {
@@ -768,7 +854,7 @@ const Video = () => {
             timesegundos,
             true // true porque ya se ha mandado un evento de pause antes
           );
-          alert('¡Vídeo sincronizado con el otro usuario!');
+          alert('¡Vídeo sincronizado!');
           setIsEnabled(true);
           myIsEnabled.current = true;
         } else {
@@ -919,7 +1005,7 @@ const Video = () => {
           </Modal>
         </>
       )}
-      <View style={{ alignItems: 'center', flex: 0.7 }}>
+      <View style={{ alignItems: 'center', flex: 1 }}>
         <YoutubePlayer
           ref={playerRef}
           videoId={socketState.idVideo}
@@ -932,7 +1018,7 @@ const Video = () => {
         />
       </View>
       <View
-        style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10, flex: 0.15 }}>
+        style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10, flex: 0.2}}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Text style={{ fontSize: 12, fontWeight: 'bold', padding: 10 }}>¡Cambia el vídeo!</Text>
           <Icon
