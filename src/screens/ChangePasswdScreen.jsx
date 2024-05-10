@@ -19,6 +19,7 @@ import Toast from 'react-native-toast-message';
 export default function ChangePasswdScreen({ navigation }) {
   const { setIsRegistered } = React.useContext(AuthContext);
   const { authState } = React.useContext(AuthContext);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [oldPassword, setOldPassword] = React.useState('');
   const [isValidOldPassword, setIsValidOldPassword] = useState(false);
@@ -34,8 +35,6 @@ export default function ChangePasswdScreen({ navigation }) {
   const [isValidNew2Password, setIsValidNew2Password] = useState(false);
   const [new2PasswordError, setNew2PasswordError] = useState(false);
   const [new2HidePassword, setNew2HidePassword] = useState(true);
-
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleOldPasswordChange = (text) => {
     setOldPassword(text);

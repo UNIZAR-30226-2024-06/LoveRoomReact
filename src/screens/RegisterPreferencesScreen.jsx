@@ -7,7 +7,9 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
-  Dimensions
+  Dimensions,
+  Modal,
+  ActivityIndicator,
 } from 'react-native';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import { Picker } from '@react-native-picker/picker';
@@ -97,6 +99,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
   const [sexualPreferenceError, setSexualPreferenceError] = useState(false);
   const [fechaNacimientoError, setFechaNacimientoError] = useState(false);
   const [isValidDate, setIsValidDate] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   React.useEffect(() => {
     return () => {
@@ -109,6 +112,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
   }, []);
 
   const handleSave = () => {
+    setIsLoading(true);
     console.log(`${process.env.EXPO_PUBLIC_API_URL}/user/update`);
     fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/update`, {
       method: 'PUT',
@@ -133,6 +137,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
     })
       .then((response) => response.json())
       .then((data) => {
+        setIsLoading(false);
         console.log(data);
         if (data == 'Usuario actualizado correctamente') {
           isDataSaved.current = true;
@@ -155,6 +160,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
         }
       })
       .catch((error) => {
+        setIsLoading(false);
         console.error('Error:', error);
       });
   };
@@ -316,6 +322,22 @@ export default function RegisterPreferencesScreen({ navigation }) {
           </View>
         </View>
       </View>
+
+      <Modal
+        transparent={true}
+        animationType={'none'}
+        visible={isLoading}
+        onRequestClose={() => {
+          console.log('close modal');
+        }}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.activityIndicatorWrapper}>
+            <ActivityIndicator animating={isLoading} size="large" color="#F89F9F" />
+            <Text style={styles.loadingText}>Creando cuenta...</Text>
+          </View>
+        </View>
+      </Modal>
 
       <View style={styles.formContainer}>
         <Text style={styles.label}>Género</Text>
@@ -653,5 +675,25 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
     textAlign: 'left' // Centra el texto
+  },
+  modalBackground: {
+    flex: 1,
+    alignItems: 'center',
+    flexDirection: 'column',
+    justifyContent: 'space-around',
+    backgroundColor: '#00000040'
+  },
+  activityIndicatorWrapper: {
+    backgroundColor: '#FFFFFF',
+    height: 120,
+    width: 200,
+    borderRadius: 10,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-around'
+  },
+  loadingText: {
+    textAlign: 'center', // Centra el texto
+    flexWrap: 'wrap' // Permite que el texto se ajuste
   }
 });

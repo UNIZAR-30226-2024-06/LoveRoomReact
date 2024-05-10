@@ -17,6 +17,7 @@ import VideoScreen from '../screens/VideoScreen';
 import FAQScreen from '../screens/FAQScreen';
 import OtherProfile from '../screens/OtherProfileScreen';
 import ChangePassword from '../screens/ChangePasswdScreen';
+import Premium from '../screens/BecomePremiumScreen';
 
 const Stack = createStackNavigator();
 
@@ -92,6 +93,7 @@ export default function StackNavigator() {
           component={ChangePassword}
           options={{ headerShown: false }}
         />
+        <Stack.Screen name="Premium" component={Premium} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

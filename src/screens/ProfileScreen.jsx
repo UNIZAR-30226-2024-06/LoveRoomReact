@@ -119,21 +119,28 @@ export default function ProfileScreen({ navigation }) {
 
         <View style={styles.headlineContainer}>
           <View style={styles.headlineRectangle}>
-            <Text style={styles.headlineText}>Mi plan</Text>
+              <Text style={styles.headlineText}>Mi plan</Text>
           </View>
           <TouchableOpacity
-            style={styles.faqButton}
-            onPress={() => {
-              console.log(authState);
-            }}
+              style={styles.faqButton}
+              onPress={() => {
+                  if (authState.tipousuario === 'normal') {
+                      console.log(authState);
+                      navigation.navigate('Premium');
+                  }
+              }}
           >
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Image source={require('../img/premium.png')} style={styles.faqIcon} />
-              <Text style={styles.faqText}>¡Hazte premium!</Text>
-            </View>
-            <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage} />
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Image source={require('../img/premium.png')} style={styles.faqIcon} />
+                  {authState.tipousuario === 'normal' ? (
+                      <Text style={styles.faqText}>¡Hazte premium!</Text>
+                  ) : (
+                      <Text style={styles.faqText}>¡Eres usuario premium!</Text>
+                  )}
+              </View>
+              <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage} />
           </TouchableOpacity>
-        </View>
+      </View>
 
         <View style={styles.headlineContainer}>
           <View style={styles.headlineRectangle}>
