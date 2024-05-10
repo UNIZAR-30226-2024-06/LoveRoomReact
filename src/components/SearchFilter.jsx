@@ -13,6 +13,7 @@ import { socketEvents } from '../constants/SocketConstants';
 import { initializeSocket } from './AuthContext';
 import AuthContext from './AuthContext';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
+import Toast from 'react-native-toast-message';
 
 // Muestra los videos resultados de la búsqueda
 // Además, si se clica en un video, comprueba que se realice el match
@@ -58,7 +59,13 @@ const SearchFilter = ({
             senderId: authState.id
           }));
           setShowModal(false);
-          alert('No hay nadie viendo este vídeo, ¡espera a que alguien entre!');
+          Toast.show({
+            type: 'info',
+            position: 'bottom',
+            text1: 'Espera un momento',
+            text2: 'No hay nadie viendo este vídeo, ¡espera a que alguien entre!',
+            visibilityTime: 2500
+          });
         } else if (data.esSalaUnitaria == false) {
           // console.log("Sala con persona, ¡he hecho match!");
           setMensaje('Has hecho match con alguien, ¡disfruta la sala!');
@@ -70,13 +77,31 @@ const SearchFilter = ({
             idSala: data.idsala.toString()
           }));
           setShowModal(false);
-          alert('Has hecho match con alguien, ¡disfruta la sala!');
+          Toast.show({
+            type: 'success',
+            position: 'bottom',
+            text1: '¡Match!',
+            text2: 'Has hecho match con alguien, ¡disfruta la sala!',
+            visibilityTime: 2500
+          });
         } else if (data.message == '404 Not Found') {
           setShowModal(false);
-          alert('Error al buscar match, inténtalo de nuevo');
+          Toast.show({
+            type: 'error',
+            position: 'bottom',
+            text1: 'Error al buscar match',
+            text2: 'Error al buscar match, inténtalo de nuevo',
+            visibilityTime: 2500
+          });
         } else {
           setShowModal(false);
-          alert('Error al buscar match, inténtalo de nuevo');
+          Toast.show({
+            type: 'error',
+            position: 'bottom',
+            text1: 'Error al buscar match',
+            text2: 'Error al buscar match, inténtalo de nuevo',
+            visibilityTime: 2500
+          });
         }
       })
       .catch((error) => {

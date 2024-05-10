@@ -114,7 +114,7 @@ export default function GetEmailScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      <View style={[styles.line, { marginBottom: marginBottomLine }]} />
+      {/* <View style={[styles.line, { marginBottom: marginBottomLine }]} />
       <View style={[styles.registerContainer, { marginBottom: marginBottomBackToLogin }]}>
         <Text style={styles.registerText}>Volver al </Text>
         <TouchableOpacity
@@ -124,7 +124,7 @@ export default function GetEmailScreen({ navigation }) {
         >
           <Text style={styles.registerLink}>Login</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
     </View>
   );
 }

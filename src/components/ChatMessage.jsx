@@ -44,7 +44,7 @@ const ChatMessage = ({ data }) => {
           position: 'bottom',
           text1: 'Mensaje reportado',
           text2: 'El mensaje ha sido reportado correctamente',
-          visibilityTime: 1000
+          visibilityTime: 2500
         });
       } else {
         Toast.show({

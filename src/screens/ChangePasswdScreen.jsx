@@ -8,13 +8,17 @@ import {
   Image,
   StyleSheet,
   Platform,
+  Modal,
+  ActivityIndicator,
   StatusBar
 } from 'react-native';
 import AuthContext from '../components/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
+import Toast from 'react-native-toast-message';
 
 export default function ChangePasswdScreen({ navigation }) {
   const { setIsRegistered } = React.useContext(AuthContext);
+  const { authState } = React.useContext(AuthContext);
 
   const [oldPassword, setOldPassword] = React.useState('');
   const [isValidOldPassword, setIsValidOldPassword] = useState(false);
@@ -30,6 +34,8 @@ export default function ChangePasswdScreen({ navigation }) {
   const [isValidNew2Password, setIsValidNew2Password] = useState(false);
   const [new2PasswordError, setNew2PasswordError] = useState(false);
   const [new2HidePassword, setNew2HidePassword] = useState(true);
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleOldPasswordChange = (text) => {
     setOldPassword(text);
@@ -49,33 +55,56 @@ export default function ChangePasswdScreen({ navigation }) {
     setNew2PasswordError(false);
   };
 
-  const handlePasswordUpdate = (text) => {
+  const handlePasswordUpdate = () => {
+    setIsLoading(true);
     console.log('Contraseña actual:', oldPassword, 'Nueva contraseña:', new1Password, 'Repetir nueva contraseña:', new2Password);
     fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/update/password`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
+            Authorization: `Bearer ${authState.token}`
         },
         body: JSON.stringify({
+            
             nuevaContrasena: new1Password,
             antiguaContrasena: oldPassword,
         }),
     })
     .then((response) => response.json())
     .then((data) => {
-        console.log(data);
+        setIsLoading(false);
         if (data.error === 'Contraseña incorrecta') {
             setOldPasswordError(true);
-        } else if (data.error === 'Contraseña actualizada correctamente') {
+        } else if (data === 'Contraseña actualizada correctamente') {
             navigation.pop();
+            Toast.show({
+              type: 'success',
+              position: 'bottom',
+              text1: 'Contraseña actualizada',
+              text2: 'Se ha actualizado la contraseña correctamente',
+              visibilityTime: 2500
+            });
         } else if (data.error === 'Error al actualizar la contraseña') {
             console.log('Error al actualizar la contraseña');
-            alert('Error al actualizar la contraseña');
+            Toast.show({
+              type: 'error',
+              position: 'bottom',
+              text1: 'Error al actualizar la contraseña',
+              text2: 'Error al actualizar la contraseña, inténtalo de nuevo',
+              visibilityTime: 2500
+            });
         }
     })
     .catch((error) => {
+      setIsLoading(false);
         console.error('Error en la solicitud:', error);
-        alert('Ocurrió un error durante la solicitud');
+        Toast.show({
+          type: 'error',
+          position: 'bottom',
+          text1: 'Error en la solicitud',
+          text2: 'Ocurrió un error durante la solicitud, inténtelo de nuevo',
+          visibilityTime: 2500
+        });
     });
   };
 
@@ -86,6 +115,22 @@ export default function ChangePasswdScreen({ navigation }) {
       <View style={[styles.logoContainer, { marginBottom: -90 }]}>
         <Image style={styles.logo} source={require('../img/logoTexto.png')} />
       </View>
+
+      <Modal
+        transparent={true}
+        animationType={'none'}
+        visible={isLoading}
+        onRequestClose={() => {
+          console.log('close modal');
+        }}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.activityIndicatorWrapper}>
+            <ActivityIndicator animating={isLoading} size="large" color="#F89F9F" />
+            <Text style={styles.loadingText}>Comprobando contraseña...</Text>
+          </View>
+        </View>
+      </Modal>
 
       <View style={styles.formContainer}>
 
@@ -205,7 +250,6 @@ export default function ChangePasswdScreen({ navigation }) {
             
             if (isFormValid) {
               handlePasswordUpdate();
-              navigation.navigate('GetEmail');
             }
           }}
         >
@@ -232,6 +276,26 @@ const styles = StyleSheet.create({
   logoContainer: {
     alignItems: 'center',
     paddingTop: 130
+  },
+  modalBackground: {
+    flex: 1,
+    alignItems: 'center',
+    flexDirection: 'column',
+    justifyContent: 'space-around',
+    backgroundColor: '#00000040'
+  },
+  activityIndicatorWrapper: {
+    backgroundColor: '#FFFFFF',
+    height: 120,
+    width: 200,
+    borderRadius: 10,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-around'
+  },
+  loadingText: {
+    textAlign: 'center', // Centra el texto
+    flexWrap: 'wrap' // Permite que el texto se ajuste
   },
   logo: {
     width: 200,
