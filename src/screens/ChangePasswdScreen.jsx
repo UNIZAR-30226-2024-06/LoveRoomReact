@@ -52,14 +52,33 @@ export default function ChangePasswdScreen({ navigation }) {
   const handlePasswordUpdate = (text) => {
     console.log('Contraseña actual:', oldPassword, 'Nueva contraseña:', new1Password, 'Repetir nueva contraseña:', new2Password);
     fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/update/password`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({nuevaContrasena: new1Password, antiguaContrasena: oldPassword})
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            nuevaContrasena: new1Password,
+            antiguaContrasena: oldPassword,
+        }),
     })
-      .then((response) => {
+    .then((response) => response.json())
+    .then((data) => {
+        console.log(data);
+        if (data.error === 'Contraseña incorrecta') {
+            setOldPasswordError(true);
+        } else if (data.error === 'Contraseña actualizada correctamente') {
+            navigation.pop();
+        } else if (data.error === 'Error al actualizar la contraseña') {
+            console.log('Error al actualizar la contraseña');
+            alert('Error al actualizar la contraseña');
+        }
+    })
+    .catch((error) => {
+        console.error('Error en la solicitud:', error);
+        alert('Ocurrió un error durante la solicitud');
+    });
   };
+
 
 
   return (
