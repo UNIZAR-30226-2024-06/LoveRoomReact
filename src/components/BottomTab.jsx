@@ -10,11 +10,18 @@ import ProfileScreen from '../screens/ProfileScreen';
 import { Image } from 'react-native';
 import AuthContext from './AuthContext';
 import MyRoomsScreen from '../screens/MyRoomsScreen';
+import NotRegisteredScreen from '../screens/NotRegisteredScreen';
 
 const Tab = createBottomTabNavigator();
 
 export default function BottomTab({ initialScreen }) {
   const { authState, setAuthState } = React.useContext(AuthContext);
+
+  if (!authState.isLoggedIn || authState.token === null) {
+    return (
+      <NotRegisteredScreen/>
+    );
+  }
 
   const ImageProfile = (size, color) => {
     if (authState.isLoggedIn) {
