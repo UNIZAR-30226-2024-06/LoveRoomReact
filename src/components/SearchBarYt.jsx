@@ -187,7 +187,7 @@ const SearchBar = ({ setVideoUrl }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#F89F9F" />
         <Text>Cargando videos de interes...</Text>
       </View>
     );

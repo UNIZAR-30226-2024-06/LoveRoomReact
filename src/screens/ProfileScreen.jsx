@@ -144,7 +144,7 @@ export default function ProfileScreen({ navigation }) {
                   {authState.tipousuario === 'normal' ? (
                       <Text style={styles.faqText}>¡Hazte premium!</Text>
                   ) : (
-                      <Text style={styles.faqText}>¡Eres usuario premium!</Text>
+                      <Text style={styles.faqText}>Eres usuario premium</Text>
                   )}
               </View>
               <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage} />

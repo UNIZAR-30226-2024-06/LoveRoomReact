@@ -13,7 +13,7 @@ import Toast from 'react-native-toast-message';
 
 const { width: ScreenWidth } = Dimensions.get('screen');
 
-const App = () => {
+const App = ( {navigation}) => {
   // Inicializa selectedPlan con 'premium' para que esté seleccionado por defecto
   const [selectedPlan, setSelectedPlan] = useState('premium');
   const { authState, setAuthState } = React.useContext(AuthContext);
@@ -24,38 +24,30 @@ const App = () => {
   };
 
   // Función para manejar el botón de continuar
-  // const handleContinue = () => {
-  //   console.log(authState.tipousuario)
-  //   if (authState.tipousuario == 'premium') {
-  //     switch (selectedPlan) {
-  //       case 'premium':
-  //         navigator.pop();
-  //         Toast.show({
-  //           type: 'success',
-  //           position: 'bottom',
-  //           text1: 'Ya eres premium',
-  //           text2: 'No se han realizado cambios en tu suscripción',
-  //           visibilityTime: 2500
-  //         });
+  const handleContinue = () => {
+    console.log(authState.tipousuario)
+    console.log("plan selec:", selectedPlan)
+    switch (selectedPlan) {
+      case 'premium':
+        navigation.navigate('Payment');
+        break;
 
-  //         case 'normal':
-  //           setAuthState({ ...authState, tipousuario: 'normal' });
-  //           navigator.pop();
-  //           Toast.show({
-  //             type: 'success',
-  //             position: 'bottom',
-  //             text1: 'Plan cambiado correctamente',
-  //             text2: 'Se han eliminado las funcionalidades premium',
-  //             visibilityTime: 2500
-  //           });
-
-
-  //   if (selectedPlan === 'premium') {
-  //     // Haz algo si el plan seleccionado es premium
-  //   } else if (selectedPlan === 'básico') {
-  //     navigation.pop();
-  //   }
-  // };
+      case 'básico':
+        navigation.pop();
+        Toast.show({
+          type: 'info',
+          position: 'bottom',
+          text1: 'Sigues siendo usuario básico',
+          text2: 'No se han realizado cambios en tu suscripción',
+          visibilityTime: 2500
+        });
+        break;
+        
+      default:
+        break;
+    }
+  };
+  
   
 
   const ContinueButton = (  ) => (

@@ -30,6 +30,7 @@ import defaultProfilePicture from '../img/perfil-vacio.png';
 import SearchBar from '../components/SearchBarYt';
 import OtherProfile from './OtherProfileScreen';
 import mime from 'mime';
+import axios from 'axios';
 
 const Video = () => {
   const navigation = useNavigation();
@@ -357,59 +358,75 @@ const Video = () => {
     //   name: uri.split('/').pop()
     // });
 
-    const data = new FormData();
+    const formData = new FormData();
     const uriParts = uri.split('.');
     const fileType = uriParts[uriParts.length - 1];
 
-    data.append('file', {
-      name: 'image',
-      type: `image/${fileType}`,
-      fileName: Platform.OS === 'ios' ? uri.replace('file://', '') : uri
-    });
+    // img = await fetch(uri);
+    // formData.append('file', {
+    //   name: 'image',
+    //   type: `image/${fileType}`,
+    //   img: img,
+    //   fileName: uri
+    // });
 
-    imagne = await fetch(uri);
-    // if (multimedia.ok) {
-    //   formData.append('file', multimedia);
-    console.log('formdata');
-    console.log(formData);
-    console.log('Subiendo media:', uri);
     const url = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/upload/${mediaType}/${authState.id}`;
     console.log('URL:', url);
-    fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${authState.token}`
-      },
-      body: formData
-    })
-      .then((response) => console.log(response))
-      .then((data) => {
-        console.log('Success:', data);
-        if (data.error == null) {
-          const mediaUrl = data.url;
-          console.log('URL de la imagen:', mediaUrl);
-          const data = {
-            id: null,
-            senderId: authState.id,
-            message: mediaUrl,
-            timestamp: null,
-            rutamultimedia: mediaUrl
-          };
-          setMessages((prevState) => [...prevState, data]);
-          sendMessage();
-        } else {
-          console.log('Error:', data.error);
-          alert('Ha habido un error en los datos de la imagen. Vuelva a intentarlo.');
-        }
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-        alert('Ha habido un error al subir la imagen. Vuelva a intentarlo.');
-      });
-    // } else {
-    //   alert('Error al subir la imagen, not ok');
-    // }
+    fetch(uri)
+    .then(response => response)
+    .then(blob => {
+      formData.append('file', blob);x
+
+      axios.post(url, formData)
+        .then(response => {
+          console.log('Image uploaded successfully: ', response);
+        })
+        .catch(error => {
+          console.error('Error uploading image: ', error);
+        });
+    });
+    // if (multimedia.ok) {
+    //   formData.append('file', multimedia);
+    // console.log('formdata');
+    // console.log(formData);
+    // console.log('Subiendo media:', uri);
+    
+  //   console.log('URL:', url);
+  //   fetch(url, {
+  //     method: 'POST',
+  //     headers: {
+  //       // 'Content-Type': 'multipart/form-data',
+  //       Authorization: `Bearer ${authState.token}`
+  //     },
+  //     body: formData
+  //   })
+  //     .then((response) => console.log(response))
+  //     .then((data) => {
+  //       console.log('Success:', data);
+  //       if (data.error == null) {
+  //         const mediaUrl = data.url;
+  //         console.log('URL de la imagen:', mediaUrl);
+  //         const data = {
+  //           id: null,
+  //           senderId: authState.id,
+  //           message: mediaUrl,
+  //           timestamp: null,
+  //           rutamultimedia: mediaUrl
+  //         };
+  //         setMessages((prevState) => [...prevState, data]);
+  //         sendMessage();
+  //       } else {
+  //         console.log('Error:', data.error);
+  //         alert('Ha habido un error en los datos de la imagen. Vuelva a intentarlo.');
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.error('Error:', error);
+  //       alert('Ha habido un error al subir la imagen. Vuelva a intentarlo.');
+  //     });
+  //   // } else {
+  //   //   alert('Error al subir la imagen, not ok');
+  //   // }
   };
 
   const toggleSwitch = () => {
