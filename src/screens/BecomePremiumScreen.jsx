@@ -6,27 +6,25 @@ import {
   StatusBar,
   TouchableOpacity,
   SafeAreaView,
+  ScrollView,
 } from 'react-native';
 import SubscribeCard from 'react-native-subscribe-card';
 import AuthContext from '../components/AuthContext';
 import Toast from 'react-native-toast-message';
 
-const { width: ScreenWidth } = Dimensions.get('screen');
+const { width: ScreenWidth, height: ScreenHeight } = Dimensions.get('window');
 
-const App = ( {navigation}) => {
-  // Inicializa selectedPlan con 'premium' para que esté seleccionado por defecto
+const App = ({ navigation }) => {
   const [selectedPlan, setSelectedPlan] = useState('premium');
-  const { authState, setAuthState } = React.useContext(AuthContext);
+  const { authState } = React.useContext(AuthContext);
 
-  // Función para manejar la selección de un plan
   const handlePlanSelect = (planName) => {
     setSelectedPlan(planName);
   };
 
-  // Función para manejar el botón de continuar
   const handleContinue = () => {
-    console.log(authState.tipousuario)
-    console.log("plan selec:", selectedPlan)
+    console.log(authState.tipousuario);
+    console.log("plan selec:", selectedPlan);
     switch (selectedPlan) {
       case 'premium':
         navigation.navigate('Payment');
@@ -42,25 +40,18 @@ const App = ( {navigation}) => {
           visibilityTime: 2500
         });
         break;
-        
+
       default:
         break;
     }
   };
-  
-  
 
-  const ContinueButton = (  ) => (
-    <View
-      style={{
-        flex: 1,
-        marginBottom: 16,
-        justifyContent: 'flex-end',
-      }}>
+  const ContinueButton = () => (
+    <View style={{ marginBottom: 16, alignItems: 'center' }}>
       <TouchableOpacity
-      onPress={() => {
-        handleContinue();
-      }}
+        onPress={() => {
+          handleContinue();
+        }}
         style={{
           height: 50,
           borderRadius: 12,
@@ -105,7 +96,7 @@ const App = ( {navigation}) => {
   );
 
   const Plans = () => (
-    <View style={{ height: '45%', marginTop: 64, justifyContent: 'space-evenly' }}>
+    <View style={{ height: ScreenHeight * 0.45, marginTop: 64, justifyContent: 'space-evenly' }}>
       <SubscribeCard
         title="Plan premium"
         descriptionPrice=" "
@@ -133,12 +124,16 @@ const App = ( {navigation}) => {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff', alignItems: 'center' }}>
+    <ScrollView contentContainerStyle={{ flexGrow: 1, backgroundColor: '#ffffff' }}>
       <StatusBar barStyle="light-content" />
-      <HeaderContainer />
-      <Plans />
-      <ContinueButton />
-    </SafeAreaView>
+      <SafeAreaView style={{ flex: 1 }}>
+        <View style={{ flex: 1, alignItems: 'center' }}>
+          <HeaderContainer />
+          <Plans />
+          <ContinueButton />
+        </View>
+      </SafeAreaView>
+    </ScrollView>
   );
 };
 

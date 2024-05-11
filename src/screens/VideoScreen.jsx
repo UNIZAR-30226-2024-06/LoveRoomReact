@@ -375,7 +375,7 @@ const Video = () => {
     fetch(uri)
     .then(response => response)
     .then(blob => {
-      formData.append('file', blob);x
+      formData.append('file', blob);
 
       axios.post(url, formData)
         .then(response => {
@@ -931,7 +931,7 @@ const Video = () => {
       <Modal transparent={true} animationType={'none'} visible={modalCargaMatch}>
         <View style={styles.modalBackground}>
           <View style={styles.activityIndicatorWrapper}>
-            <ActivityIndicator animating={modalCargaMatch} size="large" color="#0000ff" />
+            <ActivityIndicator animating={modalCargaMatch} size="large" color="#F89F9F" />
             <Text>Buscando match... </Text>
           </View>
         </View>

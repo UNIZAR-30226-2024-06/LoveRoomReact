@@ -202,7 +202,7 @@ const SearchBar = ({ setVideoUrl }) => {
       <Modal transparent={true} animationType={'none'} visible={showModal}>
         <View style={styles.modalBackground}>
           <View style={styles.activityIndicatorWrapper}>
-            <ActivityIndicator animating={showModal} size="large" color="#0000ff" />
+            <ActivityIndicator animating={showModal} size="large" color="#F89F9F" />
             <Text>Buscando match... </Text>
           </View>
         </View>
