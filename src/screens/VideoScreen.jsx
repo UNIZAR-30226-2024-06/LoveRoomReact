@@ -58,6 +58,8 @@ const Video = () => {
   const myVideoPlaying = useRef(false);
   const myIsEnabled = useRef(true);
   const myIdVideo = useRef('');
+  // Para evitar que salga de la sala cuando la app se encuentra en background
+  const ignoreBackgroundChange = useRef(false);
 
   useEffect(() => {
     const appstateList = AppState.addEventListener('change', handleAppStateChange);
@@ -67,8 +69,19 @@ const Video = () => {
     };
   }, []);
 
+  // TODO: la primera vez que se pone en background se desconecta aunque esté en true
   const handleAppStateChange = (nextAppState) => {
-    if (nextAppState === 'background') {
+    // setTimeout(() => {
+    if (nextAppState === 'background' && ignoreBackgroundChange.current == false) {
+      console.log('App is in background mode');
+      if (ignoreBackgroundChange.current) {
+        console.log('Ignorando evento handleAppStateChange');
+        return;
+      }
+      console.log('comienza el timeout');
+      // Retrasar la ejecución del siguiente bloque de código
+
+      console.log('Desconectando sala');
       // La aplicación ha pasado al fondo, desconecta el socket
       socketState.socket.emit(socketEvents.LEAVE_ROOM, socketState.idSala);
       socketState.socket.disconnect();
@@ -85,6 +98,7 @@ const Video = () => {
       ignorePause.current = true; // Para evitar bug emitir pause al salir de sala si estaba playing
       navigation.goBack();
     }
+    // }, 10000); // Retrasar la ejecución en 1000 milisegundos (1 segundo)
   };
 
   useEffect(() => {
@@ -318,6 +332,8 @@ const Video = () => {
   }, [socketState.idSala]);
 
   const handleImagePicker = async (mediaType) => {
+    ignoreBackgroundChange.current = true; // Para que no salga de la sala
+    console.log('handleImagePicker ', ignoreBackgroundChange.current);
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
       alert('Sorry, we need camera roll permissions to make this work!');
@@ -337,6 +353,14 @@ const Video = () => {
         await uploadMedia(result.assets[0].uri, mediaType);
       }
     }
+    // TODO: no sirve para nada
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        ignoreBackgroundChange.current = false;
+        console.log('handleImagePicker ', ignoreBackgroundChange.current);
+      }, 10000);
+      return () => clearTimeout(timer);
+    }, []);
   };
 
   const uploadMedia = async (uri, mediaType) => {
@@ -372,14 +396,14 @@ const Video = () => {
       .then((res) => {
         console.log('response' + JSON.stringify(res));
         if (res.error == null) {
-          const mediaUrl = res.nombreArchivo;
-          console.log('URL de la imagen:', mediaUrl);
+          const mediaName = res.nombreArchivo;
+          console.log('URL de la imagen:', mediaName);
           const data = {
             id: null,
             senderId: authState.id,
-            message: mediaUrl,
+            message: mediaName,
             timestamp: null,
-            rutamultimedia: mediaUrl
+            rutamultimedia: mediaName
           };
           setMessages((prevState) => [...prevState, data]);
           sendMessage();
@@ -388,8 +412,8 @@ const Video = () => {
           alert('Ha habido un error en los datos de la imagen. Vuelva a intentarlo.');
         }
       })
-      .catch((e) => console.log(e))
-      .done();
+      .catch((e) => console.log(e));
+    // .done();
   };
 
   const toggleSwitch = () => {
