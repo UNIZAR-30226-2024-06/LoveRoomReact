@@ -394,69 +394,62 @@ const Video = () => {
     // TODO: no sirve para nada
   };
 
-  const uploadMedia = async (uri, mediaType) => {
-    const multimedia = await fetch(uri);
-  
-    console.log('Subiendo media:', uri);
-  
-    const formData = new FormData();
-    const uriParts = uri.split('.');
-    const fileType = uriParts[uriParts.length - 1];
-  
-    formData.append('file', {
-      uri: uri,
-      type: mime.getType(uri),
-      name: uri.split('/').pop()
-    });
-    console.log('Formdata: ', formData);
-  
-    const url = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/upload/${mediaType}/${authState.id}`;
-    console.log('URL:', url);
-    
-    fetch(uri)
-    .then(response => response.blob())
-    .then(blob => {
-      formData.append('file', blob);
-  
-      console.log('URL:', url);
-      fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${authState.token}`
-        },
-        body: formData
-      })
-      .then((res) => res.json())
-      .then((res) => {
-        console.log('response' + JSON.stringify(res));
-        if (res.error == null) {
-          const mediaName = res.nombreArchivo;
-          console.log('URL de la imagen:', mediaName);
-          const data = {
-            id: null,
-            senderId: authState.id,
-            message: mediaName,
-            timestamp: null,
-            rutamultimedia: mediaName
-          };
-          setMessages((prevState) => [...prevState, data]);
-          sendMessage();
-        } else {
-          console.log('Error: guardando mensaje ', res.error);
-          Toast.show({
-            type: 'error',
-            position: 'bottom',
-            text1: 'Error',
-            text2: 'Error al subir la imagen',
-            visibilityTime: 2500
-          });
-        }
-      })
-      .catch((e) => console.log(e));
-    });
-  };
-  
+  // const uploadMedia = async (uri, mediaType) => {
+  //   const multimedia = await fetch(uri);
+
+  //   console.log('Subiendo media:', uri);
+
+  //   const formData = new FormData();
+  //   const uriParts = uri.split('.');
+  //   const fileType = uriParts[uriParts.length - 1];
+
+  //   formData.append('file', {
+  //     uri: uri,
+  //     type: mime.getType(uri),
+  //     name: uri.split('/').pop()
+  //   });
+  //   console.log('Formdata: ', formData);
+
+  //   const url = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/upload/${mediaType}/${authState.id}`;
+  //   console.log('URL:', url);
+  //   fetch(uri)
+  //   .then(response => response)
+  //   .then(blob => {
+  //     formData.append('file', blob);
+
+  //   console.log('URL:', url);
+  //   fetch(url, {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'multipart/form-data',
+  //       Authorization: `Bearer ${authState.token}`
+  //     },
+  //     body: formData
+  //   })
+  //     .then((res) => res.json())
+  //     .then((res) => {
+  //       console.log('response' + JSON.stringify(res));
+  //       if (res.error == null) {
+  //         const mediaName = res.nombreArchivo;
+  //         console.log('URL de la imagen:', mediaName);
+  //         const data = {
+  //           id: null,
+  //           senderId: authState.id,
+  //           message: mediaName,
+  //           timestamp: null,
+  //           rutamultimedia: mediaName
+  //         };
+  //         setMessages((prevState) => [...prevState, data]);
+  //         sendMessage();
+  //       } else {
+  //         console.log('Error: guardando mensaje ', data.error);
+  //         alert('Ha habido un error en los datos de la imagen. Vuelva a intentarlo.');
+  //       }
+  //     })
+  //     .catch((e) => console.log(e));
+  //   // .done();
+  //   );
+  // };
 
   const toggleSwitch = () => {
     setIsEnabled((previousState) => {
