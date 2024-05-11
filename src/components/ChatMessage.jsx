@@ -58,8 +58,67 @@ const ChatMessage = ({ data }) => {
     }, 500);
   };
 
-  // const handleMultimedia = async (uri) => {
-  //   console.log('uri: ', uri);
+  // const [imageUrl, setImageUrl] = React.useState(null);
+
+  // const fetchMultimedia = async (mediaName) => {
+  //   const url = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/${mediaName}/${authState.id}`;
+  //   console.log('URL:', url);
+  //   console.log('Fetch media:', mediaName);
+
+  //   console.log('URL:', url);
+  //   fetch(url, {
+  //     method: 'GET',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //       Authorization: `Bearer ${authState.token}`
+  //     }
+  //   })
+  //     .then((response) => {
+  //       console.log('Success info receiver');
+  //       // Create an object URL for the response
+  //       const objectURL = URL.createObjectURL(response);
+  //       console.log('Success:', objectURL);
+  //       // Set the image URL in the state so it can be displayed in your app
+  //       return objectURL;
+  //     })
+  //     .catch((error) => {
+  //       console.error('Error:', error);
+  //     });
+  // };
+
+  // React.useEffect(async () => {
+  //   if (data.rutamultimedia) {
+  //     fetchMultimedia(data.rutamultimedia)
+  //       .then((url) => setImageUrl(url))
+  //       .catch((error) => console.error('Error:', error));
+  //   }
+  // }, [data.rutamultimedia]);
+
+  const [imagePlace, setImage] = useState('');
+  // React.useEffect(async () => {
+  //   if (!data.rutamultimedia) {
+  //     console.log('noruta');
+  //   } else {
+  //     try {
+  //       const url = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/${mediaName}/${authState.id}`;
+  //       console.log('URL:', url);
+  //       console.log('Fetch media:', mediaName);
+
+  //       console.log('URL:', url);
+  //       const res = await fetch(url, {
+  //         method: 'GET',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //           Authorization: `Bearer ${authState.token}`
+  //         }
+  //       });
+  //       const data = await res.blob();
+  //       setImage(URL.createObjectURL(data));
+  //     } catch (error) {
+  //       console.error(error);
+  //     }
+  //   }
+  // });
 
   const MessageContent = () => (
     <>
@@ -76,8 +135,8 @@ const ChatMessage = ({ data }) => {
         />
         <View>
           {/* TODO: así se llama a la ruta del backend o hay que hacer un fetch */}
-          {data.imageUri ? (
-            <Image source={{ uri: data.multimedia }} style={{ width: 100, height: 100 }} />
+          {imagePlace ? (
+            <Image source={{ uri: imagePlace }} style={{ width: 100, height: 100 }} />
           ) : (
             <Text style={styles.messageText}>{data.message}</Text>
           )}

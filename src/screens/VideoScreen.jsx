@@ -12,7 +12,7 @@ import {
   StatusBar,
   Switch,
   Alert,
-  ActivityIndicator, 
+  ActivityIndicator,
   AppState
 } from 'react-native';
 import YoutubePlayer from 'react-native-youtube-iframe';
@@ -58,17 +58,32 @@ const Video = () => {
   const myVideoPlaying = useRef(false);
   const myIsEnabled = useRef(true);
   const myIdVideo = useRef('');
+  // Para evitar que salga de la sala cuando la app se encuentra en background
+  const ignoreBackgroundChange = useRef(false);
 
   useEffect(() => {
     const appstateList = AppState.addEventListener('change', handleAppStateChange);
-  
+
     return () => {
       appstateList?.remove();
     };
   }, []);
-  
+
+  // TODO: la primera vez que se pone en background se desconecta aunque esté en true
   const handleAppStateChange = (nextAppState) => {
-    if (nextAppState === 'background') {
+    // setTimeout(() => {
+    console.log('AppState:', nextAppState);
+    console.log('ignoreBackgroundChange en background:', ignoreBackgroundChange.current);
+    if (nextAppState === 'background' && ignoreBackgroundChange.current == false) {
+      console.log('App is in background mode');
+      if (ignoreBackgroundChange.current) {
+        console.log('Ignorando evento handleAppStateChange');
+        return;
+      }
+      console.log('comienza el timeout');
+      // Retrasar la ejecución del siguiente bloque de código
+
+      console.log('Desconectando sala');
       // La aplicación ha pasado al fondo, desconecta el socket
       socketState.socket.emit(socketEvents.LEAVE_ROOM, socketState.idSala);
       socketState.socket.disconnect();
@@ -85,6 +100,7 @@ const Video = () => {
       ignorePause.current = true; // Para evitar bug emitir pause al salir de sala si estaba playing
       navigation.goBack();
     }
+    // }, 10000); // Retrasar la ejecución en 1000 milisegundos (1 segundo)
   };
 
   useEffect(() => {
@@ -198,7 +214,7 @@ const Video = () => {
               if (myVideoPlaying.current) {
                 ignorePause.current = true; // Para evitar bug emitir pause al cambiar de video
               }
-    
+
               setVideoPlaying(true); // Play
               myVideoPlaying.current = true;
 
@@ -318,6 +334,8 @@ const Video = () => {
   }, [socketState.idSala]);
 
   const handleImagePicker = async (mediaType) => {
+    ignoreBackgroundChange.current = true; // Para que no salga de la sala
+    console.log('handleImagePicker ', ignoreBackgroundChange.current);
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
       alert('Sorry, we need camera roll permissions to make this work!');
@@ -332,43 +350,33 @@ const Video = () => {
       console.log(result);
 
       if (!result.cancelled) {
+        ignoreBackgroundChange.current = false;
         // Handle the selected image or video
         console.log(result.assets[0].uri);
-        // TODO: enviar al servidor la imagen
         await uploadMedia(result.assets[0].uri, mediaType);
+      } else {
+        ignoreBackgroundChange.current = false;
+        console.log('Cancelado');
       }
     }
+    // TODO: no sirve para nada
   };
 
-  // TODO:
   const uploadMedia = async (uri, mediaType) => {
-    // const uriParts = uri.split('.');
-    // const fileType = uriParts[uriParts.length - 1];
-    // const formData = new FormData();
-    // const multimedia = await fetch(uri);
+    const multimedia = await fetch(uri);
 
     console.log('Subiendo media:', uri);
-
-    // const newImageUri = 'file:///' + uri.split('file:/').join('');
-    // console.log('newImageUri:', newImageUri);
-    // const formData = new FormData();
-    // formData.append('image', {
-    //   uri: uri,
-    //   type: mime.getType(uri),
-    //   name: uri.split('/').pop()
-    // });
 
     const formData = new FormData();
     const uriParts = uri.split('.');
     const fileType = uriParts[uriParts.length - 1];
 
-    // img = await fetch(uri);
-    // formData.append('file', {
-    //   name: 'image',
-    //   type: `image/${fileType}`,
-    //   img: img,
-    //   fileName: uri
-    // });
+    formData.append('file', {
+      uri: uri,
+      type: mime.getType(uri),
+      name: uri.split('/').pop()
+    });
+    console.log('Formdata: ', formData);
 
     const url = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/upload/${mediaType}/${authState.id}`;
     console.log('URL:', url);
@@ -377,56 +385,37 @@ const Video = () => {
     .then(blob => {
       formData.append('file', blob);
 
-      axios.post(url, formData)
-        .then(response => {
-          console.log('Image uploaded successfully: ', response);
-        })
-        .catch(error => {
-          console.error('Error uploading image: ', error);
-        });
-    });
-    // if (multimedia.ok) {
-    //   formData.append('file', multimedia);
-    // console.log('formdata');
-    // console.log(formData);
-    // console.log('Subiendo media:', uri);
-    
-  //   console.log('URL:', url);
-  //   fetch(url, {
-  //     method: 'POST',
-  //     headers: {
-  //       // 'Content-Type': 'multipart/form-data',
-  //       Authorization: `Bearer ${authState.token}`
-  //     },
-  //     body: formData
-  //   })
-  //     .then((response) => console.log(response))
-  //     .then((data) => {
-  //       console.log('Success:', data);
-  //       if (data.error == null) {
-  //         const mediaUrl = data.url;
-  //         console.log('URL de la imagen:', mediaUrl);
-  //         const data = {
-  //           id: null,
-  //           senderId: authState.id,
-  //           message: mediaUrl,
-  //           timestamp: null,
-  //           rutamultimedia: mediaUrl
-  //         };
-  //         setMessages((prevState) => [...prevState, data]);
-  //         sendMessage();
-  //       } else {
-  //         console.log('Error:', data.error);
-  //         alert('Ha habido un error en los datos de la imagen. Vuelva a intentarlo.');
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.error('Error:', error);
-  //       alert('Ha habido un error al subir la imagen. Vuelva a intentarlo.');
-  //     });
-  //   // } else {
-  //   //   alert('Error al subir la imagen, not ok');
-  //   // }
+    console.log('URL:', url);
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${authState.token}`
+      },
+      body: formData
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        console.log('response' + JSON.stringify(res));
+        if (res.error == null) {
+          const mediaName = res.nombreArchivo;
+          console.log('URL de la imagen:', mediaName);
+          const data = {
+            id: null,
+            senderId: authState.id,
+            message: mediaName,
+            timestamp: null,
+            rutamultimedia: mediaName
+          };
+          setMessages((prevState) => [...prevState, data]);
+          sendMessage();
+        } else {
+          console.log('Error: guardando mensaje ', data.error);
+          alert('Ha habido un error en los datos de la imagen. Vuelva a intentarlo.');
+        }
+      })
+      .catch((e) => console.log(e));
+    // .done();
   };
 
   const toggleSwitch = () => {
@@ -1036,7 +1025,7 @@ const Video = () => {
         />
       </View>
       <View
-        style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10, flex: 0.2}}>
+        style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10, flex: 0.2 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Text style={{ fontSize: 12, fontWeight: 'bold', padding: 10 }}>¡Cambia el vídeo!</Text>
           <Icon
