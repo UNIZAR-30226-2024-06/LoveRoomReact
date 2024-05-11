@@ -12,7 +12,7 @@ import {
   StatusBar,
   Switch,
   Alert,
-  ActivityIndicator, 
+  ActivityIndicator,
   AppState
 } from 'react-native';
 import YoutubePlayer from 'react-native-youtube-iframe';
@@ -61,12 +61,12 @@ const Video = () => {
 
   useEffect(() => {
     const appstateList = AppState.addEventListener('change', handleAppStateChange);
-  
+
     return () => {
       appstateList?.remove();
     };
   }, []);
-  
+
   const handleAppStateChange = (nextAppState) => {
     if (nextAppState === 'background') {
       // La aplicación ha pasado al fondo, desconecta el socket
@@ -198,7 +198,7 @@ const Video = () => {
               if (myVideoPlaying.current) {
                 ignorePause.current = true; // Para evitar bug emitir pause al cambiar de video
               }
-    
+
               setVideoPlaying(true); // Play
               myVideoPlaying.current = true;
 
@@ -334,99 +334,62 @@ const Video = () => {
       if (!result.cancelled) {
         // Handle the selected image or video
         console.log(result.assets[0].uri);
-        // TODO: enviar al servidor la imagen
         await uploadMedia(result.assets[0].uri, mediaType);
       }
     }
   };
 
-  // TODO:
   const uploadMedia = async (uri, mediaType) => {
-    // const uriParts = uri.split('.');
-    // const fileType = uriParts[uriParts.length - 1];
-    // const formData = new FormData();
-    // const multimedia = await fetch(uri);
+    const multimedia = await fetch(uri);
 
     console.log('Subiendo media:', uri);
-
-    // const newImageUri = 'file:///' + uri.split('file:/').join('');
-    // console.log('newImageUri:', newImageUri);
-    // const formData = new FormData();
-    // formData.append('image', {
-    //   uri: uri,
-    //   type: mime.getType(uri),
-    //   name: uri.split('/').pop()
-    // });
 
     const formData = new FormData();
     const uriParts = uri.split('.');
     const fileType = uriParts[uriParts.length - 1];
 
-    // img = await fetch(uri);
-    // formData.append('file', {
-    //   name: 'image',
-    //   type: `image/${fileType}`,
-    //   img: img,
-    //   fileName: uri
-    // });
+    formData.append('file', {
+      uri: uri,
+      type: mime.getType(uri),
+      name: uri.split('/').pop()
+    });
+    console.log('Formdata: ', formData);
 
     const url = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/upload/${mediaType}/${authState.id}`;
     console.log('URL:', url);
-    fetch(uri)
-    .then(response => response)
-    .then(blob => {
-      formData.append('file', blob);x
+    console.log('Subiendo media:', uri);
 
-      axios.post(url, formData)
-        .then(response => {
-          console.log('Image uploaded successfully: ', response);
-        })
-        .catch(error => {
-          console.error('Error uploading image: ', error);
-        });
-    });
-    // if (multimedia.ok) {
-    //   formData.append('file', multimedia);
-    // console.log('formdata');
-    // console.log(formData);
-    // console.log('Subiendo media:', uri);
-    
-  //   console.log('URL:', url);
-  //   fetch(url, {
-  //     method: 'POST',
-  //     headers: {
-  //       // 'Content-Type': 'multipart/form-data',
-  //       Authorization: `Bearer ${authState.token}`
-  //     },
-  //     body: formData
-  //   })
-  //     .then((response) => console.log(response))
-  //     .then((data) => {
-  //       console.log('Success:', data);
-  //       if (data.error == null) {
-  //         const mediaUrl = data.url;
-  //         console.log('URL de la imagen:', mediaUrl);
-  //         const data = {
-  //           id: null,
-  //           senderId: authState.id,
-  //           message: mediaUrl,
-  //           timestamp: null,
-  //           rutamultimedia: mediaUrl
-  //         };
-  //         setMessages((prevState) => [...prevState, data]);
-  //         sendMessage();
-  //       } else {
-  //         console.log('Error:', data.error);
-  //         alert('Ha habido un error en los datos de la imagen. Vuelva a intentarlo.');
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.error('Error:', error);
-  //       alert('Ha habido un error al subir la imagen. Vuelva a intentarlo.');
-  //     });
-  //   // } else {
-  //   //   alert('Error al subir la imagen, not ok');
-  //   // }
+    console.log('URL:', url);
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${authState.token}`
+      },
+      body: formData
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        console.log('response' + JSON.stringify(res));
+        if (res.error == null) {
+          const mediaUrl = res.nombreArchivo;
+          console.log('URL de la imagen:', mediaUrl);
+          const data = {
+            id: null,
+            senderId: authState.id,
+            message: mediaUrl,
+            timestamp: null,
+            rutamultimedia: mediaUrl
+          };
+          setMessages((prevState) => [...prevState, data]);
+          sendMessage();
+        } else {
+          console.log('Error: guardando mensaje ', data.error);
+          alert('Ha habido un error en los datos de la imagen. Vuelva a intentarlo.');
+        }
+      })
+      .catch((e) => console.log(e))
+      .done();
   };
 
   const toggleSwitch = () => {
@@ -1036,7 +999,7 @@ const Video = () => {
         />
       </View>
       <View
-        style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10, flex: 0.2}}>
+        style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10, flex: 0.2 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Text style={{ fontSize: 12, fontWeight: 'bold', padding: 10 }}>¡Cambia el vídeo!</Text>
           <Icon
