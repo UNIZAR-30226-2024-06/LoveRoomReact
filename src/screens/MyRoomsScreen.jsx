@@ -84,11 +84,23 @@ const MyRoomsScreen = () => {
         const updatedRooms = myRooms.filter((room) => room.idsala !== roomId);
         setMyRooms(updatedRooms);
       } else {
-        alert('Ha habido un error al eliminar la sala. Por favor, inténtelo de nuevo.');
+        Toast.show({
+          type: 'error',
+          position: 'bottom',
+          text1: 'Error al eliminar la sala',
+          text2: 'Ha habido un error al eliminar la sala. Por favor, inténtelo de nuevo.',
+          visibilityTime: 2500
+        });
       }
     } catch (error) {
       console.error('Error al eliminar la sala:', error);
-      alert('Ha habido un error al eliminar la sala. Por favor, inténtelo de nuevo.');
+      Toast.show({
+        type: 'error',
+        position: 'bottom',
+        text1: 'Error al eliminar la sala',
+        text2: 'Ha habido un error al eliminar la sala. Por favor, inténtelo de nuevo.',
+        visibilityTime: 2500
+      });
     }
     console.log('Eliminando sala:', roomId);
   };
@@ -220,11 +232,23 @@ const MyRoomsScreen = () => {
           ));
           setMyRooms(updatedRooms);
         } else {
-          alert('Ha habido un error al cambiar el nombre del video. Por favor, inténtelo de nuevo.');
+          Toast.show({
+            type: 'error',
+            position: 'bottom',
+            text1: 'Error al cambiar el nombre',
+            text2: 'Ha habido un error al cambiar el nombre del video. Por favor, inténtelo de nuevo.',
+            visibilityTime: 2500
+          });
         }
       } catch (error) {
         console.error('Error al cambiar el nombre del video:', error);
-        alert('Ha habido un error al cambiar el nombre del video. Por favor, inténtelo de nuevo.');
+        Toast.show({
+          type: 'error',
+          position: 'bottom',
+          text1: 'Error al cambiar el nombre',
+          text2: 'Ha habido un error al cambiar el nombre del video. Por favor, inténtelo de nuevo.',
+          visibilityTime: 2500
+        });
       }
     }
     idSala.current = '';  
@@ -251,7 +275,7 @@ const MyRoomsScreen = () => {
       <Modal transparent={true} animationType={'none'} visible={viewModal}>
         <View style={styles.modalBackground}>
           <View style={styles.activityIndicatorWrapper}>
-            <ActivityIndicator animating={viewModal} size="large" color="#0000ff" />
+            <ActivityIndicator animating={viewModal} size="large" color="#F89F9F" />
             <Text>Cargando Sala... </Text>
           </View>
         </View>

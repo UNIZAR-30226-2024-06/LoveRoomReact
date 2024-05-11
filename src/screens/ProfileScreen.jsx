@@ -172,7 +172,14 @@ export default function ProfileScreen({ navigation }) {
             <TouchableOpacity
               style={styles.faqButton}
               onPress={() => {
-                Alert.alert('¡Contáctanos!', 'Correo: loveroomapp@gmail.com', [{ text: 'OK' }]);
+                Toast.show({
+                  type: 'success',
+                  position: 'bottom',
+                  text1: '¡Contáctanos!',
+                  text2: 'Correo: loveroomapp@gmail.com',
+                  visibilityTime: 4000
+                });
+
               }}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>

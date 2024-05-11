@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
     marginTop: 10
   },
   buttonClose: {
-    backgroundColor: 'red'
+    backgroundColor: '#797b80'
   }, loadingContainer: {
     flex: 1,
     width: '90%',

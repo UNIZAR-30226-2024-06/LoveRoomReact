@@ -18,6 +18,7 @@ import AuthContext from '../components/AuthContext';
 import RegisterScreen from './RegisterScreen';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Toast from 'react-native-toast-message';
 
 export default function LoginScreen({ navigation }) {
   const { authState, setAuthState } = React.useContext(AuthContext);
@@ -84,8 +85,13 @@ export default function LoginScreen({ navigation }) {
           AsyncStorage.setItem('token', data.token);
           navigation.pop();
         } else {
-          alert('Usuario o contraseña incorrectos', data);
-          console.log(data);
+          Toast.show({
+            type: 'error',
+            position: 'bottom',
+            text1: 'Error',
+            text2: 'Usuario o contraseña incorrectos',
+            visibilityTime: 2500
+          });
         }
       })
       .catch((error) => {

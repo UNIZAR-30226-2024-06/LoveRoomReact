@@ -31,6 +31,7 @@ import SearchBar from '../components/SearchBarYt';
 import OtherProfile from './OtherProfileScreen';
 import mime from 'mime';
 import axios from 'axios';
+import Toast from 'react-native-toast-message';
 
 const Video = () => {
   const navigation = useNavigation();
@@ -153,9 +154,14 @@ const Video = () => {
             setMessages(transformedData);
           } else {
             console.log('Error:', data.error);
-            alert(
-              'Ha habido un error al cargar el chat. Por favor, vuelva a cargar la sala de nuevo.'
-            );
+            Toast.show({
+              type: 'error',
+              position: 'bottom',
+              text1: 'Error al cargar el chat',
+              text2: 'Ha habido un error al cargar el chat. Por favor, vuelva a cargar la sala.',
+              visibilityTime: 2500
+            });
+            
             navigation.goBack();
           }
         })
@@ -257,7 +263,13 @@ const Video = () => {
               ...prevState,
               idVideo: nuevoVideo
             }));
-            alert('No hay nadie viendo este vídeo, ¡espera a que alguien entre!');
+            Toast.show({
+              type: 'info',
+              position: 'bottom',
+              text1: 'Espera a tu match',
+              text2: 'No hay nadie viendo este vídeo, ¡espera a que alguien entre!',
+              visibilityTime: 2500
+            });
           } else if (data.esSalaUnitaria == false) {
             // HAY MATCH
             // Para emitir un GET_SYNC al cambiar de video
@@ -269,11 +281,24 @@ const Video = () => {
               receiverId: data.idusuario,
               idSala: data.idsala.toString()
             }));
-            alert('Has hecho match con alguien, ¡disfruta la sala!');
+            Toast.show({
+              type: 'success',
+              position: 'bottom',
+              text1: '¡Match encontrado!',
+              text2: 'Has hecho match con alguien, ¡disfruta la sala!',
+              visibilityTime: 2500
+            });
           }
         } else {
           console.log('Error al cambiar de video en sala unitaria');
-          alert('Error al cambiar de video. Inténtalo de nuevo.');
+          Toast.show({
+            type: 'error',
+            position: 'bottom',
+            text1: 'Error al cambiar de video',
+            text2: 'Error al cambiar de video. Inténtalo de nuevo.',
+            visibilityTime: 2500
+          });
+          
         }
       });
     }
@@ -338,7 +363,14 @@ const Video = () => {
     console.log('handleImagePicker ', ignoreBackgroundChange.current);
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      alert('Sorry, we need camera roll permissions to make this work!');
+      Toast.show({
+        type: 'error',
+        position: 'bottom',
+        text1: 'Permisos insuficientes',
+        text2: 'Lo sentimos, necesitamos permisos para acceder a la galería',
+        visibilityTime: 2500
+      });
+      
     } else {
       let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes:
@@ -364,36 +396,37 @@ const Video = () => {
 
   const uploadMedia = async (uri, mediaType) => {
     const multimedia = await fetch(uri);
-
+  
     console.log('Subiendo media:', uri);
-
+  
     const formData = new FormData();
     const uriParts = uri.split('.');
     const fileType = uriParts[uriParts.length - 1];
-
+  
     formData.append('file', {
       uri: uri,
       type: mime.getType(uri),
       name: uri.split('/').pop()
     });
     console.log('Formdata: ', formData);
-
+  
     const url = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/upload/${mediaType}/${authState.id}`;
     console.log('URL:', url);
+    
     fetch(uri)
-    .then(response => response)
+    .then(response => response.blob())
     .then(blob => {
       formData.append('file', blob);
-
-    console.log('URL:', url);
-    fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${authState.token}`
-      },
-      body: formData
-    })
+  
+      console.log('URL:', url);
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${authState.token}`
+        },
+        body: formData
+      })
       .then((res) => res.json())
       .then((res) => {
         console.log('response' + JSON.stringify(res));
@@ -410,13 +443,20 @@ const Video = () => {
           setMessages((prevState) => [...prevState, data]);
           sendMessage();
         } else {
-          console.log('Error: guardando mensaje ', data.error);
-          alert('Ha habido un error en los datos de la imagen. Vuelva a intentarlo.');
+          console.log('Error: guardando mensaje ', res.error);
+          Toast.show({
+            type: 'error',
+            position: 'bottom',
+            text1: 'Error',
+            text2: 'Error al subir la imagen',
+            visibilityTime: 2500
+          });
         }
       })
       .catch((e) => console.log(e));
-    // .done();
+    });
   };
+  
 
   const toggleSwitch = () => {
     setIsEnabled((previousState) => {
@@ -476,7 +516,13 @@ const Video = () => {
       timesegundos,
       pausado
     );
-    alert('¡Vídeo sincronizado!');
+    Toast.show({
+      type: 'success',
+      position: 'bottom',
+      text1: 'Sincronización activada',
+      text2: '¡Tu vídeo se ha sincronizado con el de tu match!',
+      visibilityTime: 2500
+    });
     setIsEnabled(true);
     myIsEnabled.current = true;
   };
@@ -573,11 +619,23 @@ const Video = () => {
       playerRef.current?.seekTo(timesegundos, true);
       currentTime.current = timesegundos; // Guardamos el tiempo actual por haber pausado
       if (otroUsuarioOnline) {
-        alert('¡Vídeo sincronizado!');
+        Toast.show({
+          type: 'success',
+          position: 'bottom',
+          text1: 'Sincronización activada',
+          text2: '¡Tu vídeo se ha sincronizado con el de tu match!',
+          visibilityTime: 2500
+        });
         setIsEnabled(true);
         myIsEnabled.current = true;
       } else {
-        alert('¡El otro usuario no está conectado. Último punto de vídeo recuperado!');
+        Toast.show({
+          type: 'info',
+          position: 'bottom',
+          text1: 'Tu match no está conectado',
+          text2: 'Último punto de vídeo recuperado',
+          visibilityTime: 2500
+        });
       }
     } else {
       console.log('No se ha recibido tiempo');
@@ -640,9 +698,13 @@ const Video = () => {
     // } else {
     //   // Aqui se deberia volver a la pantalla de búsqueda ya que el usuario ya no va a poder hacer match
     //   console.log('No hay sala, volviendo a la pantalla de búsqueda');
-    //   // alert(
-    //   //   'Te has desconectado del vídeo.\n Si quieres hacer match debes salir y volver a entrar.'
-    //   // );
+    // Toast.show({
+    //   type: 'info',
+    //   position: 'bottom',
+    //   text1: 'Te has desconectado del vídeo',
+    //   text2: 'Si quieres hacer match debes salir y volver a entrar.',
+    //   visibilityTime: 2500
+    // });
     //   //navigation.navigate('Search');???
     // }
   };
@@ -650,7 +712,13 @@ const Video = () => {
   const handleUnmatch = (idSala) => {
     console.log('UNMATCH event received by ', authState.id);
     if (idSala == idRoom.current) {
-      alert('El otro usuario ha hecho unmatch. Lo sentimos.');
+      Toast.show({
+        type: 'info',
+        position: 'bottom',
+        text1: 'Unmatch',
+        text2: 'El otro usuario ha hecho unmatch. Lo sentimos.',
+        visibilityTime: 2500
+      });
       navigation.goBack();
     }
   };
@@ -861,7 +929,13 @@ const Video = () => {
             timesegundos,
             true // true porque ya se ha mandado un evento de pause antes
           );
-          alert('¡Vídeo sincronizado!');
+          Toast.show({
+            type: 'success',
+            position: 'bottom',
+            text1: 'Sincronización activada',
+            text2: '¡Tu vídeo se ha sincronizado con el de tu match!',
+            visibilityTime: 2500
+          });
           setIsEnabled(true);
           myIsEnabled.current = true;
         } else {
@@ -952,12 +1026,12 @@ const Video = () => {
       </Modal>
       {socketState.receiverId != '' && (
         <>
-          <TouchableOpacity
+         <TouchableOpacity
             style={{
               flexDirection: 'row',
               alignItems: 'center',
               padding: 15,
-              backgroundColor: '#F89F9F',
+              backgroundColor: '#c1c3c9',
               borderRadius: 30,
               marginBottom: 10
             }}
@@ -965,20 +1039,21 @@ const Video = () => {
               console.log('Ver perfil');
               setModalUserVisible(true);
             }}>
-            <View style={{ flex: 1, alignItems: 'center', flexDirection: 'row' }}>
+            <View style={{ flex: 1, alignItems: 'center', flexDirection: 'row'}}>
               <Image
                 source={
                   user.fotoperfil === 'null.jpg' ? defaultProfilePicture : { uri: user.fotoperfil }
                 }
                 style={{ width: 50, height: 50, backgroundColor: 'white', borderRadius: 60 }}
               />
-              <Text style={{ padding: 15 }}>
+              <Text style={{ padding: 15, color: 'white' }}>
                 {user.nombre}, Edad: {user.edad}
               </Text>
             </View>
-            <Text style={{ padding: 5 }}>Ver perfil</Text>
-            <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage} />
+            <Text style={{ padding: 5, color: 'white' }}>Ver perfil</Text>
+            <Icon name="chevron-right" size={25} color="white" style={styles.arrowImage} />
           </TouchableOpacity>
+
           <Modal
             animationType="slide"
             transparent={true}
@@ -1144,7 +1219,7 @@ const styles = StyleSheet.create({
     marginTop: 10
   },
   buttonClose: {
-    backgroundColor: 'red'
+    backgroundColor: '#797b80'
   },
   textStyle: {
     color: 'white',

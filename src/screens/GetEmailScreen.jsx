@@ -7,10 +7,10 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
-  Alert,
   Dimensions
 } from 'react-native';
 import AuthContext from '../components/AuthContext';
+import Toast from 'react-native-toast-message';
 
 export default function GetEmailScreen({ navigation }) {
   const { isRegistered, setIsRegistered } = React.useContext(AuthContext);
@@ -57,7 +57,14 @@ export default function GetEmailScreen({ navigation }) {
             setFormSubmitted(true);
             setErrorText('Usuario no existente');
           } else {
-            Alert.alert('Error', 'Error al obtener el usuario');
+            Toast.show({
+              type: 'error',
+              position: 'bottom',
+              text1: 'Error',
+              text2: 'Error al obtener el usuario',
+              visibilityTime: 2500
+            });
+            
           }
         } else {
           // FALTA: ENVIAR PETICION A BACKEND DE GENERAR CODIGO Y ENVIARLO AL USUARIO
@@ -66,7 +73,13 @@ export default function GetEmailScreen({ navigation }) {
       })
       .catch((error) => {
         console.error('Error:', error);
-        Alert.alert('Error', 'Error al conectar con la base de datos');
+        Toast.show({
+          type: 'error',
+          position: 'bottom',
+          text1: 'Error',
+          text2: 'Error al conectar con la base de datos',
+          visibilityTime: 2500
+        });
       });
   };
 

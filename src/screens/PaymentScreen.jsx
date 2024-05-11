@@ -10,6 +10,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
     const [fechaCaducidad, setFechaCaducidad] = useState('');
 
     const handleContinue = () => {
+        let correctInput = true;
         // Verificar si el número de tarjeta tiene 16 dígitos
         if (numeroTarjeta.length !== 16) {
             Toast.show({
@@ -19,6 +20,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
                 text2: 'El número de tarjeta debe tener 16 dígitos',
                 visibilityTime: 2500
               });
+            correctInput = false;
             return;
         }
 
@@ -31,6 +33,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
                 text2: 'El CVV debe tener 3 dígitos',
                 visibilityTime: 2500
               });
+            correctInput = false;
             return;
         }
 
@@ -44,6 +47,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
                 text2: 'La fecha de caducidad debe tener el formato DD/MM/AAAA',
                 visibilityTime: 2500
               });
+            correctInput = false;
             return;
         }
 
@@ -57,10 +61,22 @@ export default function RegisterPreferencesScreen({ navigation }) {
                 text2: 'La fecha de caducidad no es válida',
                 visibilityTime: 2500
               });
+            correctInput = false;
             return;
         }
 
-        alert('¡Validación exitosa! Continuar con el proceso...');
+        if (correctInput) {
+            //FALTA
+            //LLAMADA A BD
+            //navigation.navigate('');
+            Toast.show({
+                type: 'success',
+                position: 'bottom',
+                text1: '',
+                text2: '¡Validación exitosa! Pronto serás premium...',
+                visibilityTime: 2500
+            });
+        }
     };
 
     // Función para verificar si una fecha es válida

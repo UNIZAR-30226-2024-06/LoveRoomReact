@@ -13,6 +13,7 @@ import {
 import AuthContext from '../components/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Toast from 'react-native-toast-message';
 
 export default function Login({ navigation }) {
   const { authState, setAuthState } = React.useContext(AuthContext);
@@ -100,7 +101,13 @@ export default function Login({ navigation }) {
           setEmailError(true);
           setEmailErrorMessage('* Este correo electrónico ya está registrado');
         } else {
-          alert('Error al conectar con la base de datos');
+          Toast.show({
+            type: 'error',
+            position: 'bottom',
+            text1: 'Error',
+            text2: 'Error al conectar con la base de datos',
+            visibilityTime: 2500
+          });
         }
       })
       .catch((error) => {

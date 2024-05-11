@@ -49,13 +49,11 @@ const App = ({ navigation }) => {
   const ContinueButton = () => (
     <View style={{ marginBottom: 16, alignItems: 'center' }}>
       <TouchableOpacity
-        onPress={() => {
-          handleContinue();
-        }}
+        onPress={() => handleContinue()}
         style={{
           height: 50,
           borderRadius: 12,
-          width: ScreenWidth * 0.9,
+          width: ScreenWidth * 0.9, 
           alignItems: 'center',
           justifyContent: 'center',
           backgroundColor: '#F89F9F',
@@ -71,7 +69,7 @@ const App = ({ navigation }) => {
       </TouchableOpacity>
     </View>
   );
-
+  
   const HeaderContainer = () => (
     <View style={{ width: '80%', marginTop: '20%' }}>
       <Text
@@ -94,10 +92,9 @@ const App = ({ navigation }) => {
       </View>
     </View>
   );
-
   const Plans = () => (
-    <View style={{ height: ScreenHeight * 0.45, marginTop: 64, justifyContent: 'space-evenly' }}>
-      <SubscribeCard
+    <View style={{ height: ScreenHeight * 0.45, marginTop: 64, justifyContent: 'space-evenly'}}>
+      <SubscribeCard 
         title="Plan premium"
         descriptionPrice=" "
         description="¡Salas ilimitadas y más!"

@@ -80,7 +80,7 @@ const OtherProfile = ({ user }) => {
       </View>
 
       <View style={styles.formContainer}>
-        <Text style={styles.label}>Nombre completo:</Text>
+        <Text style={styles.label}>Nombre:</Text>
         <Text style={styles.text}>{user.nombre}</Text>
 
         <Text style={styles.label}>Sexo:</Text>
@@ -93,18 +93,6 @@ const OtherProfile = ({ user }) => {
 
         <Text style={styles.label}>Fecha de nacimiento:</Text>
         <Text style={styles.text}>{user.edad}</Text>
-
-        <Text style={styles.label}>Preferencia Sexual:</Text>
-        <Text style={styles.text}>
-          {user.buscasexo === 'H' ? 'Hombres' : user.buscasexo === 'M' ? 'Mujeres' : 'Ambos'}
-        </Text>
-
-        <View style={styles.labelContainer}>
-          <Text style={styles.label}>Preferencia de edad:</Text>
-          <Text style={styles.sliderLabel}>
-            {user.buscaedadmin}-{user.buscaedadmax}
-          </Text>
-        </View>
 
         <Text style={styles.label}>Descripción:</Text>
         <Text style={styles.text}>{user.descripcion}</Text>
