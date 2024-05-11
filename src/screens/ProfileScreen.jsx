@@ -15,6 +15,7 @@ import * as FileSystem from 'expo-file-system';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
+import Toast from 'react-native-toast-message';
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
@@ -127,7 +128,15 @@ export default function ProfileScreen({ navigation }) {
                   if (authState.tipousuario === 'normal') {
                       console.log(authState);
                       navigation.navigate('Premium');
-                  }
+                  } else if (authState.tipousuario === 'premium') {
+                      Toast.show({
+                        type: 'success',
+                        position: 'bottom',
+                        text1: 'Ya eres premium',
+                        text2: 'No se han realizado cambios en tu suscripción',
+                        visibilityTime: 2500
+                      });
+                    }
               }}
           >
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
