@@ -125,15 +125,15 @@ export default function ProfileScreen({ navigation }) {
           <TouchableOpacity
               style={styles.faqButton}
               onPress={() => {
+                console.log(authState.tipousuario);
                   if (authState.tipousuario === 'normal') {
-                      console.log(authState);
                       navigation.navigate('Premium');
                   } else if (authState.tipousuario === 'premium') {
                       Toast.show({
                         type: 'success',
                         position: 'bottom',
                         text1: 'Ya eres premium',
-                        text2: 'No se han realizado cambios en tu suscripción',
+                        text2: 'Tienes disponibles todas las funcionalidades premium',
                         visibilityTime: 2500
                       });
                     }

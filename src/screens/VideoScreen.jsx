@@ -361,12 +361,13 @@ const Video = () => {
     const uriParts = uri.split('.');
     const fileType = uriParts[uriParts.length - 1];
 
-    data.append('image', {
+    data.append('file', {
       name: 'image',
       type: `image/${fileType}`,
-      uri: Platform.OS === 'ios' ? uri.replace('file://', '') : uri
+      fileName: Platform.OS === 'ios' ? uri.replace('file://', '') : uri
     });
 
+    imagne = await fetch(uri);
     // if (multimedia.ok) {
     //   formData.append('file', multimedia);
     console.log('formdata');
@@ -377,7 +378,7 @@ const Video = () => {
     fetch(url, {
       method: 'POST',
       headers: {
-        // 'Content-Type': 'multipart/form-data',
+        'Content-Type': 'multipart/form-data',
         Authorization: `Bearer ${authState.token}`
       },
       body: formData
