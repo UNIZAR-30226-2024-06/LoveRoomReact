@@ -24,7 +24,8 @@ const SearchFilter = ({
   setListVideos,
   nextPageToken,
   setNextPageToken,
-  setVideoUrl
+  setVideoUrl, 
+  setVideosModal
 }) => {
   const navigation = useNavigation();
   const [showModal, setShowModal] = useState(false); // Para la espera al cargar
@@ -113,6 +114,7 @@ const SearchFilter = ({
 
   useEffect(() => {
     if (isFocused && socketState.idVideo !== '') {
+      setVideosModal(false);
       navigation.navigate('Video');
     }
   }, [isFocused, socketState.idVideo]);

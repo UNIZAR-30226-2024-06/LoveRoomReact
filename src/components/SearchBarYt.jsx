@@ -253,6 +253,7 @@ const SearchBar = ({ setVideoUrl }) => {
               setVideoUrl={setVideoUrl}
               videosInterest = {listVideosInterest}
               setVideosInterest = {setListVideosInterest}
+              setVideosModal = {setVideosModal}
             />
           </View>
           <View style={[styles.button, styles.buttonClose]}>

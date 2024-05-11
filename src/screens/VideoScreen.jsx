@@ -72,6 +72,8 @@ const Video = () => {
   // TODO: la primera vez que se pone en background se desconecta aunque esté en true
   const handleAppStateChange = (nextAppState) => {
     // setTimeout(() => {
+    console.log('AppState:', nextAppState);
+    console.log('ignoreBackgroundChange en background:', ignoreBackgroundChange.current);
     if (nextAppState === 'background' && ignoreBackgroundChange.current == false) {
       console.log('App is in background mode');
       if (ignoreBackgroundChange.current) {
@@ -348,19 +350,16 @@ const Video = () => {
       console.log(result);
 
       if (!result.cancelled) {
+        ignoreBackgroundChange.current = false;
         // Handle the selected image or video
         console.log(result.assets[0].uri);
         await uploadMedia(result.assets[0].uri, mediaType);
+      } else {
+        ignoreBackgroundChange.current = false;
+        console.log('Cancelado');
       }
     }
     // TODO: no sirve para nada
-    useEffect(() => {
-      const timer = setTimeout(() => {
-        ignoreBackgroundChange.current = false;
-        console.log('handleImagePicker ', ignoreBackgroundChange.current);
-      }, 10000);
-      return () => clearTimeout(timer);
-    }, []);
   };
 
   const uploadMedia = async (uri, mediaType) => {

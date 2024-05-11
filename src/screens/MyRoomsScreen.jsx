@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useRef } from 'react';
 import {
   FlatList,
   StyleSheet,
@@ -9,7 +9,7 @@ import {
   Image,
   Modal,
   Alert,
-  Dimensions
+  Dimensions, TextInput, Button
 } from 'react-native';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -190,6 +190,49 @@ const MyRoomsScreen = () => {
     }
   }, [myRooms]);
 
+  const [modalVisible, setModalVisible] = useState(false);
+  const inputValue = useRef('');
+  const idSala = useRef('');
+
+  const handleChangeNameVideo = (room) => {
+    console.log('Cambiando nombre del video:', room);
+    setModalVisible(true);
+    idSala.current = room.idsala;
+  };
+  
+  const handleConfirm = async () => {
+    if (inputValue.current !== '' && idSala.current !== '') {
+      try {
+        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/rooms/${idSala.current}/rename`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authState.token}`
+          },
+          body: JSON.stringify({ nombreSala: inputValue.current })
+        });
+        const data = await response.json();
+        console.log(data);
+        if (data.error == null) {
+          const updatedRooms = myRooms.map((r) => (
+            r.idsala === idSala.current ? { ...r, nombre: inputValue.current } : r
+          
+          ));
+          setMyRooms(updatedRooms);
+        } else {
+          alert('Ha habido un error al cambiar el nombre del video. Por favor, inténtelo de nuevo.');
+        }
+      } catch (error) {
+        console.error('Error al cambiar el nombre del video:', error);
+        alert('Ha habido un error al cambiar el nombre del video. Por favor, inténtelo de nuevo.');
+      }
+    }
+    idSala.current = '';  
+    setModalVisible(false);
+  };
+
+
+
   if (!authState.isLoggedIn || authState.token == null) {
     return <NotRegisteredScreen />;
   }
@@ -217,20 +260,29 @@ const MyRoomsScreen = () => {
         data={myRooms}
         keyExtractor={(item) => item.idsala.toString()}
         renderItem={({ item }) => (
-          <TouchableOpacity
-            activeOpacity={1}
-            onPress={() => {
-              handleRoomUseless(item);
-            }}
-          >
-            <View style={styles.roomItem}>
-              <Image
-                source={{ uri: thumbnails[item.idvideo] }}
-                style={[styles.thumbnail, { width: width || 120, height: height || 90 }]}
-              />
-              <Text style={styles.roomTitle}>{item.nombre}</Text>
-            </View>
-          </TouchableOpacity>
+          <View style={{marginBottom:10, borderWidth: 2, borderRadius: 20, borderColor: "#F89F9F"}}>
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress={() => {
+                handleRoomUseless(item);
+              }}
+            >
+              <View style={styles.roomItem}>
+                <Image
+                  source={{ uri: thumbnails[item.idvideo] }}
+                  style={[styles.thumbnail, { width: width || 120, height: height || 90 }]}
+                />
+                <View style={{ flexDirection: 'column', alignItems: 'center', flex: 1, padding: 10}}>
+                    <Text style={styles.roomTitle}>{item.nombre}</Text>
+                    <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: 'gray', borderRadius:20, justifyContent: 'space-between', alignSelf: 'stretch'}}
+                    onPress={()=> handleChangeNameVideo(item)}>
+                      <Text style={{padding: 10}}>Editar nombre</Text>
+                      <Icon style={{padding:10, }} name="edit" size={20} color="#000" />
+                    </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableOpacity>
+          </View>
         )}
         renderHiddenItem={({ item }) => (
           <View style={styles.rowBack}>
@@ -248,6 +300,34 @@ const MyRoomsScreen = () => {
         rightOpenValue={-75}
         leftOpenValue={-75}
       />
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <TextInput
+              style={{...styles.input, padding: 10}}
+              value={inputValue}
+              onChangeText={(text)=> inputValue.current = text}
+              placeholder='Introduce el nuevo nombre del video'
+            
+            />
+            <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+              <TouchableOpacity style={{...styles.button, marginRight: 10, backgroundColor: '#DFF0D8'}} onPress={handleConfirm}>
+                <Text style={styles.textStyle}>Aceptar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={{...styles.button, marginLeft: 10, backgroundColor: '#F89F9F'}} onPress={() => setModalVisible(false)}>
+                <Text style={styles.textStyle}>Cancelar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -265,6 +345,7 @@ const styles = StyleSheet.create({
   },
   roomItem: {
     padding: 10,
+    
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
     flexDirection: 'row',
@@ -275,7 +356,8 @@ const styles = StyleSheet.create({
   },
   roomTitle: {
     fontSize: 16,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    padding: 10
   },
   thumbnail: {
     marginLeft: 10
@@ -299,21 +381,22 @@ const styles = StyleSheet.create({
   backTextWhite: {
     color: '#FFF'
   },
-  rowFront: {
-    alignItems: 'center',
-    borderBottomColor: 'black',
-    borderBottomWidth: 4,
-    justifyContent: 'flex-end',
-    height: 50,
-    borderRadius: 20
-  },
+  // rowFront: {
+  //   alignItems: 'center',
+  //   borderBottomColor: 'black',
+  //   borderBottomWidth: 4,
+  //   justifyContent: 'flex-end',
+  //   height: 50,
+  //   borderRadius: 20
+  // },
   rowBack: {
     alignItems: 'flex-end',
     flex: 1,
     paddingLeft: 15,
     borderRadius: 20,
     backgroundColor: '#F89F9F',
-    width: '100%'
+    width: '100%',
+    marginBottom: 10
   },
   backRightBtn: {
     flex: 1,
@@ -322,6 +405,47 @@ const styles = StyleSheet.create({
     paddingRight: 30,
     borderTopRightRadius: 20,
     borderBottomRightRadius: 20
+  }, 
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22,
+    width: '100%'
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5
+  },
+  button: {
+    borderRadius: 20,
+    padding: 20,
+    elevation: 4,
+    marginTop: 5,
+  },
+  textStyle: {
+    color:  "#505050",
+    fontWeight: "bold",
+    textAlign: "center", 
+  },
+  input: {
+    width: '100%',
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 20,
+    borderRadius: 20,
   }
 });
 
