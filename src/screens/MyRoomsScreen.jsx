@@ -28,6 +28,16 @@ const MyRoomsScreen = () => {
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
 
+  const [showInterrogation, setShowInterrogation] = useState(false);
+
+  useEffect(() => {
+    if (myRooms.length === 0 && !loading) {
+      // Si no hay salas y no está cargando, mostrar la imagen de interrogación
+      setShowInterrogation(true);
+    } else {
+      setShowInterrogation(false);
+    }
+  }, [myRooms, loading]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -281,50 +291,62 @@ const MyRoomsScreen = () => {
           </View>
         </View>
       </Modal>
-      <SwipeListView
-        data={myRooms}
-        keyExtractor={(item) => item.idsala.toString()}
-        renderItem={({ item }) => (
-          <View style={{marginBottom:10, borderWidth: 2, borderRadius: 20, borderColor: "#F89F9F"}}>
-            <TouchableOpacity
-              activeOpacity={1}
-              onPress={() => {
-                handleRoomUseless(item);
-              }}
-            >
-              <View style={styles.roomItem}>
-                <Image
-                  source={{ uri: thumbnails[item.idvideo] }}
-                  style={[styles.thumbnail, { width: width || 120, height: height || 90 }]}
-                />
-                <View style={{ flexDirection: 'column', alignItems: 'center', flex: 1, padding: 10}}>
-                    <Text style={styles.roomTitle}>{item.nombre}</Text>
-                    <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: 'gray', borderRadius:20, justifyContent: 'space-between', alignSelf: 'stretch'}}
-                    onPress={()=> handleChangeNameVideo(item)}>
-                      <Text style={{padding: 10}}>Editar nombre</Text>
-                      <Icon style={{padding:10, }} name="edit" size={20} color="#000" />
-                    </TouchableOpacity>
+      {showInterrogation ? ( // Condicional para mostrar la imagen de interrogación
+      <View style={styles.interrogationContainer}>
+        <Image source={require('../img/buscar.png')} style={[styles.interrogationImage, { tintColor: 'gray' }]} />
+        <Text style={styles.centeredText}>
+          Todavía no estás en ninguna sala,
+          {'\n'}
+          ¡busca un vídeo y conoce nuevas personas!
+        </Text>
+      </View>
+
+      ) : (
+        <SwipeListView
+          data={myRooms}
+          keyExtractor={(item) => item.idsala.toString()}
+          renderItem={({ item }) => (
+            <View style={{marginBottom:10, borderWidth: 2, borderRadius: 20, borderColor: "#F89F9F"}}>
+              <TouchableOpacity
+                activeOpacity={1}
+                onPress={() => {
+                  handleRoomUseless(item);
+                }}
+              >
+                <View style={styles.roomItem}>
+                  <Image
+                    source={{ uri: thumbnails[item.idvideo] }}
+                    style={[styles.thumbnail, { width: width || 120, height: height || 90 }]}
+                  />
+                  <View style={{ flexDirection: 'column', alignItems: 'center', flex: 1, padding: 10}}>
+                      <Text style={styles.roomTitle}>{item.nombre}</Text>
+                      <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: 'gray', borderRadius:20, justifyContent: 'space-between', alignSelf: 'stretch'}}
+                      onPress={()=> handleChangeNameVideo(item)}>
+                        <Text style={{padding: 10}}>Editar nombre</Text>
+                        <Icon style={{padding:10, }} name="edit" size={20} color="#000" />
+                      </TouchableOpacity>
+                  </View>
                 </View>
-              </View>
-            </TouchableOpacity>
-          </View>
-        )}
-        renderHiddenItem={({ item }) => (
-          <View style={styles.rowBack}>
-            <TouchableOpacity
-              style={[styles.backRightBtn, styles.backRightBtnRight]}
-              onPress={() => {
-                console.log(item);
-                handleDeleteRoom(item.idsala);
-              }}
-            >
-              <Icon name="trash" size={30} type="font-awesome" color="#FFF" />
-            </TouchableOpacity>
-          </View>
-        )}
-        rightOpenValue={-75}
-        leftOpenValue={-75}
-      />
+              </TouchableOpacity>
+            </View>
+          )}
+          renderHiddenItem={({ item }) => (
+            <View style={styles.rowBack}>
+              <TouchableOpacity
+                style={[styles.backRightBtn, styles.backRightBtnRight]}
+                onPress={() => {
+                  console.log(item);
+                  handleDeleteRoom(item.idsala);
+                }}
+              >
+                <Icon name="trash" size={30} type="font-awesome" color="#FFF" />
+              </TouchableOpacity>
+            </View>
+          )}
+          rightOpenValue={-75}
+          leftOpenValue={-75}
+        />
+      )}
       <Modal
         animationType="slide"
         transparent={true}
@@ -339,14 +361,14 @@ const MyRoomsScreen = () => {
               style={{...styles.input, padding: 10}}
               value={inputValue}
               onChangeText={(text)=> inputValue.current = text}
-              placeholder='Introduce el nuevo nombre del video'
-            
+              placeholder='Introduce el nuevo nombre de la sala'
+              maxLength={50}            
             />
             <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-              <TouchableOpacity style={{...styles.button, marginRight: 10, backgroundColor: '#DFF0D8'}} onPress={handleConfirm}>
+              <TouchableOpacity style={{...styles.button, marginRight: 10, backgroundColor: '#3dcc2d'}} onPress={handleConfirm}>
                 <Text style={styles.textStyle}>Aceptar</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={{...styles.button, marginLeft: 10, backgroundColor: '#F89F9F'}} onPress={() => setModalVisible(false)}>
+              <TouchableOpacity style={{...styles.button, marginLeft: 10, backgroundColor: '#d94a4a'}} onPress={() => setModalVisible(false)}>
                 <Text style={styles.textStyle}>Cancelar</Text>
               </TouchableOpacity>
             </View>
@@ -355,6 +377,7 @@ const MyRoomsScreen = () => {
       </Modal>
     </View>
   );
+  
 };
 
 const styles = StyleSheet.create({
@@ -362,6 +385,20 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 10,
     paddingTop: 20
+  },
+  interrogationContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  interrogationImage: {
+    width: 100,
+    height: 100,
+    marginBottom: 20,
+  },
+  centeredText: {
+    textAlign: 'center',
+    color: 'gray',
   },
   loadingContainer: {
     flex: 1,
@@ -463,6 +500,7 @@ const styles = StyleSheet.create({
     color:  "#505050",
     fontWeight: "bold",
     textAlign: "center", 
+    color: 'white'
   },
   input: {
     width: '100%',

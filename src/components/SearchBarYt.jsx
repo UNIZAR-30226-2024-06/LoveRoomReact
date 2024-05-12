@@ -231,6 +231,7 @@ const SearchBar = ({ setVideoUrl }) => {
           onSubmitEditing={handlePeticion}
           placeholder="Search"
           style={{ fontSize: 15, width: '100%', padding: 0 }}
+          maxLength={50}
         />
       </View>
       <Modal transparent={true} animationType={'none'} visible={videosModal} onRequestClose={()=> {setVideosModal(false);setListVideos([])}}>

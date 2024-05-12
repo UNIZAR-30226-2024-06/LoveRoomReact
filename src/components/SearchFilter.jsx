@@ -52,6 +52,7 @@ const SearchFilter = ({
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
+        console.log("data.error: ", data.error);
         if (data.esSalaUnitaria == true) {
           setMensaje('No hay nadie viendo este vídeo, ¡espera a que alguien entre!');
           setSocketState((prevState) => ({
@@ -92,6 +93,15 @@ const SearchFilter = ({
             position: 'bottom',
             text1: 'Error al buscar match',
             text2: 'Error al buscar match, inténtalo de nuevo',
+            visibilityTime: 2500
+          });
+        } else if (data.error === 'El usuario ha sobrepasado su limite de salas') {
+          setShowModal(false);
+          Toast.show({
+            type: 'error',
+            position: 'bottom',
+            text1: 'Límite de salas superado',
+            text2: 'Pásate a premium para disfrutar de más salas',
             visibilityTime: 2500
           });
         } else {

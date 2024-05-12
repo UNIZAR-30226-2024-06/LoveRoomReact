@@ -93,7 +93,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
   const [cursorPosition, setCursorPosition] = useState(0);
   const [isProfileImageSelected, setIsProfileImageSelected] = useState();
   const { StorageAccessFramework } = FileSystem;
-
+  const [descriptionLength, setDescriptionLength] = useState(description.length);
   const handleSave = () => {
     console.log(`${process.env.EXPO_PUBLIC_API_URL}/user/update`);
     fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/update`, {
@@ -263,6 +263,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
           style={styles.textContainer}
           defaultValue={authState.nombre}
           onChangeText={(text) => setName(text)}
+          maxLength={50}
         />
 
         <Text style={styles.label}>Género</Text>
@@ -357,14 +358,21 @@ export default function RegisterPreferencesScreen({ navigation }) {
         </View>
 
         <Text style={styles.label}>Descripción</Text>
-        <TextInput
-          style={styles.description}
-          placeholder="Cuéntanos un poco sobre ti..."
-          multiline={true}
-          numberOfLines={4}
-          defaultValue={authState.descripcion}
-          onChangeText={(text) => setDescription(text)}
-        />
+        <View style={styles.descriptionInputContainer}>
+          <TextInput
+            style={styles.description}
+            placeholder="Cuéntanos un poco sobre ti..."
+            multiline={true}
+            numberOfLines={4}
+            defaultValue={authState.descripcion}
+            onChangeText={(text) => {
+              setDescription(text);
+              setDescriptionLength(text.length);
+            }}
+            maxLength={500}
+          />
+          <Text style={styles.characterCount}>{descriptionLength}/500</Text>
+        </View>
 
         <TouchableOpacity
           style={styles.button}
@@ -396,7 +404,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     zIndex: 1
   },
-
+  characterCount: {
+    position: 'absolute',
+    bottom: 15,
+    right: 8,
+    color: '#666',
+    fontSize: 12
+  },
   header: {
     height: screenHeight * 0.27,
     backgroundColor: '#F89F9F'

@@ -104,6 +104,7 @@ export default function LoginScreen({ navigation }) {
   const marginBottomBackToLogin = height * 0.03;
 
   return (
+    <ScrollView style={styles.container} keyboardShouldPersistTaps={'handled'}>
     <View
       style={styles.container}
       contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }}
@@ -134,6 +135,7 @@ export default function LoginScreen({ navigation }) {
           placeholder="Introduzca su correo electrónico"
           onChangeText={handleEmailChange}
           autoCapitalize="none"
+          maxLength={254}
         />
         {emailError && (
           <Text style={styles.errorText}>
@@ -152,6 +154,7 @@ export default function LoginScreen({ navigation }) {
             placeholder="Introduzca la contraseña"
             secureTextEntry={hidePassword}
             onChangeText={handlePasswordChange}
+            maxLength={100}
           />
           <TouchableOpacity
             onPress={() => setHidePassword(!hidePassword)}
@@ -195,8 +198,9 @@ export default function LoginScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      <View style={[styles.line, { marginBottom: marginBottomLine }]} />
+      {/* <View style={[styles.line, { marginBottom: marginBottomLine }]} /> */}
       <View style={[styles.registerContainer, { marginBottom: marginBottomBackToLogin }]}>
+        <View style={styles.line} />
         <Text style={styles.registerText}>¿No tienes una cuenta? </Text>
         <TouchableOpacity
           onPress={() => {
@@ -205,35 +209,39 @@ export default function LoginScreen({ navigation }) {
         >
           <Text style={styles.registerLink}>Regístrate</Text>
         </TouchableOpacity>
+        <View style={styles.line} />
       </View>
+
     </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff'
+    backgroundColor: '#fff',
+    paddingVertical: 20, // Ajusta el padding vertical según sea necesario
   },
   logoContainer: {
     alignItems: 'center',
-    paddingTop: 130
+    paddingTop: 130,
   },
   logo: {
     width: 200,
     height: 200,
-    resizeMode: 'contain'
+    resizeMode: 'contain',
   },
   formContainer: {
     backgroundColor: '#ffffff',
     marginTop: 20,
     padding: 20,
-    borderRadius: 10
+    borderRadius: 10,
   },
   label: {
     fontSize: 16,
     marginBottom: 5,
-    marginTop: 10
+    marginTop: 10,
   },
   input: {
     height: 40,
@@ -242,64 +250,63 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingHorizontal: 10,
     marginBottom: 5,
-    marginEnd: 5
+    marginEnd: 5,
   },
   inputError: {
-    borderColor: 'red' // Cambia el borde a rojo si hay un error
+    borderColor: 'red', // Cambia el borde a rojo si hay un error
   },
   button: {
     backgroundColor: '#F89F9F',
     paddingVertical: 10,
     borderRadius: 5,
-    alignItems: 'center'
+    alignItems: 'center',
   },
   buttonText: {
     color: '#ffffff',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
   forgotPassword: {
     textAlign: 'right',
     marginTop: 10,
     color: '#F89F9F',
-    textDecorationLine: 'underline'
-  },
-  line: {
-    height: 2,
-    width: '100%', // Ancho del 80% de la pantalla
-    position: 'absolute', // Posicionamiento absoluto para colocar la línea en una posición específica
-    bottom: 0, // Al principio, la línea estará al fondo de la pantalla
-    borderBottomColor: '#ccc',
-    borderBottomWidth: 1,
-    alignSelf: 'stretch' // Ajuste para que la línea ocupe todo el ancho
+    textDecorationLine: 'underline',
   },
 
+  
   registerContainer: {
-    position: 'absolute',
-    bottom: 0, // Coloca el contenedor en la parte inferior de la pantalla
-    justifyContent: 'center', // Centra el contenido horizontalmente
-    alignItems: 'center', // Centra el contenido verticalmente
+    justifyContent: 'center',
+    alignItems: 'center',
     flexDirection: 'row',
-    width: '100%' // Asegura que el contenedor ocupe todo el ancho de la pantalla
+    width: '100%',
+    marginTop: 80, // Agrega un margen superior adecuado
+    marginBottom: 20, // Agrega un margen inferior adecuado
+  },
+  line: {
+    flex: 1,
+    height: 1,
+    borderBottomColor: '#ccc',
+    borderBottomWidth: 1,
+    marginHorizontal: 5, // Ajusta esto según tu preferencia de espaciado
   },
   registerText: {
-    fontSize: 16
+    fontSize: 16,
   },
   registerLink: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#F89F9F'
+    color: '#F89F9F',
   },
   errorText: {
     color: 'red',
     fontSize: 12,
-    marginBottom: 5
+    marginBottom: 5,
   },
   modalBackground: {
     flex: 1,
     alignItems: 'center',
     flexDirection: 'column',
     justifyContent: 'space-around',
-    backgroundColor: '#00000040'
+    backgroundColor: '#00000040',
   },
   activityIndicatorWrapper: {
     backgroundColor: '#FFFFFF',
@@ -308,10 +315,10 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-around'
+    justifyContent: 'space-around',
   },
   loadingText: {
     textAlign: 'center', // Centra el texto
-    flexWrap: 'wrap' // Permite que el texto se ajuste
-  }
+    flexWrap: 'wrap', // Permite que el texto se ajuste
+  },
 });
