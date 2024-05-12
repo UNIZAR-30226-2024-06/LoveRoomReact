@@ -17,6 +17,8 @@ import * as ImagePicker from 'expo-image-picker';
 import AuthContext from '../components/AuthContext';
 import * as FileSystem from 'expo-file-system';
 import { Feather } from '@expo/vector-icons';
+import { differenceInYears } from 'date-fns';
+
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
@@ -80,7 +82,6 @@ const provinciasDeEspana = [
 export default function RegisterPreferencesScreen({ navigation }) {
   const { authState, setAuthState } = useContext(AuthContext);
   const [show, setShow] = useState(false);
-  const [name, setName] = useState(authState.nombre);
   const [fechaNacimiento, setFechaNacimiento] = useState('');
   const [cursorPosition, setCursorPosition] = useState(0);
   const [gender, setGender] = useState('');
@@ -112,8 +113,14 @@ export default function RegisterPreferencesScreen({ navigation }) {
   }, []);
 
   const handleSave = () => {
+    // Calcular la edad a partir de la fecha de nacimiento
+    const [day, month, year] = fechaNacimiento.split('/').map(Number);
+    const birthday = new Date(year, month - 1, day); // Date espera el mes basado en 0-index
+    const currentDate = new Date();
+    const edad = differenceInYears(currentDate, birthday);
+    console.log('Edad:', edad)
+  
     setIsLoading(true);
-    console.log(`${process.env.EXPO_PUBLIC_API_URL}/user/update`);
     fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/update`, {
       method: 'PUT',
       headers: {
@@ -123,47 +130,45 @@ export default function RegisterPreferencesScreen({ navigation }) {
       body: JSON.stringify({
         correo: authState.correo,
         nombre: authState.nombre,
-        //FALTA PONER FECHA NACIMIENTO Y QUITAR EDAD
-        edad: 21,
+        edad: edad,
         sexo: gender,
         buscaedadmin: agePreference[0],
         buscaedadmax: agePreference[1],
         buscasexo: sexualPreference,
         descripcion: description,
-        //subir foto primero a multimedia yt luego actualizarla
-        fotoperfil: 'null.jpg', //para que se pueda actualziar, subirla al multimedia y nos devolvera un path para subir,
+        fotoperfil: 'null.jpg',
         idlocalidad: idlocalidad
       })
     })
-      .then((response) => response.json())
-      .then((data) => {
-        setIsLoading(false);
-        console.log(data);
-        if (data == 'Usuario actualizado correctamente') {
-          isDataSaved.current = true;
-          setAuthState((prevState) => ({
-            ...prevState,
-            edad: 21,
-            sexo: gender,
-            buscaedadmin: agePreference[0],
-            buscaedadmax: agePreference[1],
-            buscasexo: sexualPreference,
-            descripcion: description,
-            //subir foto primero a multimedia yt luego actualizarla
-            fotoperfil: 'null.jpg', //para que se pueda actualziar, subirla al multimedia y nos devolvera un path para subir,
-            idlocalidad: idlocalidad
-          }));
-          navigation.navigate('Cuenta');
-          console.log('Preferencias del registro configuradas correctamente');
-        } else if (data.error == 'Error al actualizar el usuario') {
-          console.log('Error al configurar las preferencias del usuario');
-        }
-      })
-      .catch((error) => {
-        setIsLoading(false);
-        console.error('Error:', error);
-      });
+    .then((response) => response.json())
+    .then((data) => {
+      setIsLoading(false);
+      console.log(data);
+      if (data === 'Usuario actualizado correctamente') {
+        isDataSaved.current = true;
+        setAuthState((prevState) => ({
+          ...prevState,
+          edad: edad, // Actualiza la edad con el valor calculado
+          sexo: gender,
+          buscaedadmin: agePreference[0],
+          buscaedadmax: agePreference[1],
+          buscasexo: sexualPreference,
+          descripcion: description,
+          fotoperfil: 'null.jpg',
+          idlocalidad: idlocalidad
+        }));
+        navigation.navigate('Cuenta');
+        console.log('Preferencias del registro configuradas correctamente');
+      } else if (data.error === 'Error al actualizar el usuario') {
+        console.log('Error al configurar las preferencias del usuario');
+      }
+    })
+    .catch((error) => {
+      setIsLoading(false);
+      console.error('Error:', error);
+    });
   };
+  
 
   const idToValue = (id) => {
     return provinciasDeEspana[id];
