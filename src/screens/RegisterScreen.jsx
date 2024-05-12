@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   ScrollView,
   View,
@@ -7,33 +7,61 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
-  Platform,
-  StatusBar
+  ActivityIndicator,
+  Modal
 } from 'react-native';
 import AuthContext from '../components/AuthContext';
+import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Toast from 'react-native-toast-message';
 
 export default function Login({ navigation }) {
   const { authState, setAuthState } = React.useContext(AuthContext);
-  const [email, setEmail] = React.useState('');
-  const [name, setName] = React.useState('');
-  const [isValidEmail, setIsValidEmail] = React.useState(false);
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
 
-  const [password, setPassword] = React.useState('');
-  const [isValidPassword, setIsValidPassword] = React.useState(false);
+  const [isValidName, setIsValidName] = useState(false);
+  const [nameError, setNameError] = useState(false);
+  const [nameErrorMessage, setNameErrorMessage] = useState('');
 
-  const handlePasswordChange = (text) => {
-    setPassword(text);
-    setIsValidPassword(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,16}$/.test(text));
+  const [isValidEmail, setIsValidEmail] = useState(false);
+  const [emailError, setEmailError] = useState(false);
+  const [emailErrorMessage, setEmailErrorMessage] = useState(
+    '* Por favor, introduzca un correo electrónico válido.'
+  );
+
+  const [password, setPassword] = useState('');
+  const [isValidPassword, setIsValidPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
+  const [hidePassword, setHidePassword] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleNameChange = (text) => {
+    setName(text);
+    setIsValidName(text.trim().length > 0);
+    setNameError(false);
   };
 
   const handleEmailChange = (text) => {
     setEmail(text);
-    setIsValidEmail(/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/.test(text));
+    setIsValidEmail(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(text));
+    setEmailError(false); // Reinicia el estado de error del correo electrónico
+    if (!isValidEmail) {
+      setEmailErrorMessage('* Por favor, introduzca un correo electrónico válido.');
+    }
+  };
+
+  const handlePasswordChange = (text) => {
+    setPassword(text);
+    setIsValidPassword(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,16}$/.test(text));
+    setPasswordError(false); // Reinicia el estado de error de la contraseña
   };
 
   const handleRegister = () => {
-    fetch('http://192.168.1.44:5000/user/create', {
+    setIsLoading(true);
+    console.log(`${process.env.EXPO_PUBLIC_API_URL}/user/create`);
+    console.log(name, email, password);
+    fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/create`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -47,6 +75,7 @@ export default function Login({ navigation }) {
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
+        setIsLoading(false);
         if (data.token != null) {
           setAuthState({
             isLoggedIn: true,
@@ -68,60 +97,123 @@ export default function Login({ navigation }) {
           });
           AsyncStorage.setItem('token', data.token);
           navigation.navigate('RegisterPreferences');
+        } else if (data.error === 'Ya existe un usuario con ese correo') {
+          setEmailError(true);
+          setEmailErrorMessage('* Este correo electrónico ya está registrado');
         } else {
-          alert('Error al registrar el usuario');
-          console.log(data);
+          Toast.show({
+            type: 'error',
+            position: 'bottom',
+            text1: 'Error',
+            text2: 'Error al conectar con la base de datos',
+            visibilityTime: 2500
+          });
         }
       })
       .catch((error) => {
+        setIsLoading(false);
         console.error('Error:', error);
       });
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} keyboardShouldPersistTaps={'handled'}>
       <View style={[styles.logoContainer, { marginBottom: -90 }]}>
         <Image style={styles.logo} source={require('../img/logoTexto.png')} />
       </View>
+      <Modal
+        transparent={true}
+        animationType={'none'}
+        visible={isLoading}
+        onRequestClose={() => console.log('close modal')}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.activityIndicatorWrapper}>
+            <ActivityIndicator animating={isLoading} size="large" color="#F89F9F" />
+            <Text style={styles.loadingText}>Registrando...</Text>
+          </View>
+        </View>
+      </Modal>
 
       <View style={styles.formContainer}>
         <Text style={styles.label}>Nombre completo</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, nameError && styles.inputError]}
           placeholder="Introduzca su nombre completo"
-          onChangeText={(text) => setName(text)}
+          onChangeText={handleNameChange}
+          maxLength={50}
         />
-        <Text style={styles.label}>Correo Electrónico</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Introduzca su correo electrónico"
-          onChangeText={handleEmailChange}
-        />
-        {!isValidEmail && (
-          <Text style={styles.errores}>* Por favor, introduzca un correo electrónico válido.</Text>
+        {nameError && (
+          <Text style={styles.errorText}>* Por favor, introduzca su nombre completo.</Text>
         )}
 
-        <Text style={styles.label}>Contraseña</Text>
+        <Text style={styles.label}>Correo Electrónico</Text>
         <TextInput
-          style={styles.input}
-          placeholder="Introduzca su contraseña"
-          secureTextEntry={true}
-          onChangeText={handlePasswordChange}
+          style={[styles.input, emailError && styles.inputError]}
+          placeholder="Introduzca su correo electrónico"
+          onChangeText={handleEmailChange}
+          autoCapitalize="none"
+          maxLength={254}
         />
-        {!isValidPassword && (
-          <Text style={styles.errores}>
-            * La contraseña debe tener entre 8 y 16 caracteres, incluyendo al menos una mayúscula,
-            una minúscula y un número.
-          </Text>
-        )}
+        {emailError && <Text style={styles.errorText}>{emailErrorMessage}</Text>}
+
+        <Text style={styles.label}>Contraseña</Text>
+        <View>
+          <TextInput
+            style={[
+              styles.input,
+              { paddingRight: 40, flex: 1 },
+              passwordError && styles.inputError
+            ]}
+            placeholder="Introduzca una contraseña"
+            secureTextEntry={hidePassword}
+            onChangeText={handlePasswordChange}
+            maxLength={100}
+          />
+          <TouchableOpacity
+            onPress={() => setHidePassword(!hidePassword)}
+            style={{
+              position: 'absolute',
+              right: 20,
+              height: 40,
+              top: 0,
+              justifyContent: 'center'
+            }}
+          >
+            <Ionicons name={hidePassword ? 'eye-off' : 'eye'} size={24} color="black" />
+          </TouchableOpacity>
+          {passwordError && (
+            <Text style={[styles.errorText]}>
+              * La contraseña debe tener entre 8 y 16 caracteres, incluyendo al menos una mayúscula,
+              una minúscula y un número.
+            </Text>
+          )}
+        </View>
 
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
-            handleRegister();
-            navigation.navigate('Cuenta');
+            let isFormValid = true;
+
+            if (!isValidName) {
+              setNameError(true);
+              isFormValid = false;
+            }
+
+            if (!isValidEmail) {
+              setEmailError(true);
+              isFormValid = false;
+            }
+
+            if (!isValidPassword) {
+              setPasswordError(true);
+              isFormValid = false;
+            }
+
+            if (isFormValid) {
+              handleRegister();
+            }
           }}
-          disabled={!isValidEmail || !isValidPassword}
         >
           <Text style={styles.buttonText}>Registrarse</Text>
         </TouchableOpacity>
@@ -143,11 +235,6 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     resizeMode: 'contain'
-  },
-  logoText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginTop: 10
   },
   formContainer: {
     backgroundColor: '#ffffff',
@@ -171,7 +258,6 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: '#F89F9F',
     paddingVertical: 10,
-    marginVertical: 20,
     borderRadius: 5,
     alignItems: 'center'
   },
@@ -179,36 +265,32 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontWeight: 'bold'
   },
-  errores: {
-    marginTop: -10,
+  inputError: {
+    borderColor: 'red'
+  },
+  errorText: {
     color: 'red',
     fontSize: 12,
-    marginBottom: 10
+    marginBottom: 5
   },
-  forgotPassword: {
-    textAlign: 'right',
-    marginTop: 10,
-    color: '#F89F9F',
-    textDecorationLine: 'underline'
+  modalBackground: {
+    flex: 1,
+    alignItems: 'center',
+    flexDirection: 'column',
+    justifyContent: 'space-around',
+    backgroundColor: '#00000040'
   },
-  registerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    paddingBottom: '10%'
+  activityIndicatorWrapper: {
+    backgroundColor: '#FFFFFF',
+    height: 120,
+    width: 200,
+    borderRadius: 10,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-around'
   },
-  registerText: {
-    fontSize: 16
-  },
-  registerLink: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginLeft: 5,
-    color: '#F89F9F'
-  },
-  line: {
-    borderBottomColor: '#ccc',
-    borderBottomWidth: 1,
-    paddingBottom: '45%',
-    alignSelf: 'stretch' // Ajuste para que la línea ocupe todo el ancho
+  loadingText: {
+    textAlign: 'center',
+    flexWrap: 'wrap'
   }
 });

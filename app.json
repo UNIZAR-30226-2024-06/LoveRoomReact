@@ -11,7 +11,6 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-
     "plugins": [
       [
         "expo-image-picker",
@@ -20,7 +19,6 @@
         }
       ]
     ],
-
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
@@ -29,10 +27,17 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": ["android.permission.RECORD_AUDIO"],
+      "package": "com.andreei19.reactnat"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "9a04248a-7cc5-44bd-9288-8d8139a8a361"
+      }
     }
   }
 }

@@ -1,7 +1,63 @@
 import React, { useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import io from 'socket.io-client';
+import { socketEvents } from '../constants/SocketConstants';
+import Toast from 'react-native-toast-message';
 
 const AuthContext = React.createContext();
+
+// Inicializa el socket con el token del usuario
+export const initializeSocket = async (token, setSocketState, socketState) => {
+  let newSocket = socketState.socket;
+  let isSocketInitialized = false; // Bandera para controlar si el socket está inicializado
+
+  if (newSocket == null) {
+    console.log('Initializing socket');
+    newSocket = io(`${process.env.EXPO_PUBLIC_API_URL}`, {
+      auth: {
+        token: `Bearer ${token}`
+      }
+    });
+
+    await setSocketState((prevState) => ({
+      ...prevState,
+      socket: newSocket
+    }));
+
+    newSocket.on('connect', () => {
+      console.log('Connected to socket');
+      isSocketInitialized = true;
+      newSocket.on(socketEvents.MATCH, (senderId, receiverId, idSala, idVideo) => {
+        console.log('Match event received: ', receiverId, senderId, idSala, idVideo);
+        setSocketState((prevState) => ({
+          ...prevState,
+          senderId: receiverId,
+          receiverId: senderId,
+          idSala: idSala.toString(),
+          idVideo: idVideo,
+          matchRecibido: true
+        }));
+        Toast.show({
+          type: 'success',
+          position: 'bottom',
+          text1: '¡Match!',
+          text2: 'Has hecho match con alguien, ¡disfruta la sala!',
+          visibilityTime: 2500
+        });
+
+      });
+    });
+  } else if (!newSocket.connected) {
+    console.log('Socket already initialized but not connected, reconnecting...');
+    await newSocket.connect();
+    isSocketInitialized = true; // Establecer la bandera en true cuando el socket esté completamente inicializado
+  } else {
+    console.log('Socket already initialized and connected');
+    isSocketInitialized = true; // Establecer la bandera en true cuando el socket esté completamente inicializado
+  }
+
+  return { isSocketInitialized }; // Devolver el socket y la bandera
+};
 
 export const AuthProvider = ({ children }) => {
   // useState se utiliza para definir y gestionar el estado local en componentes de función.
@@ -15,8 +71,8 @@ export const AuthProvider = ({ children }) => {
     contrasena: null,
     nombre: null,
     sexo: null,
-    edad: null,
-    idLocalidad: null,
+    fechanacimiento: null,
+    idlocalidad: null,
     buscaedadmin: null,
     buscaedadmax: null,
     buscasexo: null,
@@ -25,13 +81,23 @@ export const AuthProvider = ({ children }) => {
     tipousuario: null,
     baneado: false
   });
+  console.log(authState);
+
+  const [socketState, setSocketState] = useState({
+    socket: null,
+    senderId: authState.id,
+    receiverId: '',
+    idVideo: '',
+    idSala: '',
+    matchRecibido: false
+  });
 
   // Función asincrónica que se encarga de verificar si hay un token de autenticación almacenado en AsyncStorage y si es válido.
   // Luego, actualiza el estado de autenticación en consecuencia.
   const checkToken = async () => {
     const token = await AsyncStorage.getItem('token'); // Obtiene el token de autenticación almacenado en AsyncStorage
     console.log(token);
-    fetch('http://192.168.1.44:5000/user/check/token', {
+    fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/check/token`, {
       // Realiza una petición al servidor para verificar si el token es válido
       method: 'GET',
       headers: {
@@ -48,23 +114,29 @@ export const AuthProvider = ({ children }) => {
             // Actualiza el estado de autenticación con el token y otros datos del usuario
             ...prevState,
             isLoggedIn: true,
-            token: data.token,
-            baneado: data.usuario.baneado,
+            token: token,
             id: data.usuario.id,
             correo: data.usuario.correo,
+            contrasena: data.usuario.contrasena,
             nombre: data.usuario.nombre,
             sexo: data.usuario.sexo,
             edad: data.usuario.edad,
-            idLocalidad: data.usuario.idLocalidad,
+            idlocalidad: data.usuario.idlocalidad,
             buscaedadmin: data.usuario.buscaedadmin,
             buscaedadmax: data.usuario.buscaedadmax,
             buscasexo: data.usuario.buscasexo,
             fotoperfil: data.usuario.fotoperfil,
             descripcion: data.usuario.descripcion,
             tipousuario: data.usuario.tipousuario,
-            contrasena: data.usuario.contrasena,
-
+            baneado: data.usuario.baneador
           }));
+          // fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/check/token`,{
+          //   method: 'GET',
+          //   headers: {
+          //     'Content-Type': 'application/json',
+          //     Authorization: `Bearer ${token}`
+          //   }
+          // });
         } else {
           console.log('Token inválido');
           setAuthState((prevState) => ({ ...prevState, isLoggedIn: false, token: null }));
@@ -79,7 +151,9 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ authState, setAuthState }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ authState, setAuthState, socketState, setSocketState }}>
+      {children}
+    </AuthContext.Provider>
   );
 };
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { View, Button, Text } from 'react-native';
 import NotRegisteredScreen from './NotRegisteredScreen';
 import AuthContext from '../components/AuthContext';
@@ -7,23 +7,19 @@ import SearchBar from '../components/SearchBarYt';
 import { StyleSheet } from 'react-native';
 
 export default function HomeScreen({ navigation }) {
+
   const { authState } = React.useContext(AuthContext);
 
-  // if (!authState.isLoggedIn) {
-  //   return <NotRegisteredScreen />;
-  // }
+
+
+  if (!authState.isLoggedIn) {
+    return <NotRegisteredScreen />;
+  }
+  
   return (
     <View style={{ flex: 1, alignItems: 'center' }}>
-      <Text style={styles.TextBienvenida}> ¡Bienvenido de nuevo, {authState.nombre}! </Text>
-      <SearchBar />
-      {/* <View style={styles.Video}>
-        <YouTubeIframe videoId={'TQtT9QgWjIY'} height={220} width={'100%'} style={styles.Video} />
-      </View> */}
-      {/* <YoutubeSearch /> */}
-      {/* <Button
-        title="Go to Login"
-        onPress={() => navigation.navigate('Login')}
-      /> */}
+      <Text style={styles.TextBienvenida}> ¡Hola de nuevo, {authState.nombre}! </Text>
+      <SearchBar setVideoUrl={null} />
     </View>
   );
 }

@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useRef } from 'react';
 import {
   ScrollView,
   View,
@@ -7,31 +7,258 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
-  Platform,
-  StatusBar,
-  Dimensions
+  Dimensions,
+  Modal,
+  ActivityIndicator,
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import AuthContext from '../components/AuthContext';
 import * as FileSystem from 'expo-file-system';
+import { Feather } from '@expo/vector-icons';
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
 
+const provinciasDeEspana = [
+  '-- Seleccione su localidad --',
+  'Álava',
+  'Albacete',
+  'Alicante',
+  'Almería',
+  'Asturias',
+  'Ávila',
+  'Badajoz',
+  'Baleares',
+  'Barcelona',
+  'Burgos',
+  'Cáceres',
+  'Cádiz',
+  'Cantabria',
+  'Castellón',
+  'Ceuta',
+  'Ciudad Real',
+  'Córdoba',
+  'Cuenca',
+  'Gerona',
+  'Granada',
+  'Guadalajara',
+  'Guipúzcoa',
+  'Huelva',
+  'Huesca',
+  'Jaén',
+  'La Coruña',
+  'La Rioja',
+  'Las Palmas',
+  'León',
+  'Lérida',
+  'Lugo',
+  'Madrid',
+  'Málaga',
+  'Melilla',
+  'Murcia',
+  'Navarra',
+  'Orense',
+  'Palencia',
+  'Pontevedra',
+  'Salamanca',
+  'Santa Cruz de Tenerife',
+  'Segovia',
+  'Sevilla',
+  'Soria',
+  'Tarragona',
+  'Teruel',
+  'Toledo',
+  'Valencia',
+  'Valladolid',
+  'Vizcaya',
+  'Zamora',
+  'Zaragoza'
+];
+
 export default function RegisterPreferencesScreen({ navigation }) {
   const { authState, setAuthState } = useContext(AuthContext);
-  const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(false);
-  const [gender, setGender] = useState('Seleccione su género');
+  const [name, setName] = useState(authState.nombre);
+  const [fechaNacimiento, setFechaNacimiento] = useState('');
+  const [cursorPosition, setCursorPosition] = useState(0);
+  const [gender, setGender] = useState('');
   const [sexualPreference, setSexualPreference] = useState('');
-  const [agePreferenceStart, setAgePreferenceStart] = useState(18);
-  const [agePreferenceEnd, setAgePreferenceEnd] = useState(30);
+  const [agePreference, setAgePreference] = useState([18, 100]);
   const [description, setDescription] = useState('');
   const [profileImage, setProfileImage] = useState('');
+  const [idlocalidad, setIdLocalidad] = useState(0);
   const [isProfileImageSelected, setIsProfileImageSelected] = useState();
   const { StorageAccessFramework } = FileSystem;
+  const isDataSaved = useRef(false);
+  const [descriptionLength, setDescriptionLength] = useState(0);
+
+  const [genderError, setGenderError] = useState(false);
+  const [idlocalidadError, setIdLocalidadError] = useState(false);
+  const [sexualPreferenceError, setSexualPreferenceError] = useState(false);
+  const [fechaNacimientoError, setFechaNacimientoError] = useState(false);
+  const [isValidDate, setIsValidDate] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  React.useEffect(() => {
+    return () => {
+      console.log(isDataSaved);
+      if (isDataSaved.current === false) {
+        console.log('Cleaning up...');
+        handleDelete();
+      }
+    };
+  }, []);
+
+  const handleSave = () => {
+    setIsLoading(true);
+    console.log(`${process.env.EXPO_PUBLIC_API_URL}/user/update`);
+    fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/update`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authState.token}`
+      },
+      body: JSON.stringify({
+        correo: authState.correo,
+        nombre: authState.nombre,
+        //FALTA PONER FECHA NACIMIENTO Y QUITAR EDAD
+        edad: 21,
+        sexo: gender,
+        buscaedadmin: agePreference[0],
+        buscaedadmax: agePreference[1],
+        buscasexo: sexualPreference,
+        descripcion: description,
+        //subir foto primero a multimedia yt luego actualizarla
+        fotoperfil: 'null.jpg', //para que se pueda actualziar, subirla al multimedia y nos devolvera un path para subir,
+        idlocalidad: idlocalidad
+      })
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setIsLoading(false);
+        console.log(data);
+        if (data == 'Usuario actualizado correctamente') {
+          isDataSaved.current = true;
+          setAuthState((prevState) => ({
+            ...prevState,
+            edad: 21,
+            sexo: gender,
+            buscaedadmin: agePreference[0],
+            buscaedadmax: agePreference[1],
+            buscasexo: sexualPreference,
+            descripcion: description,
+            //subir foto primero a multimedia yt luego actualizarla
+            fotoperfil: 'null.jpg', //para que se pueda actualziar, subirla al multimedia y nos devolvera un path para subir,
+            idlocalidad: idlocalidad
+          }));
+          navigation.navigate('Cuenta');
+          console.log('Preferencias del registro configuradas correctamente');
+        } else if (data.error == 'Error al actualizar el usuario') {
+          console.log('Error al configurar las preferencias del usuario');
+        }
+      })
+      .catch((error) => {
+        setIsLoading(false);
+        console.error('Error:', error);
+      });
+  };
+
+  const idToValue = (id) => {
+    return provinciasDeEspana[id];
+  };
+
+  const handleDelete = () => {
+    console.log(`${process.env.EXPO_PUBLIC_API_URL}/user/delete`);
+    fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/delete`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authState.token}`
+      }
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        navigation.navigate('Register');
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+  };
+
+  // Función para verificar si un año es bisiesto
+  const isLeapYear = (year) => {
+    return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+  };
+
+  // Función para obtener el número de días en un mes específico
+  const getDaysInMonth = (month, year) => {
+    const daysInMonths = {
+      1: 31,
+      2: isLeapYear(year) ? 29 : 28, // febrero tiene 28 días o 29 si es bisiesto
+      3: 31,
+      4: 30,
+      5: 31,
+      6: 30,
+      7: 31,
+      8: 31,
+      9: 30,
+      10: 31,
+      11: 30,
+      12: 31
+    };
+    return daysInMonths[month];
+  };
+
+  // Función para verificar si una fecha es válida considerando los años bisiestos y días en cada mes
+  const checkDate = (day, month, year) => {
+    if (year < 1900 || year > new Date().getFullYear()) {
+      return false;
+    }
+
+    if (month < 1 || month > 12) {
+      return false;
+    }
+
+    const daysInMonth = getDaysInMonth(month, year);
+
+    return day >= 1 && day <= daysInMonth;
+  };
+
+  const handleDateChange = (text) => {
+    // Elimina todos los caracteres que no sean números
+    const cleanedText = text.replace(/[^0-9]/g, '');
+
+    // Formatea la fecha de acuerdo al formato DD/MM/AAAA
+    let formattedText = '';
+    let formattedCursorPosition = cursorPosition;
+
+    for (let i = 0; i < cleanedText.length; i++) {
+      if (i === 2 || i === 4) {
+        formattedText += '/';
+        if (i < cursorPosition) {
+          formattedCursorPosition++;
+        }
+      }
+      formattedText += cleanedText[i];
+    }
+
+    // Asegúrate de que el texto formateado no exceda los 10 caracteres
+    if (formattedText.length > 10) {
+      formattedText = formattedText.slice(0, 10);
+    }
+
+    setFechaNacimiento(formattedText);
+    setCursorPosition(formattedCursorPosition);
+
+    // Valida la fecha para evitar errores en el input
+    const [day, month, year] = formattedText.split('/').map(Number);
+    const valid = checkDate(day, month, year);
+    setIsValidDate(valid);
+    setFechaNacimientoError(false);
+  };
 
   const fileName = FileSystem.documentDirectory + 'userProfileImage.jpeg';
   const checkProfileImage = async () => {
@@ -74,135 +301,193 @@ export default function RegisterPreferencesScreen({ navigation }) {
     }
   };
 
-  const showDatepicker = () => {
-    setShow(true);
-  };
-
-  const onChange = (event, selectedDate) => {
-    const currentDate = selectedDate || date;
-    setShow(false);
-    setDate(currentDate);
-  };
-
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} keyboardShouldPersistTaps={'handled'}>
       <View style={styles.header} />
       <View style={styles.profileInfo}>
         <Text style={styles.profileText}>Completar perfil</Text>
         <View style={styles.profileImageContainer}>
+          <TouchableOpacity style={styles.editIconContainer} onPress={pickImage}>
+            <Feather name="edit" size={25} color="black" />
+          </TouchableOpacity>
           <View style={styles.profileImageBorder}>
             <Image
-              //   source={require('../img/profileImage.jpg')} // Ruta de la imagen de perfil
               style={styles.profileImage}
               source={
                 isProfileImageSelected
                   ? { uri: profileImage + '?' + new Date() }
-                  : require('../img/profileImage.jpg')
+                  : require('../img/perfil-vacio.png')
               }
             />
           </View>
         </View>
       </View>
 
-      <View style={styles.formContainer}>
-        <View style={styles.container}>
-          <TouchableOpacity onPress={pickImage} style={styles.button}>
-            <Text style={styles.buttonText}>Cambiar imagen de perfil</Text>
-          </TouchableOpacity>
+      <Modal
+        transparent={true}
+        animationType={'none'}
+        visible={isLoading}
+        onRequestClose={() => {
+          console.log('close modal');
+        }}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.activityIndicatorWrapper}>
+            <ActivityIndicator animating={isLoading} size="large" color="#F89F9F" />
+            <Text style={styles.loadingText}>Creando cuenta...</Text>
+          </View>
         </View>
+      </Modal>
 
-        <Text style={styles.label}>Fecha de nacimiento</Text>
-        <TouchableOpacity onPress={showDatepicker} style={styles.dateInput}>
-          <Text>{date.toLocaleDateString()}</Text>
-        </TouchableOpacity>
-        {show && (
-          <DateTimePicker
-            testID="dateTimePicker"
-            value={date}
-            mode={'date'}
-            is24Hour={true}
-            display="DD/MM/YYYY"
-            onChange={onChange}
-          />
+      <View style={styles.formContainer}>
+        <Text style={styles.label}>Género</Text>
+        <View style={[styles.input, genderError && styles.inputError]}>
+          <Picker
+            selectedValue={gender}
+            onValueChange={(itemValue) => {
+              setGender(itemValue);
+              setGenderError(false);
+            }}
+          >
+            <Picker.Item label="-- Seleccione su género --" value="" />
+            <Picker.Item label="Masculino" value="H" />
+            <Picker.Item label="Femenino" value="M" />
+            <Picker.Item label="Otro" value="O" />
+          </Picker>
+        </View>
+        {genderError && <Text style={styles.errorText}>* Por favor, seleccione un género.</Text>}
+
+        <Text style={styles.label}>Localidad</Text>
+        <View style={[styles.input, idlocalidadError && styles.inputError]}>
+          <Picker
+            selectedValue={idToValue(idlocalidad)}
+            onValueChange={(itemValue) => {
+              const index = provinciasDeEspana.indexOf(itemValue);
+              setIdLocalidad(index);
+              setIdLocalidadError(false);
+            }}
+          >
+            {provinciasDeEspana.map((provincia, index) => (
+              <Picker.Item key={index} label={provincia} value={provincia} />
+            ))}
+          </Picker>
+        </View>
+        {idlocalidadError && (
+          <Text style={styles.errorText}>* Por favor, seleccione una localidad.</Text>
         )}
 
-        <Text style={styles.label}>Sexo</Text>
-        <Picker
-          selectedValue={gender}
-          style={styles.input}
-          onValueChange={(itemValue, itemIndex) => setGender(itemValue)}
-        >
-          <Picker.Item label="Masculino" value="H" />
-          <Picker.Item label="Femenino" value="M" />
-          <Picker.Item label="Otro" value="O" />
-        </Picker>
+        <Text style={styles.label}>Fecha de nacimiento</Text>
+        <TextInput
+          style={[styles.dateInput, fechaNacimientoError && styles.dateInputError]}
+          value={fechaNacimiento}
+          onChangeText={handleDateChange}
+          placeholder="DD/MM/AAAA"
+          maxLength={10}
+          keyboardType="numeric"
+          onSelectionChange={(event) => {
+            // Captura la posición actual del cursor
+            setCursorPosition(event.nativeEvent.selection.start);
+          }}
+        />
+        {fechaNacimientoError && (
+          <Text style={styles.errorText}>
+            * Por favor, introduzca una fecha de nacimiento válida.
+          </Text>
+        )}
 
         <Text style={styles.label}>Preferencia Sexual</Text>
-        <Picker
-          selectedValue={sexualPreference}
-          style={styles.input}
-          onValueChange={(itemValue, itemIndex) => setSexualPreference(itemValue)}
-        >
-          <Picker.Item label="Seleccione su preferencia sexual" value="" />
-          <Picker.Item label="Hombres" value="H" />
-          <Picker.Item label="Mujeres" value="M" />
-          <Picker.Item label="Ambos" value="T" />
-          {/* <Picker.Item label="Heterosexual" value="heterosexual" />
-          <Picker.Item label="Homosexual" value="homosexual" />
-          <Picker.Item label="Bisexual" value="bisexual" />
-          <Picker.Item label="Pansexual" value="pansexual" />
-          <Picker.Item label="Otro" value="other" /> */}
-        </Picker>
+        <View style={[styles.input, sexualPreferenceError && styles.inputError]}>
+          <Picker
+            selectedValue={sexualPreference}
+            onValueChange={(itemValue) => {
+              // Utiliza llaves para encapsular ambas instrucciones
+              setSexualPreference(itemValue);
+              setSexualPreferenceError(false);
+            }}
+          >
+            <Picker.Item label="-- Seleccione su preferencia sexual --" value="" />
+            <Picker.Item label="Hombres" value="H" />
+            <Picker.Item label="Mujeres" value="M" />
+            <Picker.Item label="Ambos" value="T" />
+          </Picker>
+        </View>
+        {sexualPreferenceError && (
+          <Text style={styles.errorText}>* Por favor, seleccione una preferencia sexual.</Text>
+        )}
 
-        <Text style={styles.label}>Preferencia de edad</Text>
-        <View style={{ ...styles.agePreferenceContainer, flexDirection: 'row' }}>
-          <Picker
-            selectedValue={agePreferenceStart}
-            style={styles.ageInput}
-            onValueChange={(itemValue, itemIndex) => setAgePreferenceStart(itemValue)}
-          >
-            {[...Array(100).keys()].map((value, index) => (
-              <Picker.Item key={index} label={value.toString()} value={value} />
-            ))}
-          </Picker>
-          <Text> _ </Text>
-          <Picker
-            selectedValue={agePreferenceEnd}
-            style={styles.ageInput}
-            onValueChange={(itemValue, itemIndex) => setAgePreferenceEnd(itemValue)}
-          >
-            {[...Array(100).keys()].map((value, index) => (
-              <Picker.Item key={index} label={value.toString()} value={value} />
-            ))}
-          </Picker>
+        <View style={styles.labelContainer}>
+          <Text style={styles.label}>Preferencia de edad</Text>
+          <Text style={styles.sliderLabel}>
+            {agePreference[0]}-{agePreference[1]}
+          </Text>
+        </View>
+        <View style={styles.sliderContainer}>
+          <MultiSlider
+            values={agePreference}
+            sliderLength={screenWidth - 40}
+            min={18}
+            max={100}
+            step={1}
+            onValuesChange={(values) => setAgePreference(values)}
+            allowOverlap={false}
+            snapped={true}
+            minMarkerOverlapDistance={20}
+            selectedStyle={{
+              backgroundColor: '#F89F9F'
+            }}
+            markerStyle={{
+              backgroundColor: '#F89F9F'
+            }}
+            customMarker={(e) => {
+              return <View style={styles.customMarker} />;
+            }}
+          />
         </View>
 
         <Text style={styles.label}>Descripción</Text>
-        <TextInput
-          style={styles.description}
-          placeholder="Introduce tu descripción aquí"
-          multiline={true}
-          numberOfLines={4}
-          onChangeText={(text) => setDescription(text)}
-        />
+        <View style={styles.descriptionInputContainer}>
+          <TextInput
+            style={styles.description}
+            placeholder="Cuéntanos un poco sobre ti..."
+            multiline={true}
+            numberOfLines={4}
+            maxLength={500}
+            onChangeText={(text) => {
+              setDescription(text);
+              setDescriptionLength(text.length);
+            }}
+            value={description}
+          />
+          <Text style={styles.characterCount}>{descriptionLength}/500</Text>
+        </View>
 
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
-            // TODO: handleRegister();
-            setAuthState((prevState) => ({
-              ...prevState,
-              sexo: gender,
-              buscaedadmin: agePreferenceStart,
-              buscaedadmax: agePreferenceEnd,
-              buscasexo: sexualPreference,
-              fotoperfil: fileName,
-              descripcion: description
-            }));
-            navigation.navigate('UserGuidelines');
+            let isFormValid = true;
+            if (gender === '') {
+              setGenderError(true);
+              isFormValid = false;
+            }
+            if (idlocalidad === 0) {
+              setIdLocalidadError(true);
+              isFormValid = false;
+            }
+            if (sexualPreference === '') {
+              setSexualPreferenceError(true);
+              isFormValid = false;
+            }
+            if (!isValidDate) {
+              setFechaNacimientoError(true);
+              isFormValid = false;
+            }
+            if (isFormValid) {
+              console.log('Guardando...: ', authState);
+              handleSave();
+            }
           }}
         >
-          <Text style={styles.buttonText}>Registrarse</Text>
+          <Text style={styles.buttonText}> Guardar</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -215,8 +500,40 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff'
   },
 
+  descriptionInputContainer: {
+    position: 'relative'
+  },
+  description: {
+    height: 100,
+    borderColor: '#cccccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    paddingRight: 40,
+    marginBottom: 10
+  },
+  characterCount: {
+    position: 'absolute',
+    bottom: 15,
+    right: 8,
+    color: '#666',
+    fontSize: 12
+  },
+
+  editIconContainer: {
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    borderRadius: 15,
+    padding: 5,
+    borderColor: 'black',
+    borderWidth: 1,
+    zIndex: 1
+  },
+
   header: {
-    height: screenHeight * 0.273,
+    height: screenHeight * 0.27,
     backgroundColor: '#F89F9F'
   },
   profileInfo: {
@@ -227,6 +544,7 @@ const styles = StyleSheet.create({
   profileText: {
     color: 'white',
     fontSize: 20,
+    padding: 10,
     fontWeight: 'bold'
   },
   profileImageContainer: {
@@ -247,13 +565,15 @@ const styles = StyleSheet.create({
     overflow: 'hidden'
   },
   profileImage: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 70
+    width: '100%', // Reduzca ligeramente el tamaño de la imagen
+    height: '100%', // Reduzca ligeramente el tamaño de la imagen
+    borderRadius: 70,
+    marginBottom: 0,
+    marginRight: 0 // Añade este estilo para evitar que el ícono de edición cubra la imagen
   },
   formContainer: {
     backgroundColor: '#ffffff',
-    marginTop: 20,
+    marginTop: 0,
     padding: 20,
     borderRadius: 10
   },
@@ -262,34 +582,57 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     marginTop: 10,
     fontWeight: 'bold',
-    textAlign: 'center'
+    textAlign: 'left'
   },
+
+  labelContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 10
+  },
+
+  slider: {
+    width: '100%'
+  },
+
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginBottom: 5
+  },
+
+  sliderContainer: {
+    marginBottom: 0
+  },
+
+  customMarker: {
+    height: 20,
+    width: 20,
+    borderRadius: 10,
+    backgroundColor: '#F89F9F'
+  },
+
+  sliderLabel: {
+    fontSize: 16
+  },
+
   input: {
     height: 40,
     borderColor: '#cccccc',
     borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 10
+    borderRadius: 10,
+    justifyContent: 'center'
   },
-  dateInput: {
+
+  inputError: {
     height: 40,
-    borderColor: '#cccccc',
+    borderColor: 'red',
     borderWidth: 1,
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
-    alignContent: 'center'
+    borderRadius: 10,
+    justifyContent: 'center'
   },
-  ageInput: {
-    height: 40,
-    borderColor: '#cccccc',
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 10,
-    width: '45%'
-  },
+
   description: {
     height: 240,
     borderColor: '#cccccc',
@@ -300,6 +643,7 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
     padding: 10
   },
+
   button: {
     backgroundColor: '#F89F9F',
     paddingVertical: 10,
@@ -312,36 +656,44 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16
   },
-  errores: {
-    marginTop: -10,
-    color: 'red',
-    fontSize: 12,
-    marginBottom: 10
+
+  dateInput: {
+    height: 40,
+    borderColor: '#cccccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+    textAlign: 'left' // Centra el texto
   },
-  forgotPassword: {
-    textAlign: 'right',
-    marginTop: 10,
-    color: '#F89F9F',
-    textDecorationLine: 'underline'
+
+  dateInputError: {
+    height: 40,
+    borderColor: 'red',
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+    textAlign: 'left' // Centra el texto
   },
-  registerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    paddingBottom: '10%'
+  modalBackground: {
+    flex: 1,
+    alignItems: 'center',
+    flexDirection: 'column',
+    justifyContent: 'space-around',
+    backgroundColor: '#00000040'
   },
-  registerText: {
-    fontSize: 16
+  activityIndicatorWrapper: {
+    backgroundColor: '#FFFFFF',
+    height: 120,
+    width: 200,
+    borderRadius: 10,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-around'
   },
-  registerLink: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginLeft: 5,
-    color: '#F89F9F'
-  },
-  line: {
-    borderBottomColor: '#ccc',
-    borderBottomWidth: 1,
-    paddingBottom: '45%',
-    alignSelf: 'stretch' // Ajuste para que la línea ocupe todo el ancho
+  loadingText: {
+    textAlign: 'center', // Centra el texto
+    flexWrap: 'wrap' // Permite que el texto se ajuste
   }
 });
