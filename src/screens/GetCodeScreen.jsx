@@ -12,15 +12,31 @@ import {
   ToastAndroid
 } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { correoFP } from '../utils/globalVariables';
+import { correoFP, actualizarCode } from '../utils/globalVariables';
 
 export default function GetCodeScreen({ navigation }) {
   const [lastSentTime, setLastSentTime] = useState(null);
   const lastSentTimeRef = useRef(null);
+  const [code, setCode] = useState('');
+  const [isValidCode, setIsValidCode] = useState(false);
+  const [isSixDigits, setIsSixDigits] = useState(false); 
+  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [errorText, setErrorText] = useState('* El código debe tener 6 dígitos');
+
+  const handleCodeChange = (text) => {
+    setCode(text);
+    setFormSubmitted(false);
+    setErrorText('');
+    if (text.length === 6) {
+      setIsSixDigits(true);
+    } else {
+      setIsSixDigits(false);
+    }
+  };
+  
 
 
-
-  const handleResendCode = () => {
+  const handleReSendCode = () => {
     const currentTime = Date.now();
     const resendDelay = 60000; // 60 segundos
     if (lastSentTimeRef.current && currentTime - lastSentTimeRef.current < resendDelay) {
@@ -34,7 +50,7 @@ export default function GetCodeScreen({ navigation }) {
       });
     } else {
       // Si han pasado más de 60 segundos, enviar el código nuevamente y actualizar el tiempo del último envío
-      sendCode();
+      reSendCode();
       Toast.show({
         type: 'success',
         position: 'bottom',
@@ -46,7 +62,7 @@ export default function GetCodeScreen({ navigation }) {
     }
   };
 
-  const sendCode = () => {
+  const reSendCode = () => {
     fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/send/email`, {
       method: 'POST',
       headers: {
@@ -59,7 +75,6 @@ export default function GetCodeScreen({ navigation }) {
         let respuestaValida = false;
         if (data.mensaje === 'Correo para resetear contraseña enviado con exito') {
           respuestaValida = true;
-          navigation.navigate('GetCode');
         } else if (data.error === 'El usuario introducido no existe') {
           respuestaValida = false;
           setIsValidEmail(false);
@@ -88,48 +103,69 @@ export default function GetCodeScreen({ navigation }) {
   };
 
   const handleContinue = () => {
-    // fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/check/code`, {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json'
-    //   },
-    //   body: JSON.stringify({ 
-    //     correo: correoFP,
-    //     codigo: code
-    //   })
-    // })
-    //   .then((response) => response.json()) 
-    //   .then((data) => {
-    //     let respuestaValida = false;
-    //     if (data.mensaje === 'Correo para resetear contraseña enviado con exito') {
-    //       respuestaValida = true;
-    //       navigation.navigate('GetCode');
-    //     } else if (data.error === 'El usuario introducido no existe') {
-    //       respuestaValida = false;
-    //       setIsValidEmail(false);
-    //       setFormSubmitted(true);
-    //       setErrorText('Usuario no existente');
-    //     } else if (respuestaValida === false){
-    //       Toast.show({
-    //         type: 'error',
-    //         position: 'bottom',
-    //         text1: 'Error',
-    //         text2: 'Error al enviar el correo para resetear la contraseña',
-    //         visibilityTime: 2500
-    //       }); 
-    //      }
-    //   })
-    //   .catch((error) => {
-    //     console.error('Error:', error);
-    //     Toast.show({
-    //       type: 'error',
-    //       position: 'bottom',
-    //       text1: 'Error',
-    //       text2: 'Error al conectar con la base de datos',
-    //       visibilityTime: 2500
-    //     });
-    //   });
+    fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/check/code`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ 
+        correo: correoFP,
+        codigo: code
+      })
+    })
+      .then((response) => response.json()) 
+      .then((data) => {
+        let respuestaValida = false;
+        if (data.valido) {
+          respuestaValida = true;
+          setIsValidCode(true);
+          setFormSubmitted(true);
+          navigation.navigate('ResetPasswdAfterCode');
+          actualizarCode(code);
+          Toast.show({
+            type: 'success',
+            position: 'bottom',
+            text1: 'Código correcto, resetee su contraseña',
+            text2: 'El código introducido es correcto, puede resetear su contraseña',
+            visibilityTime: 2500
+          }); 
+        } else if (data.error === 'El usuario introducido no existe') {
+          respuestaValida = true;
+          Toast.show({
+            type: 'error',
+            position: 'bottom',
+            text1: 'Error',
+            text2: 'El usuario introducido no existe',
+            visibilityTime: 2500
+          });
+        } else if (data.error === 'El codigo introducido no es correcto') {
+          respuestaValida = true;
+          setIsValidCode(false);
+          setFormSubmitted(true);
+          setErrorText('Código incorrecto');
+        } else if (respuestaValida === false){
+          Toast.show({
+            type: 'error',
+            position: 'bottom',
+            text1: 'Error',
+            text2: 'Error al enviar el correo para resetear la contraseña',
+            visibilityTime: 2500
+          }); 
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        Toast.show({
+          type: 'error',
+          position: 'bottom',
+          text1: 'Error',
+          text2: 'Error al conectar con la base de datos',
+          visibilityTime: 2500
+        });
+      });
   };
+  
+  
     
 
   return (
@@ -140,18 +176,46 @@ export default function GetCodeScreen({ navigation }) {
 
       <View style={styles.formContainer}>
         <Text style={styles.label}>Código</Text>
-        <TextInput style={styles.input} placeholder="Introduzca el código enviado a su correo" />
+        <TextInput 
+          style={[
+            styles.input,
+            ((!isSixDigits || !isValidCode) && formSubmitted) && styles.inputError,
+            errorText === '* El código debe tener 6 dígitos'
+          ]}
+          placeholder="Introduzca el código enviado a su correo" 
+          onChangeText={handleCodeChange}
+          maxLength={6}
+        />
+        {!isSixDigits && formSubmitted && errorText === '* El código debe tener 6 dígitos' && (
+          <Text style={styles.errorText}>
+            * El código debe tener 6 dígitos.
+          </Text>
+        )}
+        {errorText === 'Código incorrecto' && (
+          <Text style={styles.errorText}>
+            * El código introducido no es correcto.
+          </Text>
+        )}
+        
 
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
-            handleContinue();
+            let isFormValid = true;
+            if (!isSixDigits) {
+              isFormValid = false;
+              setFormSubmitted(true);
+              setErrorText('* El código debe tener 6 dígitos');
+            }
+            if (isFormValid) {
+              handleContinue();
+            }
           }}
         >
           <Text style={styles.buttonText}>Continuar</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={handleResendCode}>
+        <TouchableOpacity onPress={handleReSendCode}>
           <Text style={styles.forgotPassword}>Reenviar código</Text>
         </TouchableOpacity>
       </View>
@@ -187,6 +251,14 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     marginBottom: 5
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginBottom: 5
+  },
+  inputError: {
+    borderColor: 'red'
   },
   input: {
     height: 40,

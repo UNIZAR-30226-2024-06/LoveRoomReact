@@ -54,6 +54,13 @@ export default function GetEmailScreen({ navigation }) {
         if (data.mensaje === 'Correo para resetear contraseña enviado con exito') {
           respuestaValida = true;
           actualizarCorreoFP(email);
+          Toast.show({
+            type: 'success',
+            position: 'bottom',
+            text1: 'Correo enviado',
+            text2: 'Se ha enviado un correo para resetear la contraseña.',
+            visibilityTime: 2500
+          }); 
           navigation.navigate('GetCode');
         } else if (data.error === 'El usuario introducido no existe') {
           respuestaValida = false;
@@ -95,8 +102,7 @@ export default function GetEmailScreen({ navigation }) {
           style={[
             styles.input,
             !isValidEmail && formSubmitted && styles.inputError,
-            errorText === 'Usuario no existente' && styles.inputError
-          
+            errorText === 'Usuario no existente' && styles.inputError  
           ]}
           placeholder="Introduzca su correo electrónico "
           onChangeText={handleEmailChange}
@@ -156,46 +162,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 10
   },
-  // button: {
-  //   backgroundColor: '#F89F9F',
-  //   paddingVertical: 10,
-  //   borderRadius: 5,
-  //   alignItems: 'center'
-  // },
-  // buttonText: {
-  //   color: '#ffffff',
-  //   fontWeight: 'bold'
-  // },
-  // container: {
-  //   flex: 1,
-  //   justifyContent: 'center',
-  //   alignItems: 'center',
-  //   backgroundColor: '#fff'
-  // },
-  // logo: {
-  //   width: 200,
-  //   height: 200,
-  //   resizeMode: 'contain'
-  // },
-  // formContainer: {
-  //   //position: 'absolute',
-  //   backgroundColor: '#ffffff',
-  //   padding: 20,
-  //   borderRadius: 10,
-  //   width: '100%'
-  // },
-  // label: {
-  //   fontSize: 16,
-  //   marginBottom: 5
-  // },
-  // input: {
-  //   height: 40,
-  //   borderColor: '#cccccc',
-  //   borderWidth: 1,
-  //   borderRadius: 5,
-  //   paddingHorizontal: 10,
-  //   marginBottom: 5
-  // },
   inputError: {
     borderColor: 'red'
   },

@@ -7,15 +7,11 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
-  Platform,
-  StatusBar,
   ActivityIndicator,
   Modal,
   Dimensions
 } from 'react-native';
-// import Orientation from 'react-native-orientation-locker';
 import AuthContext from '../components/AuthContext';
-import RegisterScreen from './RegisterScreen';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
