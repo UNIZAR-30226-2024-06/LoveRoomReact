@@ -106,6 +106,7 @@ export default function GetEmailScreen({ navigation }) {
           ]}
           placeholder="Introduzca su correo electrónico "
           onChangeText={handleEmailChange}
+          maxLength={254}
         />
         {!isValidEmail && formSubmitted && errorText !== 'Usuario no existente' && (
           <Text style={styles.errorText}>

@@ -144,6 +144,7 @@ const Formulario = ({ numeroTarjeta, setNumeroTarjeta, cvv, setCVV, fechaCaducid
                 placeholder="XXXX XXXX XXXX XXXX"
                 value={numeroTarjeta}
                 onChangeText={setNumeroTarjeta}
+                maxLength={16}
             />
 
             <Text style={styles.label}>CVV</Text>

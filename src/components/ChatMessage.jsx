@@ -160,6 +160,7 @@ const ChatMessage = ({ data }) => {
               onChangeText={(text) => setReportReason(text)}
               placeholder="Motivo del reporte"
               multiline={true}
+              maxLength={500}
             />
             <View style={styles.buttonContainer}>
               <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>

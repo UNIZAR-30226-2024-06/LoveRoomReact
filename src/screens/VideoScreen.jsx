@@ -1134,6 +1134,7 @@ const Video = () => {
           onChangeText={setNewMessage}
           value={newMessage}
           placeholder="Escribe un mensaje..."
+          maxLength={500}
         />
         <Icon name="send" type="feather" onPress={sendMessage} />
       </View>
