@@ -72,7 +72,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
             Toast.show({
                 type: 'success',
                 position: 'bottom',
-                text1: '',
+                text1: 'Validación exitosa',
                 text2: '¡Validación exitosa! Pronto serás premium...',
                 visibilityTime: 2500
             });
@@ -90,7 +90,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
     };
 
     return (
-        <ScrollView contentContainerStyle={{ flexGrow: 1, backgroundColor: '#ffffff' }}>
+        <ScrollView contentContainerStyle={{ flexGrow: 1, backgroundColor: '#ffffff' }} keyboardShouldPersistTaps={'handled'}>
             <StatusBar barStyle="light-content" />
             <SafeAreaView style={{ flex: 1 }}>
                 <View style={{ flex: 1 }}>

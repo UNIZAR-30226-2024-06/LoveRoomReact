@@ -132,8 +132,8 @@ export default function ProfileScreen({ navigation }) {
                       Toast.show({
                         type: 'success',
                         position: 'bottom',
-                        text1: 'Ya eres premium',
-                        text2: 'Tienes disponibles todas las funcionalidades premium',
+                        text1: '¡Ya eres premium!',
+                        text2: 'Tienes disponibles todas las funcionalidades premium. ¡Disfruta!',
                         visibilityTime: 2500
                       });
                     }
@@ -173,7 +173,7 @@ export default function ProfileScreen({ navigation }) {
               style={styles.faqButton}
               onPress={() => {
                 Toast.show({
-                  type: 'success',
+                  type: 'info',
                   position: 'bottom',
                   text1: '¡Contáctanos!',
                   text2: 'Correo: loveroomapp@gmail.com',

@@ -16,6 +16,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import AuthContext, { initializeSocket } from '../components/AuthContext';
 import NotRegisteredScreen from './NotRegisteredScreen';
 import { Icon } from 'react-native-elements';
+import Toast from 'react-native-toast-message';
 
 const MyRoomsScreen = () => {
   const navigation = useNavigation();

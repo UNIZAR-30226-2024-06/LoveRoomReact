@@ -121,7 +121,7 @@ const App = ({ navigation }) => {
   );
 
   return (
-    <ScrollView contentContainerStyle={{ flexGrow: 1, backgroundColor: '#ffffff' }}>
+    <ScrollView contentContainerStyle={{ flexGrow: 1, backgroundColor: '#ffffff' }} keyboardShouldPersistTaps={'handled'}>
       <StatusBar barStyle="light-content" />
       <SafeAreaView style={{ flex: 1 }}>
         <View style={{ flex: 1, alignItems: 'center' }}>

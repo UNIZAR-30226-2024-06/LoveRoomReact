@@ -16,8 +16,9 @@ import AuthContext from '../components/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 
+import { actualizarCorreoFP } from '../utils/globalVariables';
+
 export default function ChangePasswdScreen({ navigation }) {
-  const { setIsRegistered } = React.useContext(AuthContext);
   const { authState } = React.useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -64,7 +65,6 @@ export default function ChangePasswdScreen({ navigation }) {
             Authorization: `Bearer ${authState.token}`
         },
         body: JSON.stringify({
-            
             nuevaContrasena: new1Password,
             antiguaContrasena: oldPassword,
         }),
@@ -257,6 +257,7 @@ export default function ChangePasswdScreen({ navigation }) {
 
         <TouchableOpacity
           onPress={() => {
+            actualizarCorreoFP(authState.email);
             navigation.navigate('GetEmail');
           }}
         >

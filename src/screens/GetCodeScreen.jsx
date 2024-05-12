@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import {
   ScrollView,
   View,
@@ -8,20 +8,129 @@ import {
   Image,
   StyleSheet,
   Platform,
-  StatusBar
+  StatusBar,
+  ToastAndroid
 } from 'react-native';
-import AuthContext from '../components/AuthContext';
+import Toast from 'react-native-toast-message';
+import { correoFP } from '../utils/globalVariables';
 
 export default function GetCodeScreen({ navigation }) {
-  const { setIsRegistered } = React.useContext(AuthContext);
+  const [lastSentTime, setLastSentTime] = useState(null);
+  const lastSentTimeRef = useRef(null);
 
-  const handleRegister = () => {
-    setIsRegistered(true);
+
+
+  const handleResendCode = () => {
+    const currentTime = Date.now();
+    const resendDelay = 60000; // 60 segundos
+    if (lastSentTimeRef.current && currentTime - lastSentTimeRef.current < resendDelay) {
+      // Si han pasado menos de 60 segundos desde el último envío, mostrar un mensaje de error
+      Toast.show({
+        type: 'info',
+        position: 'bottom',
+        text1: 'Espere antes de volver a reenviar el código',
+        text2: 'Debe esperar 60 segundos antes de reenviar el código.',
+        visibilityTime: 4000
+      });
+    } else {
+      // Si han pasado más de 60 segundos, enviar el código nuevamente y actualizar el tiempo del último envío
+      sendCode();
+      Toast.show({
+        type: 'success',
+        position: 'bottom',
+        text1: 'Código reenviado',
+        text2: 'El código ha sido reenviado a su correo electrónico.',
+        visibilityTime: 2500
+      });
+      lastSentTimeRef.current = currentTime;
+    }
   };
 
-  handleChangePassword = () => {
-    // Implementar lógica para cambiar la contraseña
+  const sendCode = () => {
+    fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/send/email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ correo: correoFP })
+    })
+      .then((response) => response.json()) 
+      .then((data) => {
+        let respuestaValida = false;
+        if (data.mensaje === 'Correo para resetear contraseña enviado con exito') {
+          respuestaValida = true;
+          navigation.navigate('GetCode');
+        } else if (data.error === 'El usuario introducido no existe') {
+          respuestaValida = false;
+          setIsValidEmail(false);
+          setFormSubmitted(true);
+          setErrorText('Usuario no existente');
+        } else if (respuestaValida === false){
+          Toast.show({
+            type: 'error',
+            position: 'bottom',
+            text1: 'Error',
+            text2: 'Error al enviar el correo para resetear la contraseña',
+            visibilityTime: 2500
+          }); 
+         }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        Toast.show({
+          type: 'error',
+          position: 'bottom',
+          text1: 'Error',
+          text2: 'Error al conectar con la base de datos',
+          visibilityTime: 2500
+        });
+      });
   };
+
+  const handleContinue = () => {
+    // fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/check/code`, {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   },
+    //   body: JSON.stringify({ 
+    //     correo: correoFP,
+    //     codigo: code
+    //   })
+    // })
+    //   .then((response) => response.json()) 
+    //   .then((data) => {
+    //     let respuestaValida = false;
+    //     if (data.mensaje === 'Correo para resetear contraseña enviado con exito') {
+    //       respuestaValida = true;
+    //       navigation.navigate('GetCode');
+    //     } else if (data.error === 'El usuario introducido no existe') {
+    //       respuestaValida = false;
+    //       setIsValidEmail(false);
+    //       setFormSubmitted(true);
+    //       setErrorText('Usuario no existente');
+    //     } else if (respuestaValida === false){
+    //       Toast.show({
+    //         type: 'error',
+    //         position: 'bottom',
+    //         text1: 'Error',
+    //         text2: 'Error al enviar el correo para resetear la contraseña',
+    //         visibilityTime: 2500
+    //       }); 
+    //      }
+    //   })
+    //   .catch((error) => {
+    //     console.error('Error:', error);
+    //     Toast.show({
+    //       type: 'error',
+    //       position: 'bottom',
+    //       text1: 'Error',
+    //       text2: 'Error al conectar con la base de datos',
+    //       visibilityTime: 2500
+    //     });
+    //   });
+  };
+    
 
   return (
     <ScrollView style={styles.container} keyboardShouldPersistTaps={'handled'}>
@@ -36,11 +145,14 @@ export default function GetCodeScreen({ navigation }) {
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
-            handleChangePassword();
-            navigation.navigate('ChangePassword');
+            handleContinue();
           }}
         >
           <Text style={styles.buttonText}>Continuar</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={handleResendCode}>
+          <Text style={styles.forgotPassword}>Reenviar código</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
