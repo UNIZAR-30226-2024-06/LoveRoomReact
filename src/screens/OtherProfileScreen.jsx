@@ -57,6 +57,11 @@ const provinciasDeEspana = [
 ];
 
 const OtherProfile = ({ user }) => {
+
+  const idToValue = (id) => {
+    return provinciasDeEspana[id - 1];
+  };
+
   // Obtener el usuario desde los parámetros de navegación
 
   return (
@@ -89,14 +94,15 @@ const OtherProfile = ({ user }) => {
         </Text>
 
         <Text style={styles.label}>Localidad:</Text>
-        <Text style={styles.text}>{provinciasDeEspana[user.idlocalidad]}</Text>
+        <Text style={styles.text}>{idToValue(user.idlocalidad)}</Text>
 
-        <Text style={styles.label}>Fecha de nacimiento:</Text>
+        <Text style={styles.label}>Edad:</Text>
         <Text style={styles.text}>{user.edad}</Text>
 
         <Text style={styles.label}>Descripción:</Text>
         <Text style={styles.text}>{user.descripcion}</Text>
       </View>
+
     </View>
   );
 };

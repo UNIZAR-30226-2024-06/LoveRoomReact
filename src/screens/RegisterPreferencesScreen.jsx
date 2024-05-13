@@ -120,6 +120,12 @@ export default function RegisterPreferencesScreen({ navigation }) {
     const edad = differenceInYears(currentDate, birthday);
     console.log('Edad:', edad)
   
+    // Verificar si la edad es mayor o igual a 18 años
+    if (edad < 18) {
+      setFechaNacimientoError(true); // Establecer el error de fecha de nacimiento
+      return; // Salir de la función si la edad no es válida
+    }
+  
     setIsLoading(true);
     fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/update`, {
       method: 'PUT',
@@ -168,6 +174,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
       console.error('Error:', error);
     });
   };
+  
   
 
   const idToValue = (id) => {

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Dimensions, StatusBar, TouchableOpacity, SafeAreaView, ScrollView, StyleSheet, TextInput } from 'react-native';
 import Toast from 'react-native-toast-message';
+import AuthContext from '../components/AuthContext';
 
 export default function RegisterPreferencesScreen({ navigation }) {
     const { width: ScreenWidth } = Dimensions.get('window');
@@ -8,9 +9,12 @@ export default function RegisterPreferencesScreen({ navigation }) {
     const [numeroTarjeta, setNumeroTarjeta] = useState('');
     const [cvv, setCVV] = useState('');
     const [fechaCaducidad, setFechaCaducidad] = useState('');
+    const { authState, setAuthState } = React.useContext(AuthContext);
 
     const handleContinue = () => {
         let correctInput = true;
+        let firstCallOK = false;
+        let clientToken = '';
     
         // Verificar si el número de tarjeta tiene 16 dígitos
         if (numeroTarjeta.length !== 16) {
@@ -84,38 +88,63 @@ export default function RegisterPreferencesScreen({ navigation }) {
             .then((response) => response.json()) 
             .then((data) => {
                 console.log(data);
-                if (data.successs){
-                    // Hacer algo con los datos
+                if (data.success){
+                    clientToken = data.clientToken;
+                    firstCallOK = true;
+                    fetch(`${process.env.EXPO_PUBLIC_API_URL}/payment/transaction`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${authState.token}`
+                        },
+                        body: JSON.stringify({
+                            idUser: clientToken,
+                            amount: 9.99,
+                            paymentMethodNonce: numeroTarjeta, 
+                        }),
+                    })
+                    .then((response) => response.json()) 
+                    .then((data) => {
+                        if (data.success){
+                            Toast.show({
+                                type: 'success',
+                                position: 'bottom',
+                                text1: 'Pago realizado',
+                                text2: '¡Enhorabuena! Ya eres premium',
+                                visibilityTime: 2500
+                            });
+                            navigation.navigate('Cuenta');
+                        } else {
+                            console.error('Error:', data);
+                            Toast.show({
+                                type: 'error',
+                                position: 'bottom',
+                                text1: 'Error',
+                                text2: 'No se ha podido realizar el pago',
+                                visibilityTime: 2500
+                            });
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
+                } else {
+                    console.error('Error:', data);
+                    Toast.show({
+                        type: 'error',
+                        position: 'bottom',
+                        text1: 'Error',
+                        text2: 'No se ha podido realizar el pago',
+                        visibilityTime: 2500
+                    });
                 }
             })
             .catch((error) => {
                 console.error('Error:', error);
             });
-    
-            // Realizar otras acciones después de validar la entrada
-            // Por ejemplo, hacer una llamada a la base de datos o navegar a otra pantalla
-            Toast.show({
-                type: 'success',
-                position: 'bottom',
-                text1: 'Validación exitosa',
-                text2: '¡Validación exitosa! Pronto serás premium...',
-                visibilityTime: 2500
-            });
         }
     };
-    
-    
-    
 
-    // Función para verificar si una fecha es válida
-    const isValidDate = (day, month, year) => {
-        const date = new Date(year, month - 1, day);
-        return (
-            date.getFullYear() === parseInt(year) &&
-            date.getMonth() === parseInt(month) - 1 &&
-            date.getDate() === parseInt(day)
-        );
-    };
 
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1, backgroundColor: '#ffffff' }} keyboardShouldPersistTaps={'handled'}>

@@ -303,10 +303,11 @@ export default function RegisterPreferencesScreen({ navigation }) {
             onValueChange={(itemValue) => setEdad(parseInt(itemValue))}
           >
             {[...Array(100)].map((_, index) => (
-              <Picker.Item key={index} label={(index + 1).toString()} value={(index + 1).toString()} />
+              <Picker.Item key={index} label={(index + 18).toString()} value={(index + 18).toString()} />
             ))}
           </Picker>
         </View>
+
 
 
         <Text style={styles.label}>Preferencia Sexual</Text>

@@ -1019,7 +1019,7 @@ const Video = () => {
       </Modal>
       {socketState.receiverId != '' && (
         <>
-         <TouchableOpacity
+          <TouchableOpacity
             style={{
               flexDirection: 'row',
               alignItems: 'center',
@@ -1080,7 +1080,7 @@ const Video = () => {
           </Modal>
         </>
       )}
-      <View style={{ alignItems: 'center', flex: 1 }}>
+      <View style={{ alignItems: 'center', flex: 1, maxHeight: 300 }}>
         <YoutubePlayer
           ref={playerRef}
           videoId={socketState.idVideo}
