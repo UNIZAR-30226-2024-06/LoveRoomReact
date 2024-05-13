@@ -158,7 +158,7 @@ const Video = () => {
               type: 'error',
               position: 'bottom',
               text1: 'Error al cargar el chat',
-              text2: 'Ha habido un error al cargar el chat. Por favor, vuelva a cargar la sala.',
+              text2: 'Ha habido un error. Por favor, vuelva a cargar la sala.',
               visibilityTime: 2500
             });
             
@@ -267,7 +267,7 @@ const Video = () => {
               type: 'info',
               position: 'bottom',
               text1: 'Espera a tu match',
-              text2: 'No hay nadie viendo este vídeo, ¡espera a que alguien entre!',
+              text2: 'No hay nadie viendo este vídeo, espera a que alguien entre',
               visibilityTime: 2500
             });
           } else if (data.esSalaUnitaria == false) {
@@ -367,7 +367,7 @@ const Video = () => {
         type: 'error',
         position: 'bottom',
         text1: 'Permisos insuficientes',
-        text2: 'Lo sentimos, necesitamos permisos para acceder a la galería',
+        text2: 'Lo sentimos, necesitamos permiso para acceder a la galería',
         visibilityTime: 2500
       });
       
@@ -1080,18 +1080,18 @@ const Video = () => {
           </Modal>
         </>
       )}
-<View style={{ alignItems: 'center', flex: 1 }}>
-  <YoutubePlayer
-    ref={playerRef}
-    videoId={socketState.idVideo}
-    height={'100%'} // Establece la altura al 100% del contenedor
-    width={'100%'} // Establece el ancho al 100% del contenedor
-    webViewStyle={styles.Video}
-    play={videoPlaying}
-    onChangeState={handleStateChange}
-    onReady={handleReady}
-  />
-</View>
+      <View style={{ alignItems: 'center', flex: 1 }}>
+        <YoutubePlayer
+          ref={playerRef}
+          videoId={socketState.idVideo}
+          height={'100%'} // Establece la altura al 100% del contenedor
+          width={'100%'} // Establece el ancho al 100% del contenedor
+          webViewStyle={styles.Video}
+          play={videoPlaying}
+          onChangeState={handleStateChange}
+          onReady={handleReady}
+        />
+      </View>
       <View
         style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10, flex: 0.2 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>

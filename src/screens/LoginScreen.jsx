@@ -76,6 +76,15 @@ export default function LoginScreen({ navigation }) {
           });
           AsyncStorage.setItem('token', data.token);
           navigation.pop();
+        } else if (data.error === "El usuario está baneado") {
+          Toast.show({
+            type: 'error',
+            position: 'bottom',
+            text1: 'Usuario baneado',
+            text2: 'Lo sentimos, pero tu cuenta ha sido suspendida.',
+            visibilityTime: 5000
+          });
+          
         } else {
           Toast.show({
             type: 'error',

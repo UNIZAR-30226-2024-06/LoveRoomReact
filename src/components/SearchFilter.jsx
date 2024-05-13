@@ -65,7 +65,7 @@ const SearchFilter = ({
             type: 'info',
             position: 'bottom',
             text1: 'Espera un momento',
-            text2: 'No hay nadie viendo este vídeo, ¡espera a que alguien entre!',
+            text2: 'No hay nadie viendo este vídeo, espera a que alguien entre',
             visibilityTime: 2500
           });
         } else if (data.esSalaUnitaria == false) {
