@@ -99,7 +99,7 @@ const MyRoomsScreen = () => {
           type: 'error',
           position: 'bottom',
           text1: 'Error al eliminar la sala',
-          text2: 'Ha habido un error al eliminar la sala. Por favor, inténtelo de nuevo.',
+          text2: 'Ha habido un error al eliminar la sala. Inténtelo de nuevo.',
           visibilityTime: 2500
         });
       }
@@ -109,7 +109,7 @@ const MyRoomsScreen = () => {
         type: 'error',
         position: 'bottom',
         text1: 'Error al eliminar la sala',
-        text2: 'Ha habido un error al eliminar la sala. Por favor, inténtelo de nuevo.',
+        text2: 'Ha habido un error al eliminar la sala. Inténtelo de nuevo.',
         visibilityTime: 2500
       });
     }
@@ -247,7 +247,7 @@ const MyRoomsScreen = () => {
             type: 'error',
             position: 'bottom',
             text1: 'Error al cambiar el nombre',
-            text2: 'Ha habido un error al cambiar el nombre del video. Por favor, inténtelo de nuevo.',
+            text2: 'Ha habido un error al cambiar el nombre del video. Inténtelo de nuevo.',
             visibilityTime: 2500
           });
         }
@@ -257,7 +257,7 @@ const MyRoomsScreen = () => {
           type: 'error',
           position: 'bottom',
           text1: 'Error al cambiar el nombre',
-          text2: 'Ha habido un error al cambiar el nombre del video. Por favor, inténtelo de nuevo.',
+          text2: 'Ha habido un error al cambiar el nombre del video. Inténtelo de nuevo.',
           visibilityTime: 2500
         });
       }

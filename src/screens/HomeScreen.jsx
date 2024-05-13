@@ -1,30 +1,41 @@
 import React, { useEffect, useState } from 'react';
-import { View, Button, Image, Text } from 'react-native';
+import { View, Text, Image, StyleSheet } from 'react-native';
 import NotRegisteredScreen from './NotRegisteredScreen';
 import AuthContext from '../components/AuthContext';
-import YouTubeIframe from 'react-native-youtube-iframe';
 import SearchBar from '../components/SearchBarYt';
-import { StyleSheet } from 'react-native';
+import BannedScreen from './BannedScreen';
 
 export default function HomeScreen({ navigation }) {
   const { authState } = React.useContext(AuthContext);
+  const [hasInterestVideos, setHasInterestVideos] = useState(false);
+  console.log("HOMESCREEN AUTHSTATE: ", authState);
 
   if (!authState.isLoggedIn) {
     return <NotRegisteredScreen />;
   }
 
+  if(authState.baneado){
+    return <BannedScreen />;
+  }
+
   return (
     <View style={{ flex: 1, alignItems: 'center' }}>
       <Text style={styles.TextBienvenida}> ¡Hola de nuevo, {authState.nombre}! </Text>
-      <SearchBar setVideoUrl={null} />
-      {/* <View style={styles.interrogationContainer}>
-        <Image source={require('../img/camara.png')} style={[styles.interrogationImage, { tintColor: 'gray' }]} />
-        <Text style={styles.centeredText}>
-          ¡Busca tus vídeos favoritos,
-          {'\n'}
-          y conoce gente con los mismos gustos que tú!
-        </Text>
-      </View> */}
+      <SearchBar setVideoUrl={null} onHasInterestVideosChange={setHasInterestVideos} />
+      {hasInterestVideos ? (
+        <View style={styles.Video}>
+          {/* Aquí renderiza los videos de interés */}
+        </View>
+      ) : (
+        <View style={styles.interrogationContainer}>
+          <Image source={require('../img/camara.png')} style={[styles.interrogationImage, { tintColor: 'gray' }]} />
+          <Text style={styles.centeredText}>
+            ¡Busca tus vídeos favoritos,
+            {'\n'}
+            y conoce gente con los mismos gustos que tú!
+          </Text>
+        </View>
+      )}
     </View>
   );
 }

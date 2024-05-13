@@ -133,7 +133,7 @@ export default function ProfileScreen({ navigation }) {
                         type: 'success',
                         position: 'bottom',
                         text1: '¡Ya eres premium!',
-                        text2: 'Tienes disponibles todas las funcionalidades premium. ¡Disfruta!',
+                        text2: 'Tienes disponibles las funcionalidades premium. ¡Disfruta!',
                         visibilityTime: 2500
                       });
                     }
