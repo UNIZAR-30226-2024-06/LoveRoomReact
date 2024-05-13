@@ -1080,18 +1080,18 @@ const Video = () => {
           </Modal>
         </>
       )}
-      <View style={{ alignItems: 'center', flex: 1, maxHeight: 300 }}>
-        <YoutubePlayer
-          ref={playerRef}
-          videoId={socketState.idVideo}
-          height={'100%'}
-          width={'95%'}
-          webViewStyle={styles.Video}
-          play={videoPlaying}
-          onChangeState={handleStateChange}
-          onReady={handleReady}
-        />
-      </View>
+<View style={{ alignItems: 'center', flex: 1 }}>
+  <YoutubePlayer
+    ref={playerRef}
+    videoId={socketState.idVideo}
+    height={'100%'} // Establece la altura al 100% del contenedor
+    width={'100%'} // Establece el ancho al 100% del contenedor
+    webViewStyle={styles.Video}
+    play={videoPlaying}
+    onChangeState={handleStateChange}
+    onReady={handleReady}
+  />
+</View>
       <View
         style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10, flex: 0.2 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
