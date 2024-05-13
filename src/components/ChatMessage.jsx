@@ -1,9 +1,19 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, StyleSheet, Modal, TextInput, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  ActivityIndicator,
+  Modal,
+  TextInput,
+  TouchableOpacity
+} from 'react-native';
 import { useContext } from 'react';
 import AuthContext from '../components/AuthContext';
 import { Swipeable } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
+import Video from 'react-native-video';
 
 const ChatMessage = ({ data }) => {
   const { authState } = useContext(AuthContext);
@@ -58,67 +68,30 @@ const ChatMessage = ({ data }) => {
     }, 500);
   };
 
-  // const [imageUrl, setImageUrl] = React.useState(null);
+  const [imageUrl, setImageUrl] = React.useState(null);
+  const [videoUrl, setVideoUrl] = React.useState(null);
+  const [modalImgVisible, setModalImgVisible] = useState(false);
+  const [isImageLoading, setIsImageLoading] = useState(true);
 
-  // const fetchMultimedia = async (mediaName) => {
-  //   const url = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/${mediaName}/${authState.id}`;
-  //   console.log('URL:', url);
-  //   console.log('Fetch media:', mediaName);
+  React.useEffect(() => {
+    console.log('useEffect', data.rutamultimedia);
+    if (data.rutamultimedia) {
+      const url = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/${data.rutamultimedia}/${authState.id}`;
+      console.log('URL:', url);
 
-  //   console.log('URL:', url);
-  //   fetch(url, {
-  //     method: 'GET',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       Authorization: `Bearer ${authState.token}`
-  //     }
-  //   })
-  //     .then((response) => {
-  //       console.log('Success info receiver');
-  //       // Create an object URL for the response
-  //       const objectURL = URL.createObjectURL(response);
-  //       console.log('Success:', objectURL);
-  //       // Set the image URL in the state so it can be displayed in your app
-  //       return objectURL;
-  //     })
-  //     .catch((error) => {
-  //       console.error('Error:', error);
-  //     });
-  // };
-
-  // React.useEffect(async () => {
-  //   if (data.rutamultimedia) {
-  //     fetchMultimedia(data.rutamultimedia)
-  //       .then((url) => setImageUrl(url))
-  //       .catch((error) => console.error('Error:', error));
-  //   }
-  // }, [data.rutamultimedia]);
-
-  const [imagePlace, setImage] = useState('');
-  // React.useEffect(async () => {
-  //   if (!data.rutamultimedia) {
-  //     console.log('noruta');
-  //   } else {
-  //     try {
-  //       const url = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/${mediaName}/${authState.id}`;
-  //       console.log('URL:', url);
-  //       console.log('Fetch media:', mediaName);
-
-  //       console.log('URL:', url);
-  //       const res = await fetch(url, {
-  //         method: 'GET',
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //           Authorization: `Bearer ${authState.token}`
-  //         }
-  //       });
-  //       const data = await res.blob();
-  //       setImage(URL.createObjectURL(data));
-  //     } catch (error) {
-  //       console.error(error);
-  //     }
-  //   }
-  // });
+      fetch(url, { method: 'HEAD' })
+        .then((response) => {
+          multimediaType = response.headers.get('Tipo');
+          console.log('Tipo multimedia:', multimediaType);
+          if (multimediaType == 'F') {
+            setImageUrl(url);
+          } else if (multimediaType == 'V') {
+            setVideoUrl(url);
+          }
+        })
+        .catch(console.error);
+    }
+  }, [data.rutamultimedia]);
 
   const MessageContent = () => (
     <>
@@ -133,10 +106,58 @@ const ChatMessage = ({ data }) => {
             data.senderId == authState.id ? styles.currentUserTriangle : styles.otherUserTriangle
           ]}
         />
+
         <View>
           {/* TODO: así se llama a la ruta del backend o hay que hacer un fetch */}
-          {imagePlace ? (
-            <Image source={{ uri: imagePlace }} style={{ width: 100, height: 100 }} />
+          {imageUrl || videoUrl ? (
+            <View>
+              {isImageLoading && (
+                <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />
+              )}
+              <TouchableOpacity onPress={() => setModalImgVisible(true)}>
+                (imageUrl ? (
+                <Image
+                  source={{ uri: imageUrl }}
+                  style={{ width: 250, height: 250, borderRadius: 15 }}
+                  onLoad={() => setIsImageLoading(false)}
+                  resizeMode="contain"
+                />
+                ) : (
+                <Video
+                  source={{ uri: videoUrl }}
+                  style={{ width: 250, height: 250, borderRadius: 15 }}
+                  resizeMode="contain"
+                  ref={(ref) => {
+                    this.player = ref;
+                  }} // Store reference
+                  onBuffer={this.onBuffer} // Callback when remote video is buffering
+                  onError={this.videoError} // Callback when video cannot be loaded
+                />
+                ))
+                {/* // style={{ width: '40%' }} resizeMode="contain" /> */}
+              </TouchableOpacity>
+
+              <Modal
+                animationType="slide"
+                transparent={false}
+                visible={modalImgVisible}
+                onRequestClose={() => {
+                  setModalImgVisible(!modalImgVisible);
+                }}>
+                <View style={styles.centeredView}>
+                  <TouchableOpacity
+                    style={styles.modalView}
+                    onPress={() => setModalImgVisible(false)}>
+                    <Image
+                      source={{ uri: imageUrl }}
+                      style={{ width: 400, height: 400 }}
+                      onLoad={() => setIsImageLoading(false)}
+                    />
+                    {/* // styles.fullScreenImage} /> */}
+                  </TouchableOpacity>
+                </View>
+              </Modal>
+            </View>
           ) : (
             <Text style={styles.messageText}>{data.message}</Text>
           )}
@@ -294,6 +315,37 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontWeight: 'bold'
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22
+  },
+  modalView: {
+    flex: 1,
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5
+  },
+  fullScreenImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+    resizeMode: 'contain'
+  },
+  loader: {
+    position: 'absolute'
   }
 });
 

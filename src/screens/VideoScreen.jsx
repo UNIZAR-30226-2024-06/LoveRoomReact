@@ -161,7 +161,7 @@ const Video = () => {
               text2: 'Ha habido un error al cargar el chat. Por favor, vuelva a cargar la sala.',
               visibilityTime: 2500
             });
-            
+
             navigation.goBack();
           }
         })
@@ -298,7 +298,6 @@ const Video = () => {
             text2: 'Error al cambiar de video. Inténtalo de nuevo.',
             visibilityTime: 2500
           });
-          
         }
       });
     }
@@ -370,7 +369,6 @@ const Video = () => {
         text2: 'Lo sentimos, necesitamos permisos para acceder a la galería',
         visibilityTime: 2500
       });
-      
     } else {
       let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes:
@@ -394,62 +392,62 @@ const Video = () => {
     // TODO: no sirve para nada
   };
 
-  // const uploadMedia = async (uri, mediaType) => {
-  //   const multimedia = await fetch(uri);
+  const uploadMedia = async (uri, mediaType) => {
+    const multimedia = await fetch(uri);
 
-  //   console.log('Subiendo media:', uri);
+    console.log('Subiendo media:', uri);
 
-  //   const formData = new FormData();
-  //   const uriParts = uri.split('.');
-  //   const fileType = uriParts[uriParts.length - 1];
+    const formData = new FormData();
+    const uriParts = uri.split('.');
+    const fileType = uriParts[uriParts.length - 1];
 
-  //   formData.append('file', {
-  //     uri: uri,
-  //     type: mime.getType(uri),
-  //     name: uri.split('/').pop()
-  //   });
-  //   console.log('Formdata: ', formData);
+    console.log('File type:', mime.getType(uri));
+    formData.append('file', {
+      uri: uri,
+      type: mime.getType(uri),
+      name: uri.split('/').pop()
+    });
+    console.log('Formdata: ', formData);
 
-  //   const url = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/upload/${mediaType}/${authState.id}`;
-  //   console.log('URL:', url);
-  //   fetch(uri)
-  //   .then(response => response)
-  //   .then(blob => {
-  //     formData.append('file', blob);
+    const url = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/upload/${mediaType}/${authState.id}`;
+    console.log('URL:', url);
+    console.log('Subiendo media:', uri);
 
-  //   console.log('URL:', url);
-  //   fetch(url, {
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'multipart/form-data',
-  //       Authorization: `Bearer ${authState.token}`
-  //     },
-  //     body: formData
-  //   })
-  //     .then((res) => res.json())
-  //     .then((res) => {
-  //       console.log('response' + JSON.stringify(res));
-  //       if (res.error == null) {
-  //         const mediaName = res.nombreArchivo;
-  //         console.log('URL de la imagen:', mediaName);
-  //         const data = {
-  //           id: null,
-  //           senderId: authState.id,
-  //           message: mediaName,
-  //           timestamp: null,
-  //           rutamultimedia: mediaName
-  //         };
-  //         setMessages((prevState) => [...prevState, data]);
-  //         sendMessage();
-  //       } else {
-  //         console.log('Error: guardando mensaje ', data.error);
-  //         alert('Ha habido un error en los datos de la imagen. Vuelva a intentarlo.');
-  //       }
-  //     })
-  //     .catch((e) => console.log(e));
-  //   // .done();
-  //   );
-  // };
+    console.log('URL:', url);
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${authState.token}`
+      },
+      body: formData
+    })
+      .then((res) => {
+        res.json();
+        console.log(res);
+      })
+      .then((res) => {
+        console.log('response' + JSON.stringify(res));
+        if (res.error == null) {
+          const mediaUrl = res.nombreArchivo;
+          console.log('URL de la imagen:', mediaUrl);
+          const data = {
+            id: null,
+            senderId: authState.id,
+            message: mediaUrl,
+            timestamp: null,
+            rutamultimedia: mediaUrl
+          };
+          setMessages((prevState) => [...prevState, data]);
+          sendMessage();
+        } else {
+          console.log('Error: guardando mensaje ', data.error);
+          alert('Ha habido un error en los datos de la imagen. Vuelva a intentarlo.');
+        }
+      })
+      .catch((e) => console.log(e))
+      .done();
+  };
 
   const toggleSwitch = () => {
     setIsEnabled((previousState) => {
@@ -1019,7 +1017,7 @@ const Video = () => {
       </Modal>
       {socketState.receiverId != '' && (
         <>
-         <TouchableOpacity
+          <TouchableOpacity
             style={{
               flexDirection: 'row',
               alignItems: 'center',
@@ -1032,7 +1030,7 @@ const Video = () => {
               console.log('Ver perfil');
               setModalUserVisible(true);
             }}>
-            <View style={{ flex: 1, alignItems: 'center', flexDirection: 'row'}}>
+            <View style={{ flex: 1, alignItems: 'center', flexDirection: 'row' }}>
               <Image
                 source={
                   user.fotoperfil === 'null.jpg' ? defaultProfilePicture : { uri: user.fotoperfil }
