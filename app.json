@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "reactnat",
-    "slug": "reactnat",
-    "version": "1.0.0",
+    "name": "LoveRoom",
+    "slug": "LoveRoom",
+    "version": "2.0.0",
     "orientation": "default",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/logoLoveRoom.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/logoLoveRoom.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -25,14 +25,14 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/logoLoveRoom.png",
         "backgroundColor": "#ffffff"
       },
       "permissions": ["android.permission.RECORD_AUDIO"],
-      "package": "com.andreei19.reactnat"
+      "package": "com.andreei19.LoveRoom"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/logoLoveRoom.png"
     },
     "extra": {
       "eas": {

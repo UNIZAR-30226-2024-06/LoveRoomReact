@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   ScrollView,
   View,
@@ -15,6 +15,7 @@ import AuthContext from '../components/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function LoginScreen({ navigation }) {
   const { authState, setAuthState } = React.useContext(AuthContext);
@@ -28,6 +29,17 @@ export default function LoginScreen({ navigation }) {
 
   const [hidePassword, setHidePassword] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      setEmail('');
+      setPassword('');
+      setIsValidEmail(true); 
+      setEmailError(false);
+      setIsValidPassword(true);
+      setPasswordError(false);
+    }, [])
+  );
 
   const handleEmailChange = (text) => {
     setEmail(text);
@@ -77,7 +89,13 @@ export default function LoginScreen({ navigation }) {
             contrasena: data.usuario.contrasena
           });
           AsyncStorage.setItem('token', data.token);
-          navigation.pop();
+          if (data.usuario.tipousuario === 'administrador') {
+            console.log('Admin');
+            navigation.navigate('Admin');
+          } else {
+            navigation.pop();
+          }
+
         } else {
           Toast.show({
             type: 'error',

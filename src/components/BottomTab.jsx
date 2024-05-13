@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 
@@ -11,17 +11,26 @@ import { Image } from 'react-native';
 import AuthContext from './AuthContext';
 import MyRoomsScreen from '../screens/MyRoomsScreen';
 import NotRegisteredScreen from '../screens/NotRegisteredScreen';
+import AdminScreen from '../screens/AdminScreen';
 
 const Tab = createBottomTabNavigator();
 
-export default function BottomTab({ initialScreen }) {
+export default function BottomTab({ initialScreen, navigation }) {
   const { authState, setAuthState } = React.useContext(AuthContext);
+
+  useEffect(() => {
+    console.log("Checkeo de si es admin : " , authState.tipousuario);
+    // if (authState.tipousuario === 'administrador') { 
+    //   navigation.navigate('Admin');
+    // }
+  }, [authState.tipousuario]);
 
   if (!authState.isLoggedIn || authState.token === null) {
     return (
       <NotRegisteredScreen/>
     );
   }
+
 
   const ImageProfile = (size, color) => {
     if (authState.isLoggedIn) {
@@ -113,6 +122,24 @@ export default function BottomTab({ initialScreen }) {
           headerShadowVisible: false
         }}
       />
+      {authState.tipousuario === 'administrador' && <Tab.Screen
+          name="Admin"
+          component={AdminScreen}
+          options={{
+            headerTitleAlign: 'center',
+            headerTitle: () => (
+              <Image
+                source={require('../img/logo.png')}
+                style={{ width: 200, height: 32, backgroundColor: '#F89F9F' }}
+              />
+            ),
+            headerStyle: {
+              backgroundColor: '#F89F9F'
+            },
+            headerShadowVisible: false,
+            headerLeft:null,
+          }} 
+        />}
     </Tab.Navigator>
   );
 }

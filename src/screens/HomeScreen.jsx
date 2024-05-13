@@ -13,6 +13,11 @@ export default function HomeScreen({ navigation }) {
     return <NotRegisteredScreen />;
   }
 
+  // if (authState.tipousuario === 'administrador') { 
+  //   navigation.navigate('Admin');
+  // }
+
+
   return (
     <View style={{ flex: 1, alignItems: 'center' }}>
       <Text style={styles.TextBienvenida}> ¡Hola de nuevo, {authState.nombre}! </Text>

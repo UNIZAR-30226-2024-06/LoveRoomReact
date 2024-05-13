@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import io from 'socket.io-client';
 import { socketEvents } from '../constants/SocketConstants';
 import Toast from 'react-native-toast-message';
+import { useNavigation } from '@react-navigation/native';
 
 const AuthContext = React.createContext();
 
@@ -37,13 +38,13 @@ export const initializeSocket = async (token, setSocketState, socketState) => {
           idVideo: idVideo,
           matchRecibido: true
         }));
-        Toast.show({
-          type: 'success',
-          position: 'bottom',
-          text1: '¡Match!',
-          text2: 'Has hecho match con alguien, ¡disfruta la sala!',
-          visibilityTime: 2500
-        });
+        // Toast.show({
+        //   type: 'success',
+        //   position: 'bottom',
+        //   text1: '¡Match!',
+        //   text2: 'Has hecho match con alguien, ¡disfruta la sala!',
+        //   visibilityTime: 2500
+        // });
 
       });
     });
@@ -128,7 +129,7 @@ export const AuthProvider = ({ children }) => {
             fotoperfil: data.usuario.fotoperfil,
             descripcion: data.usuario.descripcion,
             tipousuario: data.usuario.tipousuario,
-            baneado: data.usuario.baneador
+            baneado: data.usuario.baneado
           }));
           // fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/check/token`,{
           //   method: 'GET',

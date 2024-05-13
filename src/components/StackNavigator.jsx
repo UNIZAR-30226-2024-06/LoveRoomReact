@@ -20,6 +20,7 @@ import ChangePassword from '../screens/ChangePasswdScreen';
 import Premium from '../screens/BecomePremiumScreen';
 import Payment from '../screens/PaymentScreen';
 import ResetPasswdAfterCode from '../screens/ResPassAfterCodeScreen';
+import AdminScreen from '../screens/AdminScreen';
 
 const Stack = createStackNavigator();
 

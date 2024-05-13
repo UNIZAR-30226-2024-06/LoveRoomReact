@@ -137,24 +137,25 @@ const MyRoomsScreen = () => {
     }
   };
 
+  const initializeAndProceed = async () => {
+    console.log('Initializing socket and proceeding...');
+    const { isSocketInitialized } = await initializeSocket(authState.token, setSocketState, socketState);
+
+    // Esperar hasta que el socket esté completamente inicializado antes de continuar
+    if (isSocketInitialized) {
+      // Realizar las acciones que dependen del socket completamente inicializado
+      console.log('Socket initialized, proceeding with further actions...');
+      setTimeout(() => {
+        console.log('Navigating to Video...');
+        setViewModal(false);
+        navigation.navigate('Video');
+      }, 3000);
+    } else {
+      console.log('Socket is not yet initialized, waiting...');
+    }
+  };
+
   useEffect(() => {
-    const initializeAndProceed = async () => {
-      const { isSocketInitialized } = await initializeSocket(authState.token, setSocketState, socketState);
-
-      // Esperar hasta que el socket esté completamente inicializado antes de continuar
-      if (isSocketInitialized) {
-        // Realizar las acciones que dependen del socket completamente inicializado
-        console.log('Socket initialized, proceeding with further actions...');
-        setTimeout(() => {
-          console.log('Navigating to Video...');
-          setViewModal(false);
-          navigation.navigate('Video');
-        }, 3000);
-      } else {
-        console.log('Socket is not yet initialized, waiting...');
-      }
-    };
-
     console.log('View modal:', viewModal);
     if (viewModal) {
       initializeAndProceed();
