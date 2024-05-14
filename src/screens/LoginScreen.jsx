@@ -108,7 +108,7 @@ export default function LoginScreen({ navigation }) {
         }
       })
       .catch((error) => {
-        Alert.alert('Error');
+        Alert.alert('Error: ', error);
         setIsLoading(false);
         console.error('Error:', error);
       });
