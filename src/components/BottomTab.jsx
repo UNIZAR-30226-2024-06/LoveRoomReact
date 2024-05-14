@@ -124,6 +124,12 @@ export default function BottomTab({ initialScreen, navigation }) {
           name="Admin"
           component={AdminScreen}
           options={{
+            tabBarIcon: ({ focused, color, size }) => (
+              <Image
+                source={require('../img/admin.png')}
+                style={{ width: size, height: size, tintColor: color }}
+              />
+            ),
             headerTitleAlign: 'center',
             headerTitle: () => (
               <Image

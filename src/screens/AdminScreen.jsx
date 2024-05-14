@@ -165,9 +165,9 @@ function Admin({ navigation }) {
 
     useEffect(() => {
         const genderData = [
-            { name: 'Hombres', population: users.filter(user => user.sexo === 'H').length, color: 'rgba(0, 0, 255, 1)', legendFontColor: '#7F7F7F', legendFontSize: 15 },
-            { name: 'Mujeres', population: users.filter(user => user.sexo === 'M').length, color: 'rgba(255, 0, 0, 1)', legendFontColor: '#7F7F7F', legendFontSize: 15 },
-            { name: 'Otro', population: users.filter(user => user.sexo === 'O').length, color: 'rgba(0, 255, 0, 1)', legendFontColor: '#7F7F7F', legendFontSize: 15 },
+            { name: 'Hombres', population: users.filter(user => user.sexo === 'H').length, color: 'rgba(5, 49, 242, 0.8)', legendFontColor: '#7F7F7F', legendFontSize: 15 },
+            { name: 'Mujeres', population: users.filter(user => user.sexo === 'M').length, color: 'rgba(220, 89, 157, 0.8)', legendFontColor: '#7F7F7F', legendFontSize: 15 },
+            { name: 'Otro', population: users.filter(user => user.sexo === 'O').length, color: 'rgba(94, 217, 102, 1)', legendFontColor: '#7F7F7F', legendFontSize: 15 },
           ];
         const ageData = [
         { name: '18-25', population: users.filter(user => user.edad >= 18 && user.edad <= 25).length, color: 'rgba(255, 0, 0, 1)', legendFontColor: '#7F7F7F', legendFontSize: 15 },
@@ -230,6 +230,8 @@ function Admin({ navigation }) {
       Alert.alert('Error', 'No se han podido cargar los reportes');
     } else setReports(data);
   }
+
+  
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -410,7 +412,8 @@ function Admin({ navigation }) {
                                 width: '95%',
                                 backgroundColor: '#d9dbda',
                                 borderRadius: 10,
-                                alignItems: 'center'
+                                alignItems: 'center',
+                                marginBottom: 10
                                 }}
                             >
                                 
@@ -476,7 +479,7 @@ function Admin({ navigation }) {
                         </View>
                     </Modal>
             <View style={styles.card}>
-            <Text style={styles.title}>Usuarios</Text>
+            <Text style={styles.title}>Reportes</Text>
                 <FlatList
                     data={reports}
                     renderItem={({ item }) => (
