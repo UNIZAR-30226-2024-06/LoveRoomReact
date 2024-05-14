@@ -123,6 +123,7 @@ export default function ProfileScreen({ navigation }) {
             <Text style={styles.headlineText}>Mi plan</Text>
           </View>
           <TouchableOpacity
+
             style={styles.faqButton}
             onPress={() => {
               console.log(authState.tipousuario);
@@ -138,6 +139,7 @@ export default function ProfileScreen({ navigation }) {
                 });
               }
             }}
+
           >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Image source={require('../img/premium.png')} style={styles.faqIcon} />

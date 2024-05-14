@@ -1,14 +1,5 @@
-import { useEffect, useState, useContext, useCallback } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Modal,
-  ActivityIndicator,
-  FlatList,
-  Image
-} from 'react-native';
+import React, { useEffect, useState, useContext, useCallback } from 'react';
+import { View, Text, TextInput, TouchableOpacity, Modal, ActivityIndicator, FlatList, Image } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
 import SearchFilter from './SearchFilter';
@@ -19,7 +10,7 @@ import { initializeSocket } from '../components/AuthContext';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 
-const SearchBar = ({ setVideoUrl }) => {
+const SearchBarYt = ({ setVideoUrl, onHasInterestVideosChange }) => {
   const { authState } = useContext(AuthContext);
   const navigation = useNavigation();
   const { socketState, setSocketState } = useContext(AuthContext);
@@ -68,7 +59,7 @@ const SearchBar = ({ setVideoUrl }) => {
             type: 'info',
             position: 'bottom',
             text1: 'Espera un momento',
-            text2: 'No hay nadie viendo este vídeo, ¡espera a que alguien entre!',
+            text2: 'No hay nadie viendo este vídeo, espera a que alguien entre',
             visibilityTime: 2500
           });
         } else if (data.esSalaUnitaria == false) {
@@ -151,13 +142,17 @@ const SearchBar = ({ setVideoUrl }) => {
       .then((response) => response.json())
       .then(async (data) => {
         console.log(data);
-        const videoDetailsPromises = data.map((video) =>
-          fetchVideoDetails(video.idvideo, video.viewers)
-        );
-        const videosWithDetails = await Promise.all(videoDetailsPromises);
-        setListVideosInterest(videosWithDetails);
-        setLoading(false);
-        console.log(videosWithDetails);
+        if (data.length > 0) {
+          onHasInterestVideosChange(true);
+          const videoDetailsPromises = data.map((video) => fetchVideoDetails(video.idvideo, video.viewers));
+          const videosWithDetails = await Promise.all(videoDetailsPromises);
+          setListVideosInterest(videosWithDetails);
+          setLoading(false);
+          console.log(videosWithDetails);
+        } else {
+          onHasInterestVideosChange(false);
+          setLoading(false);
+        }
       });
   };
 
@@ -202,6 +197,7 @@ const SearchBar = ({ setVideoUrl }) => {
       </View>
     );
   }
+
   return (
     <View
       style={{
@@ -244,18 +240,9 @@ const SearchBar = ({ setVideoUrl }) => {
           maxLength={50}
         />
       </View>
-      <Modal
-        transparent={true}
-        animationType={'none'}
-        visible={videosModal}
-        onRequestClose={() => {
-          setVideosModal(false);
-          setListVideos([]);
-        }}
-      >
-        <View
-          style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 20 }}
-        >
+
+      <Modal transparent={true} animationType={'none'} visible={videosModal} onRequestClose={() => { setVideosModal(false); setListVideos([]) }}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 20 }}>
           <View
             style={{
               backgroundColor: 'white',
@@ -296,11 +283,9 @@ const SearchBar = ({ setVideoUrl }) => {
         )}
         keyExtractor={(item, index) => item.videoId + index}
         renderItem={({ item }) => {
-          // if(item.snippet.title.toLowerCase().includes(search.toLowerCase())){
           return (
             <TouchableOpacity
               onPress={() => {
-                // navigation.navigate('Video', {videoId: item.id.videoId})
                 if (setVideoUrl == null) {
                   buscarMatch(item.videoId);
                 } else {
@@ -340,7 +325,6 @@ const SearchBar = ({ setVideoUrl }) => {
                       <Text
                         style={{
                           fontSize: 10
-                          // fontWeight: "italic",
                         }}
                       >
                         Canal: {item.channel}
@@ -348,7 +332,6 @@ const SearchBar = ({ setVideoUrl }) => {
                       <Text
                         style={{
                           fontSize: 10
-                          // fontWeight: "italic",
                         }}
                       >
                         Fecha de publicación: {item.publishedAt}
@@ -367,7 +350,6 @@ const SearchBar = ({ setVideoUrl }) => {
               </View>
             </TouchableOpacity>
           );
-          // }
         }}
       />
     </View>
@@ -408,4 +390,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default SearchBar;
+export default SearchBarYt;

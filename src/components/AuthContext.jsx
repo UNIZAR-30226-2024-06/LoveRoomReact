@@ -96,7 +96,7 @@ export const AuthProvider = ({ children }) => {
   // Luego, actualiza el estado de autenticación en consecuencia.
   const checkToken = async () => {
     const token = await AsyncStorage.getItem('token'); // Obtiene el token de autenticación almacenado en AsyncStorage
-    console.log(token);
+    console.log("Checktoken", token );
     fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/check/token`, {
       // Realiza una petición al servidor para verificar si el token es válido
       method: 'GET',
@@ -130,6 +130,7 @@ export const AuthProvider = ({ children }) => {
             tipousuario: data.usuario.tipousuario,
             baneado: data.usuario.baneado
           }));
+          console.log("AuthStateJiJi", authState);
           // fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/check/token`,{
           //   method: 'GET',
           //   headers: {

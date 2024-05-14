@@ -11,83 +11,151 @@ import {
   TextInput
 } from 'react-native';
 import Toast from 'react-native-toast-message';
+import AuthContext from '../components/AuthContext';
 
 export default function RegisterPreferencesScreen({ navigation }) {
   const { width: ScreenWidth } = Dimensions.get('window');
 
-  const [numeroTarjeta, setNumeroTarjeta] = useState('');
-  const [cvv, setCVV] = useState('');
-  const [fechaCaducidad, setFechaCaducidad] = useState('');
 
-  const handleContinue = () => {
-    let correctInput = true;
-    // Verificar si el número de tarjeta tiene 16 dígitos
-    if (numeroTarjeta.length !== 16) {
-      Toast.show({
-        type: 'error',
-        position: 'bottom',
-        text1: 'Tarjeta incorrecta',
-        text2: 'El número de tarjeta debe tener 16 dígitos',
-        visibilityTime: 2500
-      });
-      correctInput = false;
-      return;
-    }
+    const [numeroTarjeta, setNumeroTarjeta] = useState('');
+    const [cvv, setCVV] = useState('');
+    const [fechaCaducidad, setFechaCaducidad] = useState('');
+    const { authState, setAuthState } = React.useContext(AuthContext);
 
-    // Verificar si el CVV tiene 3 dígitos y son todos números
-    if (!/^\d{3}$/.test(cvv)) {
-      Toast.show({
-        type: 'error',
-        position: 'bottom',
-        text1: 'CVV incorrecto',
-        text2: 'El CVV debe tener 3 dígitos',
-        visibilityTime: 2500
-      });
-      correctInput = false;
-      return;
-    }
+    const handleContinue = () => {
+        let correctInput = true;
+        let firstCallOK = false;
+        let clientToken = '';
+    
+        // Verificar si el número de tarjeta tiene 16 dígitos
+        if (numeroTarjeta.length !== 16) {
+            Toast.show({
+                type: 'error',
+                position: 'bottom',
+                text1: 'Tarjeta incorrecta',
+                text2: 'El número de tarjeta debe tener 16 dígitos',
+                visibilityTime: 2500
+            });
+            correctInput = false;
+            return;
+        }
+    
+        // Verificar si el CVV tiene 3 dígitos y son todos números
+        if (!/^\d{3}$/.test(cvv)) {
+            Toast.show({
+                type: 'error',
+                position: 'bottom',
+                text1: 'CVV incorrecto',
+                text2: 'El CVV debe tener 3 dígitos',
+                visibilityTime: 2500
+            });
+            correctInput = false;
+            return;
+        }
+    
+        // Verificar si la fecha de caducidad es válida
+        const datePattern = /^(0[1-9]|1[0-2])\/(2[4-9]|9[0-9])$/;
+        if (!datePattern.test(fechaCaducidad)) {
+            Toast.show({
+                type: 'error',
+                position: 'bottom',
+                text1: 'Fecha incorrecta',
+                text2: 'La fecha de caducidad debe tener el formato MM/AA',
+                visibilityTime: 2500
+            });
+            correctInput = false;
+            return;
+        }
+    
+        // Obtener el mes y año actuales
+        const today = new Date();
+        const currentYear = today.getFullYear() % 100; // Solo los últimos dos dígitos del año
+        const currentMonth = today.getMonth() + 1; // getMonth() devuelve el índice del mes, por eso sumamos 1
+    
+        // Obtener el mes y año ingresados
+        const [month, year] = fechaCaducidad.split('/').map((value) => parseInt(value));
+    
+        // Verificar si la fecha de caducidad es válida (el año no puede ser menor al actual)
+        if (year < currentYear || (year === currentYear && month < currentMonth)) {
+            Toast.show({
+                type: 'error',
+                position: 'bottom',
+                text1: 'Fecha incorrecta',
+                text2: 'La fecha de caducidad no es válida',
+                visibilityTime: 2500
+            });
+            correctInput = false;
+            return;
+        }
+    
+        if (correctInput) {
+            fetch(`${process.env.EXPO_PUBLIC_API_URL}/payment/client_token`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${authState.token}`
+                },
+            })
+            .then((response) => response.json()) 
+            .then((data) => {
+                console.log(data);
+                if (data.success){
+                    clientToken = data.clientToken;
+                    firstCallOK = true;
+                    fetch(`${process.env.EXPO_PUBLIC_API_URL}/payment/transaction`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${authState.token}`
+                        },
+                        body: JSON.stringify({
+                            idUser: clientToken,
+                            amount: 9.99,
+                            paymentMethodNonce: numeroTarjeta, 
+                        }),
+                    })
+                    .then((response) => response.json()) 
+                    .then((data) => {
+                        if (data.success){
+                            Toast.show({
+                                type: 'success',
+                                position: 'bottom',
+                                text1: 'Pago realizado',
+                                text2: '¡Enhorabuena! Ya eres premium',
+                                visibilityTime: 2500
+                            });
+                            navigation.navigate('Cuenta');
+                        } else {
+                            console.error('Error:', data);
+                            Toast.show({
+                                type: 'error',
+                                position: 'bottom',
+                                text1: 'Error',
+                                text2: 'No se ha podido realizar el pago',
+                                visibilityTime: 2500
+                            });
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
+                } else {
+                    console.error('Error:', data);
+                    Toast.show({
+                        type: 'error',
+                        position: 'bottom',
+                        text1: 'Error',
+                        text2: 'No se ha podido realizar el pago',
+                        visibilityTime: 2500
+                    });
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+    };
 
-    // Verificar si la fecha de caducidad es válida
-    const datePattern = /^(\d{2})\/(\d{2})\/(\d{4})$/;
-    if (!datePattern.test(fechaCaducidad)) {
-      Toast.show({
-        type: 'error',
-        position: 'bottom',
-        text1: 'Fecha incorrecta',
-        text2: 'La fecha de caducidad debe tener el formato DD/MM/AAAA',
-        visibilityTime: 2500
-      });
-      correctInput = false;
-      return;
-    }
-
-    const [day, month, year] = fechaCaducidad.split('/');
-    const isValid = isValidDate(day, month, year);
-    if (!isValid) {
-      Toast.show({
-        type: 'error',
-        position: 'bottom',
-        text1: 'Fecha incorrecta',
-        text2: 'La fecha de caducidad no es válida',
-        visibilityTime: 2500
-      });
-      correctInput = false;
-      return;
-    }
-
-    if (correctInput) {
-      //FALTA
-      //LLAMADA A BD
-      //navigation.navigate('');
-      Toast.show({
-        type: 'success',
-        position: 'bottom',
-        text1: 'Validación exitosa',
-        text2: '¡Validación exitosa! Pronto serás premium...',
-        visibilityTime: 2500
-      });
-    }
-  };
 
   // Función para verificar si una fecha es válida
   const isValidDate = (day, month, year) => {
@@ -180,18 +248,27 @@ const Formulario = ({
         maxLength={3}
       />
 
-      <Text style={styles.label}>Fecha de caducidad</Text>
-      <TextInput
-        style={styles.textContainer}
-        placeholder="DD/MM/AAAA"
-        value={fechaCaducidad}
-        onChangeText={setFechaCaducidad}
-        keyboardType="numeric"
-        maxLength={10}
-      />
+
+            <Text style={styles.label}>Fecha de caducidad</Text>
+            <TextInput
+                style={styles.textContainer}
+                placeholder="MM/AA"
+                value={fechaCaducidad}
+                onChangeText={(text) => {
+                    // Aplicamos la lógica para insertar la barra automáticamente
+                    if (text.length === 2 && fechaCaducidad.length === 1) {
+                        text += '/';
+                    }
+                    setFechaCaducidad(text);
+                }}
+                keyboardType='numeric'
+                maxLength={5} // MM/AA tienen 5 caracteres en total
+            />
+        </View>
     </View>
   </View>
 );
+
 
 const ContinueButton = ({ handleContinue }) => (
   <View style={{ marginBottom: 16, alignItems: 'center' }}>

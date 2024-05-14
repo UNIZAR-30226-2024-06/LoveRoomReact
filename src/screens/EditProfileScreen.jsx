@@ -79,6 +79,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
   //Solo se hace estado cuando se quiere mostrar algo
   const { authState, setAuthState } = useContext(AuthContext);
   const [name, setName] = useState(authState.nombre);
+  const [edad, setEdad] = useState(authState.edad);
   const [fechaNacimiento, setFechaNacimiento] = useState(authState.fechaNacimiento);
   const [show, setShow] = useState(false);
   const [gender, setGender] = useState(authState.sexo);
@@ -105,8 +106,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
       body: JSON.stringify({
         correo: authState.correo,
         nombre: name,
-        //FALTA PONER FECHA NACIMIENTO Y QUITAR EDAD
-        edad: 21,
+        edad: edad,
         sexo: gender,
         buscaedadmin: agePreference[0],
         buscaedadmax: agePreference[1],
@@ -124,7 +124,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
         if (data == 'Usuario actualizado correctamente') {
           setAuthState((prevState) => ({
             ...prevState,
-            edad: 21,
+            edad: edad,
             sexo: gender,
             nombre: name,
             buscaedadmin: agePreference[0],
@@ -296,18 +296,19 @@ export default function RegisterPreferencesScreen({ navigation }) {
           </Picker>
         </View>
 
-        <Text style={styles.label}>Fecha de nacimiento</Text>
-        <TextInput
-          style={styles.dateInput}
-          value={fechaNacimiento}
-          onChangeText={handleDateChange}
-          placeholder="DD/MM/AAAA"
-          maxLength={10}
-          keyboardType="numeric"
-          onSelectionChange={(event) => {
-            setCursorPosition(event.nativeEvent.selection.start);
-          }}
-        />
+        <Text style={styles.label}>Edad</Text>
+        <View style={{ ...styles.input, justifyContent: 'center' }}>
+          <Picker
+            selectedValue={edad.toString()}
+            onValueChange={(itemValue) => setEdad(parseInt(itemValue))}
+          >
+            {[...Array(100)].map((_, index) => (
+              <Picker.Item key={index} label={(index + 18).toString()} value={(index + 18).toString()} />
+            ))}
+          </Picker>
+        </View>
+
+
 
         <Text style={styles.label}>Preferencia Sexual</Text>
         <View style={{ ...styles.input, justifyContent: 'center' }}>

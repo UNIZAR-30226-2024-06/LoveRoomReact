@@ -97,8 +97,8 @@ const App = ({ navigation }) => {
     </View>
   );
   const Plans = () => (
-    <View style={{ height: ScreenHeight * 0.45, marginTop: 64, justifyContent: 'space-evenly' }}>
-      <SubscribeCard
+    <View style={{ height: ScreenHeight * 0.45, width: ScreenWidth * 0.9, marginTop: 64, justifyContent: 'space-evenly'}}>
+      <SubscribeCard 
         title="Plan premium"
         descriptionPrice=" "
         description="¡Salas ilimitadas y más!"

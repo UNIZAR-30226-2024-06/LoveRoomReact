@@ -54,8 +54,6 @@ export default function LoginScreen({ navigation }) {
     setPasswordError(false); // Reinicia el estado de error de la contraseña
   };
 
-  // FALTA: MODIFICAR ESTO PARA QUE PRIMERO SE VERIFIQUE QUE EL CORREO EXISTA Y LUEGO SE HAGA EL LOGIN, ASI PODEMOS DAR
-  // A SABER AL USUARIO SI FALLA EL CORREO O LA CONTRASEÑA
   const handleLogin = () => {
     setIsLoading(true);
     // Alert.alert(`${process.env.EXPO_PUBLIC_API_URL}/user/login`);
@@ -91,12 +89,22 @@ export default function LoginScreen({ navigation }) {
             contrasena: data.usuario.contrasena
           });
           AsyncStorage.setItem('token', data.token);
+          
           if (data.usuario.tipousuario === 'administrador') {
             console.log('Admin');
             navigation.navigate("Account", {screen : 'Admin'});
           } else {
             navigation.pop();
-          }
+          } 
+        } if (data.error === "El usuario está baneado") {
+          Toast.show({
+            type: 'error',
+            position: 'bottom',
+            text1: 'Usuario baneado',
+            text2: 'Lo sentimos, pero tu cuenta ha sido suspendida.',
+            visibilityTime: 5000
+          });
+
         } else {
           Toast.show({
             type: 'error',

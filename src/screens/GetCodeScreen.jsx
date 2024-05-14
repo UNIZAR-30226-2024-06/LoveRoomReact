@@ -9,7 +9,7 @@ import {
   StyleSheet,
   Platform,
   StatusBar,
-  ToastAndroid
+  Android
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { correoFP, actualizarCode } from '../utils/globalVariables';
@@ -124,7 +124,7 @@ export default function GetCodeScreen({ navigation }) {
             type: 'success',
             position: 'bottom',
             text1: 'Código correcto, resetee su contraseña',
-            text2: 'El código introducido es correcto, puede resetear su contraseña',
+            text2: 'El código introducido es correcto, resetea tu contraseña.',
             visibilityTime: 2500
           });
         } else if (data.error === 'El usuario introducido no existe') {
