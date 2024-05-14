@@ -27,7 +27,7 @@ const Stack = createStackNavigator();
 export default function StackNavigator() {
   const dimensions = useWindowDimensions();
   const isLandscape = dimensions.width > dimensions.height;
-
+//
   return (
     <NavigationContainer>
       <Stack.Navigator>

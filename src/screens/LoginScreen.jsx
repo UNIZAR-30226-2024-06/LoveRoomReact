@@ -58,7 +58,7 @@ export default function LoginScreen({ navigation }) {
   // A SABER AL USUARIO SI FALLA EL CORREO O LA CONTRASEÑA
   const handleLogin = () => {
     setIsLoading(true);
-    Alert.alert(`${process.env.EXPO_PUBLIC_API_URL}/user/login`);
+    // Alert.alert(`${process.env.EXPO_PUBLIC_API_URL}/user/login`);
     fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/login`, {
       method: 'POST',
       headers: {
@@ -70,7 +70,7 @@ export default function LoginScreen({ navigation }) {
       .then((data) => {
         setIsLoading(false);
         console.log(data);
-        alert('respuesta recibida');
+        // alert('respuesta recibida');
         if (data.token != null) {
           setAuthState({
             isLoggedIn: true,
@@ -93,7 +93,7 @@ export default function LoginScreen({ navigation }) {
           AsyncStorage.setItem('token', data.token);
           if (data.usuario.tipousuario === 'administrador') {
             console.log('Admin');
-            navigation.navigate('Admin');
+            navigation.navigate("Account", {screen : 'Admin'});
           } else {
             navigation.pop();
           }
@@ -108,7 +108,7 @@ export default function LoginScreen({ navigation }) {
         }
       })
       .catch((error) => {
-        Alert.alert('Error: ', error);
+        // Alert.alert('Error: ', error);
         setIsLoading(false);
         console.error('Error:', error);
       });

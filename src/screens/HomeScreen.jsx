@@ -14,7 +14,7 @@ export default function HomeScreen({ navigation }) {
   }
 
   // if (authState.tipousuario === 'administrador') {
-  //   navigation.navigate('Admin');
+  //   navigation.navigate("Account", {screen : 'Admin'});
   // }
 
   return (

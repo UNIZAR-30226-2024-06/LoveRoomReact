@@ -65,7 +65,7 @@ export default function UserGuidelinesScreen({ navigation }) {
         style={styles.button}
         onPress={() => {
           // TODO: handleRegister();
-          navigation.navigate('Cuenta');
+          navigation.navigate("Account", {screen : 'Cuenta'});
         }}
       >
         <Text style={styles.buttonText}>Aceptar y continuar</Text>

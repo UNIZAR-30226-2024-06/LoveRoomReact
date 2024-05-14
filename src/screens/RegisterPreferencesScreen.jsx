@@ -153,7 +153,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
             fotoperfil: 'null.jpg', //para que se pueda actualziar, subirla al multimedia y nos devolvera un path para subir,
             idlocalidad: idlocalidad
           }));
-          navigation.navigate('Cuenta');
+          navigation.navigate("Account", {screen : 'Cuenta'});
           console.log('Preferencias del registro configuradas correctamente');
         } else if (data.error == 'Error al actualizar el usuario') {
           console.log('Error al configurar las preferencias del usuario');

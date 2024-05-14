@@ -21,7 +21,7 @@ export default function BottomTab({ initialScreen, navigation }) {
   useEffect(() => {
     console.log('Checkeo de si es admin : ', authState.tipousuario);
     // if (authState.tipousuario === 'administrador') {
-    //   navigation.navigate('Admin');
+    //   navigation.navigate("Account", {screen : 'Admin'});
     // }
   }, [authState.tipousuario]);
 

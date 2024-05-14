@@ -97,7 +97,7 @@ export default function Login({ navigation }) {
           });
 
           if (data.usuario.tipousuario === 'administrador') {
-            navigation.navigate('Admin');
+            navigation.navigate("Account", {screen : 'Admin'});
           }
           AsyncStorage.setItem('token', data.token);
           navigation.navigate('RegisterPreferences');
