@@ -218,7 +218,7 @@ function Admin({ navigation }) {
 
       const resolveReport = async (item, banear) => {
         const user = users.find(user => user.id === item.idusuario);
-        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/${item.id}/resolve`, {
+        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/reports/${item.id}/resolve`, {
             method: 'PATCH',
             headers: {
               'Content-Type': 'application/json',
@@ -273,7 +273,6 @@ function Admin({ navigation }) {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${authState.token}`,
       },
-      body: JSON.stringify({ showResolved: false}),
     });
     const data = await response.json();
     console.log(data);
