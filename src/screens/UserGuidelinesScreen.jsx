@@ -25,6 +25,7 @@ export default function UserGuidelinesScreen({ navigation }) {
 
   return (
     <ScrollView
+      keyboardShouldPersistTaps={'handled'}
       style={styles.container}
       ref={scrollViewRef}
       scrollEventThrottle={16} // Controla con qué frecuencia se llamará al evento onScroll

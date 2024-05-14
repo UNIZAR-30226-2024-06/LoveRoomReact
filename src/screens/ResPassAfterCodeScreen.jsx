@@ -7,25 +7,19 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
-  Platform,
   Modal,
   ActivityIndicator,
-  StatusBar
 } from 'react-native';
 import AuthContext from '../components/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
+import { correoFP, Code } from '../utils/globalVariables';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { actualizarCorreoFP } from '../utils/globalVariables';
 
-export default function ChangePasswdScreen({ navigation }) {
-  const { authState } = React.useContext(AuthContext);
+export default function ResetPassAfterCode({ navigation }) {
+  const { authState, setAuthState } = React.useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(false);
-
-  const [oldPassword, setOldPassword] = React.useState('');
-  const [isValidOldPassword, setIsValidOldPassword] = useState(false);
-  const [oldPasswordError, setOldPasswordError] = useState(false);
-  const [oldHidePassword, setOldHidePassword] = useState(true);
 
   const [new1Password, setNew1Password] = React.useState('');
   const [isValidNew1Password, setIsValidNew1Password] = useState(false);
@@ -36,12 +30,6 @@ export default function ChangePasswdScreen({ navigation }) {
   const [isValidNew2Password, setIsValidNew2Password] = useState(false);
   const [new2PasswordError, setNew2PasswordError] = useState(false);
   const [new2HidePassword, setNew2HidePassword] = useState(true);
-
-  const handleOldPasswordChange = (text) => {
-    setOldPassword(text);
-    setIsValidOldPassword(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,16}$/.test(text));
-    setOldPasswordError(false);
-  };
 
   const handleNew1PasswordChange = (text) => {
     setNew1Password(text);
@@ -57,8 +45,8 @@ export default function ChangePasswdScreen({ navigation }) {
 
   const handlePasswordUpdate = () => {
     setIsLoading(true);
-    console.log('Contraseña actual:', oldPassword, 'Nueva contraseña:', new1Password, 'Repetir nueva contraseña:', new2Password);
-    fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/update/password`, {
+    console.log('Nueva contraseña:', new1Password, 'Repetir nueva contraseña:', new2Password);
+    fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/reset/password`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
@@ -66,24 +54,48 @@ export default function ChangePasswdScreen({ navigation }) {
         },
         body: JSON.stringify({
             nuevaContrasena: new1Password,
-            antiguaContrasena: oldPassword,
+            codigo: Code,
+            correo: correoFP
         }),
     })
     .then((response) => response.json())
     .then((data) => {
+        console.log('Respuesta:', data);
+        console.log('Correo:', correoFP);
+        console.log('Codigo:', Code);
+
         setIsLoading(false);
-        if (data.error === 'Contraseña incorrecta') {
-            setOldPasswordError(true);
-        } else if (data === 'Contraseña actualizada correctamente') {
-            navigation.pop();
-            Toast.show({
-              type: 'success',
-              position: 'bottom',
-              text1: 'Contraseña actualizada',
-              text2: 'Se ha actualizado la contraseña correctamente',
-              visibilityTime: 2500
-            });
-        } else if (data.error === 'Error al actualizar la contraseña') {
+        if (data.token != null) {
+          setAuthState({
+            isLoggedIn: true,
+            token: data.token,
+            baneado: data.usuario.baneado,
+            id: data.usuario.id,
+            correo: data.usuario.correo,
+            nombre: data.usuario.nombre,
+            sexo: data.usuario.sexo,
+            edad: data.usuario.edad,
+            idLocalidad: data.usuario.idLocalidad,
+            buscaedadmin: data.usuario.buscaedadmin,
+            buscaedadmax: data.usuario.buscaedadmax,
+            buscasexo: data.usuario.buscasexo,
+            fotoperfil: data.usuario.fotoperfil,
+            descripcion: data.usuario.descripcion,
+            tipousuario: data.usuario.tipousuario,
+            contrasena: data.usuario.contrasena
+          });
+          AsyncStorage.setItem('token', data.token);
+          navigation.navigate('Login');
+          Toast.show({
+            type: 'success',
+            position: 'bottom',
+            text1: 'Contraseña actualizada',
+            text2: 'Se ha actualizado la contraseña correctamente',
+            visibilityTime: 2500
+          });
+        } else if (data.error === 'El usuario introducido no existe' || 
+                   data.error === 'Codigo introducido no es correcto' ||
+                   data.error === 'Error al resetear la contraseña') {
             console.log('Error al actualizar la contraseña');
             Toast.show({
               type: 'error',
@@ -126,45 +138,12 @@ export default function ChangePasswdScreen({ navigation }) {
         <View style={styles.modalBackground}>
           <View style={styles.activityIndicatorWrapper}>
             <ActivityIndicator animating={isLoading} size="large" color="#F89F9F" />
-            <Text style={styles.loadingText}>Comprobando contraseña...</Text>
+            <Text style={styles.loadingText}>Actualizando contraseña...</Text>
           </View>
         </View>
       </Modal>
 
       <View style={styles.formContainer}>
-
-      <Text style={styles.label}>Contraseña existente</Text>
-      <View>
-          <TextInput
-            style={[
-              styles.input,
-              { paddingRight: 40, flex: 1 },
-              oldPasswordError && { borderColor: 'red' }
-            ]}
-            placeholder="Introduzca su contraseña actual"
-            secureTextEntry={oldHidePassword}
-            onChangeText={handleOldPasswordChange}
-            maxLength={100}
-          />
-          <TouchableOpacity
-            onPress={() => setOldHidePassword(!oldHidePassword)}
-            style={{
-              position: 'absolute',
-              right: 20,
-              height: 40,
-              top: 0,
-              justifyContent: 'center'
-            }}
-          >
-            <Ionicons name={oldHidePassword ? 'eye-off' : 'eye'} size={24} color="black" />
-          </TouchableOpacity>
-        {oldPasswordError && (
-          <Text style={styles.errorText}>
-            * La contraseña es incorrecta.
-          </Text>
-        )}
-      </View>
-
         <Text style={styles.label}>Nueva contraseña</Text>
         <View>
           <TextInput
@@ -232,11 +211,6 @@ export default function ChangePasswdScreen({ navigation }) {
           onPress={() => {
             let isFormValid = true;
 
-            if (!isValidOldPassword) {
-              setOldPasswordError(true);
-              isFormValid = false;
-            }
-
             if (!isValidNew1Password) {
               setNew1PasswordError(true);
               isFormValid = false;
@@ -253,15 +227,6 @@ export default function ChangePasswdScreen({ navigation }) {
           }}
         >
           <Text style={styles.buttonText}>Continuar</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => {
-            actualizarCorreoFP(authState.email);
-            navigation.navigate('GetEmail');
-          }}
-        >
-          <Text style={styles.forgotPassword}>He olvidado mi contraseña</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

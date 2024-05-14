@@ -3,14 +3,13 @@ import { View, Text, StyleSheet } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
 
-export default function NotRegisteredScreen() {
+export default function BannedScreen() {
   const navigation = useNavigation();
   return (
     <View style={styles.container}>
-      {/* <Text style={styles.text}>X</Text> */}
-      <Text style={styles.text}>Necesitas registrarte para ver este contenido{'\n'}</Text>
+      <Text style={styles.text}>Lo sentimos, pero tu cuenta ha sido suspendida debido a un incumplimiento de nuestras políticas. Por favor, contáctanos si tienes alguna pregunta {'\n'}</Text>
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Login')}>
-        <Text style={styles.buttonText}>Iniciar sesión</Text>
+        <Text style={styles.buttonText}>Aceptar</Text>
       </TouchableOpacity>
     </View>
   );
@@ -25,7 +24,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 20,
-    textAlign: 'center' // Add this line to align text to center
+    textAlign: 'center' 
   },
   button: {
     backgroundColor: '#F89F9F',

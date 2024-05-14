@@ -7,29 +7,80 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
-  Platform,
-  StatusBar,
   Dimensions
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import AuthContext from '../components/AuthContext';
 import * as FileSystem from 'expo-file-system';
-import Slider from '@react-native-community/slider';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
-import { Feather } from '@expo/vector-icons'; // Importa el ícono de Feather
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Feather } from '@expo/vector-icons';
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
 
+const provinciasDeEspana = [
+  'Álava',
+  'Albacete',
+  'Alicante',
+  'Almería',
+  'Asturias',
+  'Ávila',
+  'Badajoz',
+  'Baleares',
+  'Barcelona',
+  'Burgos',
+  'Cáceres',
+  'Cádiz',
+  'Cantabria',
+  'Castellón',
+  'Ceuta',
+  'Ciudad Real',
+  'Córdoba',
+  'Cuenca',
+  'Gerona',
+  'Granada',
+  'Guadalajara',
+  'Guipúzcoa',
+  'Huelva',
+  'Huesca',
+  'Jaén',
+  'La Coruña',
+  'La Rioja',
+  'Las Palmas',
+  'León',
+  'Lérida',
+  'Lugo',
+  'Madrid',
+  'Málaga',
+  'Melilla',
+  'Murcia',
+  'Navarra',
+  'Orense',
+  'Palencia',
+  'Pontevedra',
+  'Salamanca',
+  'Santa Cruz de Tenerife',
+  'Segovia',
+  'Sevilla',
+  'Soria',
+  'Tarragona',
+  'Teruel',
+  'Toledo',
+  'Valencia',
+  'Valladolid',
+  'Vizcaya',
+  'Zamora',
+  'Zaragoza'
+];
+
 export default function RegisterPreferencesScreen({ navigation }) {
-  const { authState } = useContext(AuthContext);
+  console.log(authState);
+  //Solo se hace estado cuando se quiere mostrar algo
+  const { authState, setAuthState } = useContext(AuthContext);
   const [name, setName] = useState(authState.nombre);
-  const [email, setEmail] = useState(authState.correo);
-  const [password, setPassword] = useState(authState.contrasena);
-  const [age, setAge] = useState(authState.edad);
+  const [edad, setEdad] = useState(authState.edad);
+  const [fechaNacimiento, setFechaNacimiento] = useState(authState.fechaNacimiento);
   const [show, setShow] = useState(false);
   const [gender, setGender] = useState(authState.sexo);
   const [sexualPreference, setSexualPreference] = useState(authState.buscasexo);
@@ -39,8 +90,99 @@ export default function RegisterPreferencesScreen({ navigation }) {
   ]);
   const [description, setDescription] = useState(authState.descripcion);
   const [profileImage, setProfileImage] = useState(authState.fotoperfil);
+  const [idlocalidad, setIdLocalidad] = useState(authState.idlocalidad);
+  const [cursorPosition, setCursorPosition] = useState(0);
   const [isProfileImageSelected, setIsProfileImageSelected] = useState();
   const { StorageAccessFramework } = FileSystem;
+  const [descriptionLength, setDescriptionLength] = useState(description.length);
+  const handleSave = () => {
+    console.log(`${process.env.EXPO_PUBLIC_API_URL}/user/update`);
+    fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/update`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authState.token}`
+      },
+      body: JSON.stringify({
+        correo: authState.correo,
+        nombre: name,
+        edad: edad,
+        sexo: gender,
+        buscaedadmin: agePreference[0],
+        buscaedadmax: agePreference[1],
+        buscasexo: sexualPreference,
+        descripcion: description,
+        //subir foto primero a multimedia yt luego actualizarla
+        fotoperfil: 'null.jpg', //para que se pueda actualziar, subirla al multimedia y nos devolvera un path para subir,
+        idlocalidad: idlocalidad
+      })
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        console.log(authState);
+        if (data == 'Usuario actualizado correctamente') {
+          setAuthState((prevState) => ({
+            ...prevState,
+            edad: edad,
+            sexo: gender,
+            nombre: name,
+            buscaedadmin: agePreference[0],
+            buscaedadmax: agePreference[1],
+            buscasexo: sexualPreference,
+            descripcion: description,
+            //subir foto primero a multimedia yt luego actualizarla
+            fotoperfil: 'null.jpg', //para que se pueda actualziar, subirla al multimedia y nos devolvera un path para subir,
+            idlocalidad: idlocalidad
+          }));
+          navigation.navigate('Cuenta');
+          console.log('G: Actualizo bien');
+        } else if (data.error == 'Error al actualizar el usuario') {
+          console.log('G: Actualizo mal');
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        console.log('Llega al catch');
+      });
+  };
+
+  const valueToId = (value) => {
+    const index = provinciasDeEspana.indexOf(value);
+    setIdLocalidad(index + 1);
+  };
+
+  const idToValue = (id) => {
+    return provinciasDeEspana[id - 1];
+  };
+
+  const handleDateChange = (text) => {
+    // Elimina todos los caracteres que no sean números
+    const cleanedText = text.replace(/[^0-9]/g, '');
+
+    // Formatea la fecha de acuerdo al formato DD/MM/AAAA
+    let formattedText = '';
+    let formattedCursorPosition = cursorPosition;
+
+    for (let i = 0; i < cleanedText.length; i++) {
+      if (i === 2 || i === 4) {
+        formattedText += '/';
+        if (i < cursorPosition) {
+          formattedCursorPosition++;
+        }
+      }
+      formattedText += cleanedText[i];
+    }
+
+    // Asegúrate de que el texto formateado no exceda los 10 caracteres
+    if (formattedText.length > 10) {
+      formattedText = formattedText.slice(0, 10);
+    }
+
+    setFechaNacimiento(formattedText);
+    // Actualiza la posición del cursor
+    setCursorPosition(formattedCursorPosition);
+  };
 
   const fileName = FileSystem.documentDirectory + 'userProfileImage.jpeg';
   const checkProfileImage = async () => {
@@ -129,7 +271,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} keyboardShouldPersistTaps={'handled'}>
       <View style={styles.header} />
       <View style={styles.profileInfo}>
         <Text style={styles.profileText}>Editar perfil</Text>
@@ -143,7 +285,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
               source={
                 isProfileImageSelected
                   ? { uri: profileImage + '?' + new Date() }
-                  : require('../img/profileImage.jpg')
+                  : require('../img/profileImage.jpg') //OBTENER FOTO DE LA BASE DE DATOS NO?
               }
             />
           </View>
@@ -156,33 +298,10 @@ export default function RegisterPreferencesScreen({ navigation }) {
           style={styles.textContainer}
           defaultValue={authState.nombre}
           onChangeText={(text) => setName(text)}
+          maxLength={50}
         />
 
-        <Text style={styles.label}>Correo Electrónico</Text>
-        <TextInput
-          style={styles.textContainer}
-          defaultValue={authState.correo}
-          onChangeText={(text) => setEmail(text)}
-        />
-
-        <Text style={styles.label}>Contraseña</Text>
-        <TextInput
-          style={styles.textContainer}
-          defaultValue={authState.contrasena}
-          secureTextEntry={true}
-          onChangeText={(text) => setPassword(text)}
-        />
-
-        <Text style={styles.label}>Edad</Text>
-        <View style={{ ...styles.input, justifyContent: 'center' }}>
-          <Picker selectedValue={age} onValueChange={(itemValue) => setAge(itemValue)}>
-            {[...Array(83)].map((_, i) => (
-              <Picker.Item key={i} label={(i + 18).toString()} value={i + 18} />
-            ))}
-          </Picker>
-        </View>
-
-        <Text style={styles.label}>Sexo</Text>
+        <Text style={styles.label}>Género</Text>
         <View style={{ ...styles.input, justifyContent: 'center' }}>
           <Picker
             selectedValue={gender}
@@ -193,6 +312,35 @@ export default function RegisterPreferencesScreen({ navigation }) {
             <Picker.Item label="Masculino" value="H" />
             <Picker.Item label="Femenino" value="M" />
             <Picker.Item label="Otro" value="O" />
+          </Picker>
+        </View>
+
+        <Text style={styles.label}>Localidad</Text>
+        <View style={{ ...styles.input, justifyContent: 'center' }}>
+          <Picker
+            selectedValue={idToValue(idlocalidad)}
+            onValueChange={(itemValue) => {
+              const index = provinciasDeEspana.indexOf(itemValue);
+              setIdLocalidad(index + 1);
+            }}>
+            {provinciasDeEspana.map((provincia, index) => (
+              <Picker.Item key={index} label={provincia} value={provincia} />
+            ))}
+          </Picker>
+        </View>
+
+        <Text style={styles.label}>Edad</Text>
+        <View style={{ ...styles.input, justifyContent: 'center' }}>
+          <Picker
+            selectedValue={edad.toString()}
+            onValueChange={(itemValue) => setEdad(parseInt(itemValue))}>
+            {[...Array(100)].map((_, index) => (
+              <Picker.Item
+                key={index}
+                label={(index + 18).toString()}
+                value={(index + 18).toString()}
+              />
+            ))}
           </Picker>
         </View>
 
@@ -210,20 +358,20 @@ export default function RegisterPreferencesScreen({ navigation }) {
             }>
             <Picker.Item label="Hombres" value="H" />
             <Picker.Item label="Mujeres" value="M" />
-            <Picker.Item label="Todos" value="T" />
+            <Picker.Item label="Ambos" value="T" />
           </Picker>
         </View>
+
         <View style={styles.labelContainer}>
           <Text style={styles.label}>Preferencia de edad</Text>
           <Text style={styles.sliderLabel}>
             {agePreference[0]}-{agePreference[1]}
           </Text>
         </View>
-        <View style={styles.sliderLabelsContainer}></View>
         <View style={styles.sliderContainer}>
           <MultiSlider
             values={agePreference}
-            sliderLength={screenWidth - 40} // Utiliza el ancho total de la pantalla menos los márgenes
+            sliderLength={screenWidth - 40}
             min={18}
             max={100}
             step={1}
@@ -244,21 +392,28 @@ export default function RegisterPreferencesScreen({ navigation }) {
         </View>
 
         <Text style={styles.label}>Descripción</Text>
-        <TextInput
-          style={styles.description}
-          placeholder="Introduce tu descripción aquí"
-          multiline={true}
-          numberOfLines={4}
-          onChangeText={(text) => setDescription(text)}
-        />
+        <View style={styles.descriptionInputContainer}>
+          <TextInput
+            style={styles.description}
+            placeholder="Cuéntanos un poco sobre ti..."
+            multiline={true}
+            numberOfLines={4}
+            defaultValue={authState.descripcion}
+            onChangeText={(text) => {
+              setDescription(text);
+              setDescriptionLength(text.length);
+            }}
+            maxLength={500}
+          />
+          <Text style={styles.characterCount}>{descriptionLength}/500</Text>
+        </View>
 
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
-            // TODO: handleRegister();
-            navigation.navigate('Cuenta');
+            handleSave();
           }}>
-          <Text style={styles.buttonText}>Guardar</Text>
+          <Text style={styles.buttonText}> Guardar</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -278,11 +433,17 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.5)',
     borderRadius: 15,
     padding: 5,
-    borderColor: 'black', // Agrega el borde de color F89F9F
+    borderColor: 'black',
     borderWidth: 1,
-    zIndex: 1 // Asegura que el ícono esté por encima de la imagen
+    zIndex: 1
   },
-
+  characterCount: {
+    position: 'absolute',
+    bottom: 15,
+    right: 8,
+    color: '#666',
+    fontSize: 12
+  },
   header: {
     height: screenHeight * 0.27,
     backgroundColor: '#F89F9F'
@@ -343,9 +504,6 @@ const styles = StyleSheet.create({
     marginTop: 10
   },
 
-  sliderContainer: {
-    marginBottom: 20
-  },
   sliderText: {
     fontSize: 16,
     marginBottom: 10
@@ -355,8 +513,9 @@ const styles = StyleSheet.create({
   },
 
   sliderContainer: {
-    marginBottom: 20
+    marginBottom: 0
   },
+
   customMarker: {
     height: 20,
     width: 20,
@@ -410,7 +569,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 10,
-    marginBottom: 10,
+    height: 35,
+    marginBottom: 0,
     textAlignVertical: 'center'
   },
   button: {
@@ -461,5 +621,14 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     padding: 14
+  },
+  dateInput: {
+    height: 40,
+    borderColor: '#cccccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+    textAlign: 'left' // Centra el texto
   }
 });

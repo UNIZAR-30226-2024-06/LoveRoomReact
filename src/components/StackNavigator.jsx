@@ -7,7 +7,7 @@ import NotRegisteredScreen from '../screens/NotRegisteredScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import ChangePasswdScreen from '../screens/ChangePasswdScreen';
 import GetCodeScreen from '../screens/GetCodeScreen';
-import { useWindowDimensions } from 'react-native';
+import { useWindowDimensions, Image } from 'react-native';
 import GetEmailScreen from '../screens/GetEmailScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
@@ -15,6 +15,12 @@ import RegisterPreferencesScreen from '../screens/RegisterPreferencesScreen';
 import UserGuidelinesScreen from '../screens/UserGuidelinesScreen';
 import VideoScreen from '../screens/VideoScreen';
 import FAQScreen from '../screens/FAQScreen';
+import OtherProfile from '../screens/OtherProfileScreen';
+import ChangePassword from '../screens/ChangePasswdScreen';
+import Premium from '../screens/BecomePremiumScreen';
+import Payment from '../screens/PaymentScreen';
+import ResetPasswdAfterCode from '../screens/ResPassAfterCodeScreen';
+import Banned from '../screens/BannedScreen';
 
 const Stack = createStackNavigator();
 
@@ -56,8 +62,45 @@ export default function StackNavigator() {
           component={EditProfileScreen}
           options={{ headerShown: false }}
         />
-        <Stack.Screen name="Video" component={VideoScreen} />
+        <Stack.Screen
+          name="Video"
+          component={VideoScreen}
+          options={{
+            tabBarIcon: ({ color, size }) => (
+              <Image
+                source={require('../img/HomeTab.png')}
+                style={{ width: size, height: size, tintColor: color }}
+              />
+            ),
+            headerTitleAlign: 'center',
+            headerTitle: () => (
+              <Image
+                source={require('../img/logo.png')}
+                style={{ width: 200, height: 32, backgroundColor: '#F89F9F' }}
+              />
+            ),
+            headerStyle: {
+              backgroundColor: '#F89F9F'
+            },
+            headerShadowVisible: false
+          }}
+        />
         <Stack.Screen name="FAQ" component={FAQScreen} options={{ headerShown: false }} />
+        <Stack.Screen
+          name="OtherProfile"
+          component={OtherProfile}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="changePassword"
+          component={ChangePassword}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen name="Premium" component={Premium} options={{ headerShown: false }} />
+
+        <Stack.Screen name="Payment" component={Payment} options={{ headerShown: false }} />
+        <Stack.Screen name="ResetPasswdAfterCode" component={ResetPasswdAfterCode} options={{ headerShown: false }} />
+        <Stack.Screen name="Banned" component={Banned} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

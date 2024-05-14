@@ -1,29 +1,41 @@
-import React from 'react';
-import { View, Button, Text } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Image, StyleSheet } from 'react-native';
 import NotRegisteredScreen from './NotRegisteredScreen';
 import AuthContext from '../components/AuthContext';
-import YouTubeIframe from 'react-native-youtube-iframe';
 import SearchBar from '../components/SearchBarYt';
-import { StyleSheet } from 'react-native';
+import BannedScreen from './BannedScreen';
 
 export default function HomeScreen({ navigation }) {
   const { authState } = React.useContext(AuthContext);
+  const [hasInterestVideos, setHasInterestVideos] = useState(false);
+  console.log("HOMESCREEN AUTHSTATE: ", authState);
 
-  // if (!authState.isLoggedIn) {
-  //   return <NotRegisteredScreen />;
-  // }
+  if (!authState.isLoggedIn) {
+    return <NotRegisteredScreen />;
+  }
+
+  if(authState.baneado){
+    return <BannedScreen />;
+  }
+
   return (
     <View style={{ flex: 1, alignItems: 'center' }}>
-      <Text style={styles.TextBienvenida}> ¡Bienvenido de nuevo, {authState.nombre}! </Text>
-      <SearchBar />
-      {/* <View style={styles.Video}>
-        <YouTubeIframe videoId={'TQtT9QgWjIY'} height={220} width={'100%'} style={styles.Video} />
-      </View> */}
-      {/* <YoutubeSearch /> */}
-      {/* <Button
-        title="Go to Login"
-        onPress={() => navigation.navigate('Login')}
-      /> */}
+      <Text style={styles.TextBienvenida}> ¡Hola de nuevo, {authState.nombre}! </Text>
+      <SearchBar setVideoUrl={null} onHasInterestVideosChange={setHasInterestVideos} />
+      {hasInterestVideos ? (
+        <View style={styles.Video}>
+          {/* Aquí renderiza los videos de interés */}
+        </View>
+      ) : (
+        <View style={styles.interrogationContainer}>
+          <Image source={require('../img/camara.png')} style={[styles.interrogationImage, { tintColor: 'gray' }]} />
+          <Text style={styles.centeredText}>
+            ¡Busca tus vídeos favoritos,
+            {'\n'}
+            y conoce gente con los mismos gustos que tú!
+          </Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -41,5 +53,18 @@ const styles = StyleSheet.create({
     width: '90%',
     justifyContent: 'center',
     alignItems: 'center'
-  }
+  },
+  interrogationContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  interrogationImage: {
+    width: 100,
+    height: 100,
+  },
+  centeredText: {
+    textAlign: 'center',
+    color: 'gray',
+  },
 });

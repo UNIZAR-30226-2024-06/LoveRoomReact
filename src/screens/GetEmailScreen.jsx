@@ -7,21 +7,17 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
-  Alert
+  Dimensions
 } from 'react-native';
 import AuthContext from '../components/AuthContext';
+import Toast from 'react-native-toast-message';
+import { actualizarCorreoFP } from '../utils/globalVariables';
 
 export default function GetEmailScreen({ navigation }) {
-  // const { isRegistered, setIsRegistered } = React.useContext(AuthContext);
   const [email, setEmail] = React.useState('');
-  const [isValidEmail, setIsValidEmail] = React.useState(true);
+  const [isValidEmail, setIsValidEmail] = React.useState(false);
   const [formSubmitted, setFormSubmitted] = React.useState(false);
-  const [errorText, setErrorText] = React.useState('');
-
-
-  // const handleRegister = () => {
-  //   setIsRegistered(true);
-  // };
+  const [errorText, setErrorText] = React.useState('* Por favor, introduzca un correo electrónico válido.');
 
   const handleEmailChange = (text) => {
     setEmail(text);
@@ -31,94 +27,108 @@ export default function GetEmailScreen({ navigation }) {
       setErrorText(''); // Limpiar el mensaje de error cuando el usuario comienza a escribir nuevamente
     }
   };
-  
-
 
   const handleChangePassword = () => {
+    console.log(errorText);
+    console.log(formSubmitted);
+    console.log(isValidEmail);
+    console.log(email);
     setFormSubmitted(true);
     if (isValidEmail) {
-      isRegistered2();
+      sendCode();
     }
   };
 
-const isRegistered2 = () => {
-  fetch(`http://192.168.1.44:5000/user/${email}`, {
-    method: 'GET',
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error('Error al obtener el usuario');
-      }
-      return response.json();
+  //pedir a backend usuario para ver si existe. si existe, ir a 
+  const sendCode = () => {
+    fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/send/email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ correo: email })
     })
-    .then((data) => {
-      if (data.error) {
-        if (data.error === 'Usuario no encontrado') {
-          // Si el usuario no se encuentra, actualiza el estado para mostrar el mensaje de error
+      .then((response) => response.json()) 
+      .then((data) => {
+        let respuestaValida = false;
+        if (data.mensaje === 'Correo para resetear contraseña enviado con exito') {
+          respuestaValida = true;
+          actualizarCorreoFP(email);
+          Toast.show({
+            type: 'success',
+            position: 'bottom',
+            text1: 'Correo enviado',
+            text2: 'Se ha enviado un correo para resetear la contraseña.',
+            visibilityTime: 2500
+          }); 
+          navigation.navigate('GetCode');
+        } else if (data.error === 'El usuario introducido no existe') {
+          respuestaValida = false;
           setIsValidEmail(false);
           setFormSubmitted(true);
           setErrorText('Usuario no existente');
-        } else {
-          Alert.alert('Error', 'Error al obtener el usuario');
-        }
-      } else {
-        // FALTA: ENVIAR PETICION A BACKEND DE GENERAR CODIGO Y ENVIARLO AL USUARIO
-        navigation.navigate('GetCode');
-      }
-    })
-    .catch((error) => {
-      console.error('Error:', error);
-      Alert.alert('Error', 'Error al conectar con la base de datos');
-    });
-};
+        } else if (respuestaValida === false){
+          Toast.show({
+            type: 'error',
+            position: 'bottom',
+            text1: 'Error',
+            text2: 'Error al enviar el correo para resetear la contraseña',
+            visibilityTime: 2500
+          }); 
+         }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        Toast.show({
+          type: 'error',
+          position: 'bottom',
+          text1: 'Error',
+          text2: 'Error al conectar con la base de datos',
+          visibilityTime: 2500
+        });
+      });
+  };
+  
 
-  return (
-    <ScrollView style={styles.container}>
-      <View style={[styles.logoContainer, { marginBottom: -90 }]}>
+  return  (
+  <ScrollView style={styles.container} keyboardShouldPersistTaps={'handled'}>
+    <View style={[styles.logoContainer, { marginBottom: -90 }]}>
         <Image style={styles.logo} source={require('../img/logoTexto.png')} />
-      </View>
+    </View>
 
-      <View style={styles.formContainer}>
+    <View style={styles.formContainer}>
         <Text style={styles.label}>Correo electrónico</Text>
         <TextInput
           style={[
             styles.input,
-            (!isValidEmail && formSubmitted) && styles.inputError,
-            (errorText === 'Usuario no existente') && styles.inputError 
-          ]} 
+            !isValidEmail && formSubmitted && styles.inputError,
+            errorText === 'Usuario no existente' && styles.inputError  
+          ]}
           placeholder="Introduzca su correo electrónico "
           onChangeText={handleEmailChange}
+          maxLength={254}
         />
         {!isValidEmail && formSubmitted && errorText !== 'Usuario no existente' && (
-          <Text style={styles.errorText}>* Por favor, introduzca un correo electrónico válido.</Text>
+          <Text style={styles.errorText}>
+            * Por favor, introduzca un correo electrónico válido.
+          </Text>
         )}
         {errorText === 'Usuario no existente' && (
-          <Text style={styles.errorText}>* No existe ninguna cuenta de usuario asociada a este correo electrónico.</Text>
+          <Text style={styles.errorText}>
+            * No existe ninguna cuenta de usuario asociada a este correo electrónico.
+          </Text>
         )}
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handleChangePassword}
-        >
-          <Text style={styles.buttonText}>Continuar</Text>
-        </TouchableOpacity>
-      </View>
+        <TouchableOpacity style={styles.button} onPress={handleChangePassword}>
+           <Text style={styles.buttonText}>Continuar</Text>
+         </TouchableOpacity>
+     </View>
+  </ScrollView>
+    )
+  };
 
-      <View style={styles.line}></View>
 
-      <View style={styles.registerContainer}>
-        <Text style={styles.registerText}>¿No tienes una cuenta?</Text>
-        <TouchableOpacity
-          onPress={() => {
-            navigation.navigate('Register');
-          }}
-        >
-          <Text style={styles.registerLink}>Regístrate</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
-  );
-}
+
 
 const styles = StyleSheet.create({
   container: {
@@ -134,11 +144,6 @@ const styles = StyleSheet.create({
     height: 200,
     resizeMode: 'contain'
   },
-  logoText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginTop: 10
-  },
   formContainer: {
     backgroundColor: '#ffffff',
     marginTop: 20,
@@ -147,7 +152,8 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    marginBottom: 5
+    marginBottom: 5,
+    marginTop: 10
   },
   input: {
     height: 40,
@@ -155,10 +161,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 10,
-    marginBottom: 5
+    marginBottom: 10
   },
   inputError: {
-    borderColor: 'red', 
+    borderColor: 'red'
   },
   errorText: {
     color: 'red',
@@ -175,19 +181,21 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontWeight: 'bold'
   },
-
   line: {
+    height: 2,
+    width: '100%', // Ancho del 80% de la pantalla
+    position: 'absolute', // Posicionamiento absoluto para colocar la línea en una posición específica
+    bottom: 0, // Al principio, la línea estará al fondo de la pantalla
     borderBottomColor: '#ccc',
     borderBottomWidth: 1,
-    paddingBottom: '80%',
-    alignSelf: 'stretch', // Ajuste para que la línea ocupe todo el ancho
-    marginBottom: 10
+    alignSelf: 'stretch' // Ajuste para que la línea ocupe todo el ancho
   },
 
   registerContainer: {
-    flexDirection: 'row',
+    position: 'absolute', // Posicionamiento absoluto para colocar la línea en una posición específica
+    bottom: 0, // Al principio, la línea estará al fondo de la pantalla
     justifyContent: 'center',
-    paddingBottom: '10%'
+    flexDirection: 'row'
   },
   registerText: {
     fontSize: 16
@@ -195,7 +203,6 @@ const styles = StyleSheet.create({
   registerLink: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginLeft: 5,
     color: '#F89F9F'
   }
 });
