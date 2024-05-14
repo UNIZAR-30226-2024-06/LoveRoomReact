@@ -130,7 +130,6 @@ export const AuthProvider = ({ children }) => {
             tipousuario: data.usuario.tipousuario,
             baneado: data.usuario.baneado
           }));
-          console.log("AuthStateJiJi", authState);
           // fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/check/token`,{
           //   method: 'GET',
           //   headers: {

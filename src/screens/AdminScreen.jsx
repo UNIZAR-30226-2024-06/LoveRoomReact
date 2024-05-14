@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Modal, Alert, TextInput } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Modal, TextInput } from 'react-native';
 import AuthContext from '../components/AuthContext';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { BarChart, PieChart } from 'react-native-chart-kit';
@@ -7,6 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FlatList } from 'react-native-gesture-handler';
 import { Dimensions } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import Toast from 'react-native-toast-message';
 
 
 const getOrientation = () => {
@@ -119,7 +120,13 @@ function Admin({ navigation }) {
     const data = await response.json();
     console.log(data);
     if (data.error==null) {
-        Alert.alert('Tipo de usuario actualizado correctamente');
+        Toast.show({
+            type: 'success',
+            position: 'bottom',
+            text1: 'Usuario actualizado correctamente',
+            text2: `El usuario ${user.nombre} ahora es ${userType}`,
+            visibilityTime: 2500,
+        });
         user.tipousuario = userType;
         setRefresh(!refresh);
     }
@@ -137,7 +144,13 @@ function Admin({ navigation }) {
     const data = await response.json();
     console.log(data);
     if (data.error == null) {
-        Alert.alert(`Usuario ${ban} correctamente`);
+        Toast.show({
+            type: 'success',
+            position: 'bottom',
+            text1: 'Usuario actualizado correctamente',
+            text2: `El usuario ${user.nombre} ha sido ${user.baneado ? 'desbaneado' : 'baneado'}`,
+            visibilityTime: 2500,
+        });
         user.baneado = !user.baneado;
         setRefresh(!refresh);
     }
@@ -203,6 +216,43 @@ function Admin({ navigation }) {
       return report.texto.toLowerCase().includes(search.toLowerCase());
       });
 
+      const resolveReport = async (item, banear) => {
+        const user = users.find(user => user.id === item.idusuario);
+        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/${item.id}/resolve`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${authState.token}`,
+            },
+            body: JSON.stringify({ banUser : banear }),
+          });
+            const data = await response.json();
+            console.log(data);
+            if (data.error == null) {
+                Toast.show({
+                    type: 'success',
+                    position: 'bottom',
+                    text1: 'Reporte resuelto',
+                    text2: `El reporte ha sido resuelto correctamente`,
+                    visibilityTime: 2500,
+                });
+                setReports(reports.filter(report => report.id !== item.id));
+                setRefreshReports(!refreshReports);
+                if(banear){
+                    user.baneado = true;
+                    setRefresh(!refresh);
+                }
+            } else {
+                Toast.show({
+                    type: 'error',
+                    position: 'bottom',
+                    text1: 'Error',
+                    text2: 'No se ha podido resolver el reporte',
+                    visibilityTime: 2500,
+                });
+            }
+      }
+
   const fetchUserData = async () => {
     const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/users`, {
       method: 'GET',
@@ -223,11 +273,18 @@ function Admin({ navigation }) {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${authState.token}`,
       },
+      body: JSON.stringify({ showResolved: false}),
     });
     const data = await response.json();
     console.log(data);
     if (data.error != null) {
-      Alert.alert('Error', 'No se han podido cargar los reportes');
+      Toast.show({
+        type: 'error',
+        position: 'bottom',
+        text1: 'Error',
+        text2: 'No se han podido cargar los reportes',
+        visibilityTime: 2500,
+        });
     } else setReports(data);
   }
 
@@ -484,7 +541,6 @@ function Admin({ navigation }) {
                     data={reports}
                     renderItem={({ item }) => (
                         <View style={{padding: 5}}>
-                            <Text>id :{item.id}</Text>
                             <Text>Mensaje: {item.texto}</Text>
                             <Text>Motivo: {item.motivo?item.motivo:'Ninguno'}</Text>
                             <View style={{ borderBottomWidth: 1, borderBottomColor: 'black' }} />
@@ -540,29 +596,31 @@ function Admin({ navigation }) {
                                 data={filteredReports}
                                 extraData={refreshReports}
                                 renderItem={({ item }) => (
-                                    <View style={{padding: 5, flexDirection: 'row', flex: 1}}>
-                                        <View style={{padding: 10, borderColor: 'gray', flex: 1, borderWidth: 2, borderRadius: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
-                                            <View style={{flexDirection: 'column', flex: 2}}>
-                                                <Text style={{fontSize: 20, fontWeight: 'bold'}}>
-                                                    Id: {item.id}
-                                                </Text>
-                                                <Text>Mensaje: {item.texto}</Text>
-                                                <Text>Motivo: {item.motivo?item.motivo:'Ninguno'}</Text>
-                                            </View>
-                                            <View style={{flexDirection: 'column', padding: 5, flex: 2}}>
-                                                <TouchableOpacity style={{borderColor: 'gray', padding: 5, borderRadius: 10, borderWidth: 2, marginLeft: 5, justifyContent: 'center', marginBottom: 5}}
-                                                onPress={()=>{'Baneado'}}>
-                                                    
-                                                   <Text style={{color: 'black'}}>Banear usuario</Text>
-                                                </TouchableOpacity>
-                                              <TouchableOpacity style={{borderColor: 'gray', padding: 5, borderRadius: 10, borderWidth: 2, marginLeft: 5, justifyContent: 'center', marginBottom: 5}}
-                                                onPress={()=>{console.log('No baneado')}}>
-                                                    
-                                                 <Text style={{color: 'black'}}>Quitar reporte</Text>
-                                                </TouchableOpacity>
-                                            </View>
+                                    <View style={{ padding: 5, flexDirection: 'row', flex: 1 }}>
+                                   <View style={{ padding: 10, borderColor: 'gray', flex: 1, borderWidth: 2, borderRadius: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <View style={{ flexDirection: 'column', flex: 2 }}>
+                                        <View style={{ marginBottom: 5 }}>
+                                            <Text style={{ fontWeight: 'bold', marginTop: 5 }}>Mensaje:</Text>
                                         </View>
+                                        <Text style={{ marginBottom: 5 }}>{item.texto}</Text>
+                                        <View style={{ marginBottom: 5 }}>
+                                            <Text style={{ fontWeight: 'bold' }}>Motivo:</Text>
+                                        </View>
+                                        <Text>{item.motivo ? item.motivo : 'Ninguno'}</Text>
                                     </View>
+                                    <View style={{ flexDirection: 'column', padding: 5, flex: 2 }}>
+                                        <TouchableOpacity style={{ borderColor: 'gray', padding: 5, borderRadius: 10, borderWidth: 2, marginLeft: 5, justifyContent: 'center', marginBottom: 5 }}
+                                            onPress={() => { resolveReport(item, true) }}>
+                                            <Text style={{ color: 'black' }}>Banear usuario</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity style={{ borderColor: 'gray', padding: 5, borderRadius: 10, borderWidth: 2, marginLeft: 5, justifyContent: 'center', marginBottom: 5 }}
+                                            onPress={() => { resolveReport(item, false) }}>
+                                            <Text style={{ color: 'black' }}>Quitar reporte</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                                </View>
+                                
                                 )}
                                 keyExtractor={item => item.id.toString()}
                             />

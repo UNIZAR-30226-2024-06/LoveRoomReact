@@ -117,6 +117,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
                     .then((response) => response.json()) 
                     .then((data) => {
                         if (data.success){
+                            setAuthState((prevState) => ({ ...prevState, tipousuario: 'premium'}));
                             Toast.show({
                                 type: 'success',
                                 position: 'bottom',
@@ -248,23 +249,21 @@ const Formulario = ({
         maxLength={3}
       />
 
-
-            <Text style={styles.label}>Fecha de caducidad</Text>
-            <TextInput
-                style={styles.textContainer}
-                placeholder="MM/AA"
-                value={fechaCaducidad}
-                onChangeText={(text) => {
-                    // Aplicamos la lógica para insertar la barra automáticamente
-                    if (text.length === 2 && fechaCaducidad.length === 1) {
-                        text += '/';
-                    }
-                    setFechaCaducidad(text);
-                }}
-                keyboardType='numeric'
-                maxLength={5} // MM/AA tienen 5 caracteres en total
-            />
-        </View>
+      <Text style={styles.label}>Fecha de caducidad</Text>
+      <TextInput
+        style={styles.textContainer}
+        placeholder="MM/AA"
+        value={fechaCaducidad}
+        onChangeText={(text) => {
+          // Aplicamos la lógica para insertar la barra automáticamente
+          if (text.length === 2 && fechaCaducidad.length === 1) {
+            text += '/';
+          }
+          setFechaCaducidad(text);
+        }}
+        keyboardType='numeric'
+        maxLength={5} // MM/AA tienen 5 caracteres en total
+      />
     </View>
   </View>
 );

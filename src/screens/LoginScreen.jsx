@@ -96,7 +96,7 @@ export default function LoginScreen({ navigation }) {
           } else {
             navigation.pop();
           } 
-        } if (data.error === "El usuario está baneado") {
+        } else if (data.error === "El usuario está baneado") {
           Toast.show({
             type: 'error',
             position: 'bottom',

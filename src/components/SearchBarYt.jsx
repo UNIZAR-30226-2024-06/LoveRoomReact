@@ -28,6 +28,14 @@ const SearchBarYt = ({ setVideoUrl, onHasInterestVideosChange }) => {
     await fetchMatch(videoId);
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      setSearch(''); // Vaciar la búsqueda cuando la pantalla está enfocada
+      setLoading(true);
+      fetchMyVideos();
+    }, [authState])
+  );
+
   const isFocused = useIsFocused();
 
   useEffect(() => {
