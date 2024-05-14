@@ -9,7 +9,7 @@ import {
   StyleSheet,
   Dimensions,
   Modal,
-  ActivityIndicator,
+  ActivityIndicator
 } from 'react-native';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import { Picker } from '@react-native-picker/picker';

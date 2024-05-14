@@ -99,7 +99,11 @@ export default function StackNavigator() {
         <Stack.Screen name="Premium" component={Premium} options={{ headerShown: false }} />
 
         <Stack.Screen name="Payment" component={Payment} options={{ headerShown: false }} />
-        <Stack.Screen name="ResetPasswdAfterCode" component={ResetPasswdAfterCode} options={{ headerShown: false }} />
+        <Stack.Screen
+          name="ResetPasswdAfterCode"
+          component={ResetPasswdAfterCode}
+          options={{ headerShown: false }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

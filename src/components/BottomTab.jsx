@@ -19,18 +19,15 @@ export default function BottomTab({ initialScreen, navigation }) {
   const { authState, setAuthState } = React.useContext(AuthContext);
 
   useEffect(() => {
-    console.log("Checkeo de si es admin : " , authState.tipousuario);
-    // if (authState.tipousuario === 'administrador') { 
+    console.log('Checkeo de si es admin : ', authState.tipousuario);
+    // if (authState.tipousuario === 'administrador') {
     //   navigation.navigate('Admin');
     // }
   }, [authState.tipousuario]);
 
   if (!authState.isLoggedIn || authState.token === null) {
-    return (
-      <NotRegisteredScreen/>
-    );
+    return <NotRegisteredScreen />;
   }
-
 
   const ImageProfile = (size, color) => {
     if (authState.isLoggedIn) {
@@ -122,7 +119,8 @@ export default function BottomTab({ initialScreen, navigation }) {
           headerShadowVisible: false
         }}
       />
-      {authState.tipousuario === 'administrador' && <Tab.Screen
+      {authState.tipousuario === 'administrador' && (
+        <Tab.Screen
           name="Admin"
           component={AdminScreen}
           options={{
@@ -137,9 +135,10 @@ export default function BottomTab({ initialScreen, navigation }) {
               backgroundColor: '#F89F9F'
             },
             headerShadowVisible: false,
-            headerLeft:null,
-          }} 
-        />}
+            headerLeft: null
+          }}
+        />
+      )}
     </Tab.Navigator>
   );
 }

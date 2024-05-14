@@ -45,7 +45,6 @@ export const initializeSocket = async (token, setSocketState, socketState) => {
         //   text2: 'Has hecho match con alguien, ¡disfruta la sala!',
         //   visibilityTime: 2500
         // });
-
       });
     });
   } else if (!newSocket.connected) {

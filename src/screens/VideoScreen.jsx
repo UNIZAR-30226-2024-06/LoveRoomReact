@@ -161,7 +161,7 @@ const Video = () => {
               text2: 'Ha habido un error al cargar el chat. Por favor, vuelva a cargar la sala.',
               visibilityTime: 2500
             });
-            
+
             navigation.goBack();
           }
         })
@@ -298,7 +298,6 @@ const Video = () => {
             text2: 'Error al cambiar de video. Inténtalo de nuevo.',
             visibilityTime: 2500
           });
-          
         }
       });
     }
@@ -370,7 +369,6 @@ const Video = () => {
         text2: 'Lo sentimos, necesitamos permisos para acceder a la galería',
         visibilityTime: 2500
       });
-      
     } else {
       let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes:
@@ -998,7 +996,8 @@ const Video = () => {
         visible={modalVisible}
         onRequestClose={() => {
           setModalVisible(false);
-        }}>
+        }}
+      >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <View style={styles.contentContainer}>
@@ -1019,7 +1018,7 @@ const Video = () => {
       </Modal>
       {socketState.receiverId != '' && (
         <>
-         <TouchableOpacity
+          <TouchableOpacity
             style={{
               flexDirection: 'row',
               alignItems: 'center',
@@ -1031,8 +1030,9 @@ const Video = () => {
             onPress={() => {
               console.log('Ver perfil');
               setModalUserVisible(true);
-            }}>
-            <View style={{ flex: 1, alignItems: 'center', flexDirection: 'row'}}>
+            }}
+          >
+            <View style={{ flex: 1, alignItems: 'center', flexDirection: 'row' }}>
               <Image
                 source={
                   user.fotoperfil === 'null.jpg' ? defaultProfilePicture : { uri: user.fotoperfil }
@@ -1054,7 +1054,8 @@ const Video = () => {
             onRequestClose={() => {
               setModalUserVisible(false);
             }}
-            style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+          >
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
               <ScrollView
                 keyboardShouldPersistTaps={'handled'}
@@ -1063,7 +1064,8 @@ const Video = () => {
                   borderRadius: 10,
                   width: '90%',
                   maxHeight: '70%'
-                }}>
+                }}
+              >
                 <OtherProfile user={user} />
               </ScrollView>
               <View style={[styles.button, styles.buttonClose]}>
@@ -1093,7 +1095,8 @@ const Video = () => {
         />
       </View>
       <View
-        style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10, flex: 0.2 }}>
+        style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10, flex: 0.2 }}
+      >
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Text style={{ fontSize: 12, fontWeight: 'bold', padding: 10 }}>¡Cambia el vídeo!</Text>
           <Icon

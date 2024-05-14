@@ -126,7 +126,8 @@ const ChatMessage = ({ data }) => {
         style={[
           styles.messageContainer,
           data.senderId == authState.id ? styles.currentUserMessage : styles.otherUserMessage
-        ]}>
+        ]}
+      >
         <View
           style={[
             styles.triangle,
@@ -151,7 +152,8 @@ const ChatMessage = ({ data }) => {
         animationType="fade"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={handleCancel}>
+        onRequestClose={handleCancel}
+      >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Reportar mensaje</Text>
@@ -191,9 +193,11 @@ const ChatMessage = ({ data }) => {
                 backgroundColor: 'transparent',
                 justifyContent: 'center',
                 padding: 20
-              }}></View>
+              }}
+            ></View>
           );
-        }}>
+        }}
+      >
         <MessageContent />
       </Swipeable>
     </>

@@ -57,45 +57,52 @@ export default function ChangePasswdScreen({ navigation }) {
 
   const handlePasswordUpdate = () => {
     setIsLoading(true);
-    console.log('Contraseña actual:', oldPassword, 'Nueva contraseña:', new1Password, 'Repetir nueva contraseña:', new2Password);
+    console.log(
+      'Contraseña actual:',
+      oldPassword,
+      'Nueva contraseña:',
+      new1Password,
+      'Repetir nueva contraseña:',
+      new2Password
+    );
     fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/update/password`, {
-        method: 'PATCH',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${authState.token}`
-        },
-        body: JSON.stringify({
-            nuevaContrasena: new1Password,
-            antiguaContrasena: oldPassword,
-        }),
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authState.token}`
+      },
+      body: JSON.stringify({
+        nuevaContrasena: new1Password,
+        antiguaContrasena: oldPassword
+      })
     })
-    .then((response) => response.json())
-    .then((data) => {
+      .then((response) => response.json())
+      .then((data) => {
         setIsLoading(false);
         if (data.error === 'Contraseña incorrecta') {
-            setOldPasswordError(true);
+          setOldPasswordError(true);
         } else if (data === 'Contraseña actualizada correctamente') {
-            navigation.pop();
-            Toast.show({
-              type: 'success',
-              position: 'bottom',
-              text1: 'Contraseña actualizada',
-              text2: 'Se ha actualizado la contraseña correctamente',
-              visibilityTime: 2500
-            });
+          navigation.pop();
+          Toast.show({
+            type: 'success',
+            position: 'bottom',
+            text1: 'Contraseña actualizada',
+            text2: 'Se ha actualizado la contraseña correctamente',
+            visibilityTime: 2500
+          });
         } else if (data.error === 'Error al actualizar la contraseña') {
-            console.log('Error al actualizar la contraseña');
-            Toast.show({
-              type: 'error',
-              position: 'bottom',
-              text1: 'Error al actualizar la contraseña',
-              text2: 'Error al actualizar la contraseña, inténtalo de nuevo',
-              visibilityTime: 2500
-            });
+          console.log('Error al actualizar la contraseña');
+          Toast.show({
+            type: 'error',
+            position: 'bottom',
+            text1: 'Error al actualizar la contraseña',
+            text2: 'Error al actualizar la contraseña, inténtalo de nuevo',
+            visibilityTime: 2500
+          });
         }
-    })
-    .catch((error) => {
-      setIsLoading(false);
+      })
+      .catch((error) => {
+        setIsLoading(false);
         console.error('Error en la solicitud:', error);
         Toast.show({
           type: 'error',
@@ -104,10 +111,8 @@ export default function ChangePasswdScreen({ navigation }) {
           text2: 'Ocurrió un error durante la solicitud, inténtelo de nuevo',
           visibilityTime: 2500
         });
-    });
+      });
   };
-
-
 
   return (
     <ScrollView style={styles.container} keyboardShouldPersistTaps={'handled'}>
@@ -132,9 +137,8 @@ export default function ChangePasswdScreen({ navigation }) {
       </Modal>
 
       <View style={styles.formContainer}>
-
-      <Text style={styles.label}>Contraseña existente</Text>
-      <View>
+        <Text style={styles.label}>Contraseña existente</Text>
+        <View>
           <TextInput
             style={[
               styles.input,
@@ -158,12 +162,8 @@ export default function ChangePasswdScreen({ navigation }) {
           >
             <Ionicons name={oldHidePassword ? 'eye-off' : 'eye'} size={24} color="black" />
           </TouchableOpacity>
-        {oldPasswordError && (
-          <Text style={styles.errorText}>
-            * La contraseña es incorrecta.
-          </Text>
-        )}
-      </View>
+          {oldPasswordError && <Text style={styles.errorText}>* La contraseña es incorrecta.</Text>}
+        </View>
 
         <Text style={styles.label}>Nueva contraseña</Text>
         <View>
@@ -201,29 +201,30 @@ export default function ChangePasswdScreen({ navigation }) {
         <Text style={styles.label}>Repite nueva contraseña</Text>
         <View>
           <TextInput
-            style={[styles.input, { paddingRight: 40, flex: 1 },
-              new2PasswordError && { borderColor: 'red' }]}
+            style={[
+              styles.input,
+              { paddingRight: 40, flex: 1 },
+              new2PasswordError && { borderColor: 'red' }
+            ]}
             placeholder="Introduzca la nueva contraseña"
             secureTextEntry={new2HidePassword}
             onChangeText={handleNew2PasswordChange}
             maxLength={100}
           />
           <TouchableOpacity
-              onPress={() => setNew2HidePassword(!new2HidePassword)}
-              style={{
-                position: 'absolute',
-                right: 20,
-                height: 40,
-                top: 0,
-                justifyContent: 'center'
-              }}
-            >
-              <Ionicons name={new2HidePassword ? 'eye-off' : 'eye'} size={24} color="black" />
-            </TouchableOpacity>
+            onPress={() => setNew2HidePassword(!new2HidePassword)}
+            style={{
+              position: 'absolute',
+              right: 20,
+              height: 40,
+              top: 0,
+              justifyContent: 'center'
+            }}
+          >
+            <Ionicons name={new2HidePassword ? 'eye-off' : 'eye'} size={24} color="black" />
+          </TouchableOpacity>
           {new2PasswordError && (
-            <Text style={styles.errorText}>
-              * Las contraseñas no coindicen.
-            </Text>
+            <Text style={styles.errorText}>* Las contraseñas no coindicen.</Text>
           )}
         </View>
 
@@ -246,7 +247,7 @@ export default function ChangePasswdScreen({ navigation }) {
               setNew2PasswordError(true);
               isFormValid = false;
             }
-            
+
             if (isFormValid) {
               handlePasswordUpdate();
             }

@@ -17,7 +17,9 @@ export default function GetEmailScreen({ navigation }) {
   const [email, setEmail] = React.useState('');
   const [isValidEmail, setIsValidEmail] = React.useState(false);
   const [formSubmitted, setFormSubmitted] = React.useState(false);
-  const [errorText, setErrorText] = React.useState('* Por favor, introduzca un correo electrónico válido.');
+  const [errorText, setErrorText] = React.useState(
+    '* Por favor, introduzca un correo electrónico válido.'
+  );
 
   const handleEmailChange = (text) => {
     setEmail(text);
@@ -39,7 +41,7 @@ export default function GetEmailScreen({ navigation }) {
     }
   };
 
-  //pedir a backend usuario para ver si existe. si existe, ir a 
+  //pedir a backend usuario para ver si existe. si existe, ir a
   const sendCode = () => {
     fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/send/email`, {
       method: 'POST',
@@ -48,7 +50,7 @@ export default function GetEmailScreen({ navigation }) {
       },
       body: JSON.stringify({ correo: email })
     })
-      .then((response) => response.json()) 
+      .then((response) => response.json())
       .then((data) => {
         let respuestaValida = false;
         if (data.mensaje === 'Correo para resetear contraseña enviado con exito') {
@@ -60,22 +62,22 @@ export default function GetEmailScreen({ navigation }) {
             text1: 'Correo enviado',
             text2: 'Se ha enviado un correo para resetear la contraseña.',
             visibilityTime: 2500
-          }); 
+          });
           navigation.navigate('GetCode');
         } else if (data.error === 'El usuario introducido no existe') {
           respuestaValida = false;
           setIsValidEmail(false);
           setFormSubmitted(true);
           setErrorText('Usuario no existente');
-        } else if (respuestaValida === false){
+        } else if (respuestaValida === false) {
           Toast.show({
             type: 'error',
             position: 'bottom',
             text1: 'Error',
             text2: 'Error al enviar el correo para resetear la contraseña',
             visibilityTime: 2500
-          }); 
-         }
+          });
+        }
       })
       .catch((error) => {
         console.error('Error:', error);
@@ -88,21 +90,20 @@ export default function GetEmailScreen({ navigation }) {
         });
       });
   };
-  
 
-  return  (
-  <ScrollView style={styles.container} keyboardShouldPersistTaps={'handled'}>
-    <View style={[styles.logoContainer, { marginBottom: -90 }]}>
+  return (
+    <ScrollView style={styles.container} keyboardShouldPersistTaps={'handled'}>
+      <View style={[styles.logoContainer, { marginBottom: -90 }]}>
         <Image style={styles.logo} source={require('../img/logoTexto.png')} />
-    </View>
+      </View>
 
-    <View style={styles.formContainer}>
+      <View style={styles.formContainer}>
         <Text style={styles.label}>Correo electrónico</Text>
         <TextInput
           style={[
             styles.input,
             !isValidEmail && formSubmitted && styles.inputError,
-            errorText === 'Usuario no existente' && styles.inputError  
+            errorText === 'Usuario no existente' && styles.inputError
           ]}
           placeholder="Introduzca su correo electrónico "
           onChangeText={handleEmailChange}
@@ -120,15 +121,12 @@ export default function GetEmailScreen({ navigation }) {
         )}
 
         <TouchableOpacity style={styles.button} onPress={handleChangePassword}>
-           <Text style={styles.buttonText}>Continuar</Text>
-         </TouchableOpacity>
-     </View>
-  </ScrollView>
-    )
-  };
-
-
-
+          <Text style={styles.buttonText}>Continuar</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
+  );
+}
 
 const styles = StyleSheet.create({
   container: {

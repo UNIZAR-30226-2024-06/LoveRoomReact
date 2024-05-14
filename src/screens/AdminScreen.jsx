@@ -83,8 +83,10 @@ const provinciasDeEspana = [
 function Admin({ navigation }) {
   const { authState, setAuthState } = React.useContext(AuthContext);
   const [users, setUsers] = React.useState([]);
+  const [reports, setReports] = React.useState([]);
   const [modalEstadisticasVisible, setModalEstadisticasVisible] = React.useState(false);
   const [modalUsuariosVisible, setModalUsuariosVisible] = React.useState(false);
+  const [modalReportsVisible, setModalReportsVisible] = React.useState(false);
   const LogOutButton = React.useRef(false);
   const [orientation, setOrientation] = useState(getOrientation());
 
@@ -102,6 +104,7 @@ function Admin({ navigation }) {
   }, []);
 
   const [refresh, setRefresh] = useState(false);
+  const [refreshReports, setRefreshReports] = useState(false);
 
   const updateType = async (user, userType) => {
     const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/update/type/${userType}`, {
@@ -144,6 +147,7 @@ function Admin({ navigation }) {
 
     React.useEffect(() => {
         fetchUserData();
+        fetchReports();
     }, []);
 
 
@@ -195,6 +199,10 @@ function Admin({ navigation }) {
     return user.nombre.toLowerCase().includes(search.toLowerCase());
     });
 
+    const filteredReports = reports.filter(report => {
+      return report.texto.toLowerCase().includes(search.toLowerCase());
+      });
+
   const fetchUserData = async () => {
     const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/users`, {
       method: 'GET',
@@ -206,6 +214,21 @@ function Admin({ navigation }) {
     const data = await response.json();
     console.log(data);
     setUsers(data);
+  }
+
+  const fetchReports = async () => {
+    const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/reports`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authState.token}`,
+      },
+    });
+    const data = await response.json();
+    console.log(data);
+    if (data.error != null) {
+      Alert.alert('Error', 'No se han podido cargar los reportes');
+    } else setReports(data);
   }
 
   return (
@@ -333,7 +356,7 @@ function Admin({ navigation }) {
                 </View>}
                 {orientation==='portrait'? (<View style={{flexDirection:'row', justifyContent: 'space-between', width: '100%', flex: 1, alignItems: 'center'}}>
                     <Icon name="refresh" size={20} color="black" 
-                        onPress={() => { fetchUserData();}}
+                        onPress={() => { fetchUserData();fetchReports();}}
                     />
                     <TouchableOpacity style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}
                         onPress={() => setModalEstadisticasVisible(true)}
@@ -369,14 +392,13 @@ function Admin({ navigation }) {
                         <Icon name="chevron-right" size={10} color="black" style={{marginLeft: 5, padding: 5}} />
                     </TouchableOpacity>
             </View>
-            <View style={styles.card}>
-            <Text>Reportes</Text>
             <Modal
                     animationType="slide"
                     transparent={true}
                     visible={modalUsuariosVisible}
                     onRequestClose={() => {
                         setModalEstadisticasVisible(!modalUsuariosVisible);
+                        setSearch('');
                     }}
                 >
                         <View style={[styles.centeredView]}>
@@ -444,6 +466,7 @@ function Admin({ navigation }) {
                                     style={{ ...styles.openButton, backgroundColor: "#F98F9F" }}
                                     onPress={() => {
                                         setModalUsuariosVisible(!modalUsuariosVisible);
+                                        setSearch('');
                                     }}
                                 >
                                     <Icon name="times" size={20} color="white" />
@@ -452,7 +475,107 @@ function Admin({ navigation }) {
                             </View>
                         </View>
                     </Modal>
+            <View style={styles.card}>
+            <Text style={styles.title}>Usuarios</Text>
+                <FlatList
+                    data={reports}
+                    renderItem={({ item }) => (
+                        <View style={{padding: 5}}>
+                            <Text>id :{item.id}</Text>
+                            <Text>Mensaje: {item.texto}</Text>
+                            <Text>Motivo: {item.motivo?item.motivo:'Ninguno'}</Text>
+                            <View style={{ borderBottomWidth: 1, borderBottomColor: 'black' }} />
+                        </View>
+                    )}
+                    keyExtractor={item => item.id.toString()}
+                />
+                <TouchableOpacity style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}
+                        onPress={() => setModalReportsVisible(true)}
+                    >
+                        <Text style={{ padding: 5, color: 'black' }}>Gestionar reportes</Text>
+                        <Icon name="chevron-right" size={10} color="black" style={{marginLeft: 5, padding: 5}} />
+                    </TouchableOpacity>
             </View>
+            <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalReportsVisible}
+                    onRequestClose={() => {
+                        setModalReportsVisible(!modalReportsVisible);
+                        setSearch('');
+                    }}
+                >
+                        <View style={[styles.centeredView]}>
+                            <View style={styles.modalView}>
+                            <View
+                                style={{
+                                flexDirection: 'row',
+                                padding: 10,
+                                width: '95%',
+                                backgroundColor: '#d9dbda',
+                                borderRadius: 10,
+                                alignItems: 'center'
+                                }}
+                            >
+                                
+                                <Feather
+                                    name="search"
+                                    size={20}
+                                    color="black"
+                                    style={{ marginRight: 4, marginLeft: 1 }}
+                                />
+                                <TextInput
+                                value={search}
+                                onChangeText={(text) => setSearch(text)}
+                                placeholder="Buscar reporte..."
+                                style={{ fontSize: 15, width: '100%', padding: 0 }}
+                                maxLength={50}
+                                />
+                            </View>
+                            <FlatList
+                            style={{alignSelf: 'stretch'}}
+                                data={filteredReports}
+                                extraData={refreshReports}
+                                renderItem={({ item }) => (
+                                    <View style={{padding: 5, flexDirection: 'row', flex: 1}}>
+                                        <View style={{padding: 10, borderColor: 'gray', flex: 1, borderWidth: 2, borderRadius: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+                                            <View style={{flexDirection: 'column', flex: 2}}>
+                                                <Text style={{fontSize: 20, fontWeight: 'bold'}}>
+                                                    Id: {item.id}
+                                                </Text>
+                                                <Text>Mensaje: {item.texto}</Text>
+                                                <Text>Motivo: {item.motivo?item.motivo:'Ninguno'}</Text>
+                                            </View>
+                                            <View style={{flexDirection: 'column', padding: 5, flex: 2}}>
+                                                <TouchableOpacity style={{borderColor: 'gray', padding: 5, borderRadius: 10, borderWidth: 2, marginLeft: 5, justifyContent: 'center', marginBottom: 5}}
+                                                onPress={()=>{'Baneado'}}>
+                                                    
+                                                   <Text style={{color: 'black'}}>Banear usuario</Text>
+                                                </TouchableOpacity>
+                                              <TouchableOpacity style={{borderColor: 'gray', padding: 5, borderRadius: 10, borderWidth: 2, marginLeft: 5, justifyContent: 'center', marginBottom: 5}}
+                                                onPress={()=>{console.log('No baneado')}}>
+                                                    
+                                                 <Text style={{color: 'black'}}>Quitar reporte</Text>
+                                                </TouchableOpacity>
+                                            </View>
+                                        </View>
+                                    </View>
+                                )}
+                                keyExtractor={item => item.id.toString()}
+                            />
+                                <TouchableOpacity
+                                    style={{ ...styles.openButton, backgroundColor: "#F98F9F" }}
+                                    onPress={() => {
+                                        setModalReportsVisible(!modalReportsVisible);
+                                        setSearch('');
+                                    }}
+                                >
+                                    <Icon name="times" size={20} color="white" />
+                                </TouchableOpacity>
+
+                            </View>
+                        </View>
+                    </Modal>
         </View>
     </ScrollView>
   );

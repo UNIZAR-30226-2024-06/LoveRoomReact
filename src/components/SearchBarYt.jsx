@@ -1,5 +1,14 @@
 import { useEffect, useState, useContext, useCallback } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Modal, ActivityIndicator, FlatList, Image } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Modal,
+  ActivityIndicator,
+  FlatList,
+  Image
+} from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
 import SearchFilter from './SearchFilter';
@@ -13,7 +22,7 @@ import Toast from 'react-native-toast-message';
 const SearchBar = ({ setVideoUrl }) => {
   const { authState } = useContext(AuthContext);
   const navigation = useNavigation();
-  const {socketState, setSocketState} = useContext(AuthContext);
+  const { socketState, setSocketState } = useContext(AuthContext);
   const [search, setSearch] = useState('');
   const [listVideos, setListVideos] = useState([]);
   const [nextPageToken, setNextPageToken] = useState('');
@@ -103,30 +112,31 @@ const SearchBar = ({ setVideoUrl }) => {
         console.error('Error:', error);
       });
   };
-  
 
   const fetchVideoDetails = async (videoId, viewers) => {
-    const response = await fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${process.env.EXPO_PUBLIC_YT_KEY}&part=snippet`);
+    const response = await fetch(
+      `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${process.env.EXPO_PUBLIC_YT_KEY}&part=snippet`
+    );
     const data = await response.json();
-  
+
     // Extrae los detalles del video
     const videoDetails = data.items[0];
-  
+
     // Crea un objeto con solo los detalles que necesitas
     const simplifiedDetails = {
       imageUrl: videoDetails.snippet.thumbnails.default.url,
-      width : videoDetails.snippet.thumbnails.default.width,
-      height : videoDetails.snippet.thumbnails.default.height,
+      width: videoDetails.snippet.thumbnails.default.width,
+      height: videoDetails.snippet.thumbnails.default.height,
       title: videoDetails.snippet.title,
       channel: videoDetails.snippet.channelTitle,
       publishedAt: videoDetails.snippet.publishedAt.slice(0, 10),
-      viewers : viewers,
+      viewers: viewers,
       videoId: videoId
     };
     console.log(simplifiedDetails);
     return simplifiedDetails;
   };
-  
+
   const fetchMyVideos = async () => {
     console.log('Token: ', authState.token);
     console.log('AuthState Token:', authState.token);
@@ -141,14 +151,15 @@ const SearchBar = ({ setVideoUrl }) => {
       .then((response) => response.json())
       .then(async (data) => {
         console.log(data);
-        const videoDetailsPromises = data.map((video) => fetchVideoDetails(video.idvideo, video.viewers));
+        const videoDetailsPromises = data.map((video) =>
+          fetchVideoDetails(video.idvideo, video.viewers)
+        );
         const videosWithDetails = await Promise.all(videoDetailsPromises);
         setListVideosInterest(videosWithDetails);
         setLoading(false);
         console.log(videosWithDetails);
-      }); 
+      });
   };
-
 
   useFocusEffect(
     useCallback(() => {
@@ -157,7 +168,6 @@ const SearchBar = ({ setVideoUrl }) => {
       fetchMyVideos();
     }, [authState])
   );
-
 
   const handlePeticion = () => {
     setNextPageToken('');
@@ -234,8 +244,18 @@ const SearchBar = ({ setVideoUrl }) => {
           maxLength={50}
         />
       </View>
-      <Modal transparent={true} animationType={'none'} visible={videosModal} onRequestClose={()=> {setVideosModal(false);setListVideos([])}}>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 20 }}>
+      <Modal
+        transparent={true}
+        animationType={'none'}
+        visible={videosModal}
+        onRequestClose={() => {
+          setVideosModal(false);
+          setListVideos([]);
+        }}
+      >
+        <View
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 20 }}
+        >
           <View
             style={{
               backgroundColor: 'white',
@@ -252,22 +272,22 @@ const SearchBar = ({ setVideoUrl }) => {
               nextPageToken={nextPageToken}
               setNextPageToken={setNextPageToken}
               setVideoUrl={setVideoUrl}
-              videosInterest = {listVideosInterest}
-              setVideosInterest = {setListVideosInterest}
-              setVideosModal = {setVideosModal}
+              videosInterest={listVideosInterest}
+              setVideosInterest={setListVideosInterest}
+              setVideosModal={setVideosModal}
             />
           </View>
           <View style={[styles.button, styles.buttonClose]}>
-              <Icon
-                name="close"
-                type="ionicon"
-                color="white"
-                onPress={() => {
-                  setVideosModal(false);
-                  setListVideos([]);
-                }}
-              />
-            </View>
+            <Icon
+              name="close"
+              type="ionicon"
+              color="white"
+              onPress={() => {
+                setVideosModal(false);
+                setListVideos([]);
+              }}
+            />
+          </View>
         </View>
       </Modal>
       <FlatList
@@ -363,7 +383,8 @@ const styles = StyleSheet.create({
   },
   buttonClose: {
     backgroundColor: '#797b80'
-  }, loadingContainer: {
+  },
+  loadingContainer: {
     flex: 1,
     width: '90%',
     justifyContent: 'center',
@@ -386,6 +407,5 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around'
   }
 });
-
 
 export default SearchBar;

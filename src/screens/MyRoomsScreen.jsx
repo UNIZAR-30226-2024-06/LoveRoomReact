@@ -9,7 +9,9 @@ import {
   Image,
   Modal,
   Alert,
-  Dimensions, TextInput, Button
+  Dimensions,
+  TextInput,
+  Button
 } from 'react-native';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -139,7 +141,11 @@ const MyRoomsScreen = () => {
 
   const initializeAndProceed = async () => {
     console.log('Initializing socket and proceeding...');
-    const { isSocketInitialized } = await initializeSocket(authState.token, setSocketState, socketState);
+    const { isSocketInitialized } = await initializeSocket(
+      authState.token,
+      setSocketState,
+      socketState
+    );
 
     // Esperar hasta que el socket esté completamente inicializado antes de continuar
     if (isSocketInitialized) {
@@ -223,32 +229,35 @@ const MyRoomsScreen = () => {
     setModalVisible(true);
     idSala.current = room.idsala;
   };
-  
+
   const handleConfirm = async () => {
     if (inputValue.current !== '' && idSala.current !== '') {
       try {
-        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/rooms/${idSala.current}/rename`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${authState.token}`
-          },
-          body: JSON.stringify({ nombreSala: inputValue.current })
-        });
+        const response = await fetch(
+          `${process.env.EXPO_PUBLIC_API_URL}/rooms/${idSala.current}/rename`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${authState.token}`
+            },
+            body: JSON.stringify({ nombreSala: inputValue.current })
+          }
+        );
         const data = await response.json();
         console.log(data);
         if (data.error == null) {
-          const updatedRooms = myRooms.map((r) => (
+          const updatedRooms = myRooms.map((r) =>
             r.idsala === idSala.current ? { ...r, nombre: inputValue.current } : r
-          
-          ));
+          );
           setMyRooms(updatedRooms);
         } else {
           Toast.show({
             type: 'error',
             position: 'bottom',
             text1: 'Error al cambiar el nombre',
-            text2: 'Ha habido un error al cambiar el nombre del video. Por favor, inténtelo de nuevo.',
+            text2:
+              'Ha habido un error al cambiar el nombre del video. Por favor, inténtelo de nuevo.',
             visibilityTime: 2500
           });
         }
@@ -258,16 +267,15 @@ const MyRoomsScreen = () => {
           type: 'error',
           position: 'bottom',
           text1: 'Error al cambiar el nombre',
-          text2: 'Ha habido un error al cambiar el nombre del video. Por favor, inténtelo de nuevo.',
+          text2:
+            'Ha habido un error al cambiar el nombre del video. Por favor, inténtelo de nuevo.',
           visibilityTime: 2500
         });
       }
     }
-    idSala.current = '';  
+    idSala.current = '';
     setModalVisible(false);
   };
-
-
 
   if (!authState.isLoggedIn || authState.token == null) {
     return <NotRegisteredScreen />;
@@ -293,21 +301,25 @@ const MyRoomsScreen = () => {
         </View>
       </Modal>
       {showInterrogation ? ( // Condicional para mostrar la imagen de interrogación
-      <View style={styles.interrogationContainer}>
-        <Image source={require('../img/buscar.png')} style={[styles.interrogationImage, { tintColor: 'gray' }]} />
-        <Text style={styles.centeredText}>
-          Todavía no estás en ninguna sala,
-          {'\n'}
-          ¡busca un vídeo y conoce nuevas personas!
-        </Text>
-      </View>
-
+        <View style={styles.interrogationContainer}>
+          <Image
+            source={require('../img/buscar.png')}
+            style={[styles.interrogationImage, { tintColor: 'gray' }]}
+          />
+          <Text style={styles.centeredText}>
+            Todavía no estás en ninguna sala,
+            {'\n'}
+            ¡busca un vídeo y conoce nuevas personas!
+          </Text>
+        </View>
       ) : (
         <SwipeListView
           data={myRooms}
           keyExtractor={(item) => item.idsala.toString()}
           renderItem={({ item }) => (
-            <View style={{marginBottom:10, borderWidth: 2, borderRadius: 20, borderColor: "#F89F9F"}}>
+            <View
+              style={{ marginBottom: 10, borderWidth: 2, borderRadius: 20, borderColor: '#F89F9F' }}
+            >
               <TouchableOpacity
                 activeOpacity={1}
                 onPress={() => {
@@ -319,13 +331,25 @@ const MyRoomsScreen = () => {
                     source={{ uri: thumbnails[item.idvideo] }}
                     style={[styles.thumbnail, { width: width || 120, height: height || 90 }]}
                   />
-                  <View style={{ flexDirection: 'column', alignItems: 'center', flex: 1, padding: 10}}>
-                      <Text style={styles.roomTitle}>{item.nombre}</Text>
-                      <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: 'gray', borderRadius:20, justifyContent: 'space-between', alignSelf: 'stretch'}}
-                      onPress={()=> handleChangeNameVideo(item)}>
-                        <Text style={{padding: 10}}>Editar nombre</Text>
-                        <Icon style={{padding:10, }} name="edit" size={20} color="#000" />
-                      </TouchableOpacity>
+                  <View
+                    style={{ flexDirection: 'column', alignItems: 'center', flex: 1, padding: 10 }}
+                  >
+                    <Text style={styles.roomTitle}>{item.nombre}</Text>
+                    <TouchableOpacity
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        borderWidth: 1,
+                        borderColor: 'gray',
+                        borderRadius: 20,
+                        justifyContent: 'space-between',
+                        alignSelf: 'stretch'
+                      }}
+                      onPress={() => handleChangeNameVideo(item)}
+                    >
+                      <Text style={{ padding: 10 }}>Editar nombre</Text>
+                      <Icon style={{ padding: 10 }} name="edit" size={20} color="#000" />
+                    </TouchableOpacity>
                   </View>
                 </View>
               </TouchableOpacity>
@@ -359,17 +383,23 @@ const MyRoomsScreen = () => {
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <TextInput
-              style={{...styles.input, padding: 10}}
+              style={{ ...styles.input, padding: 10 }}
               value={inputValue}
-              onChangeText={(text)=> inputValue.current = text}
-              placeholder='Introduce el nuevo nombre de la sala'
-              maxLength={50}            
+              onChangeText={(text) => (inputValue.current = text)}
+              placeholder="Introduce el nuevo nombre de la sala"
+              maxLength={50}
             />
-            <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-              <TouchableOpacity style={{...styles.button, marginRight: 10, backgroundColor: '#3dcc2d'}} onPress={handleConfirm}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <TouchableOpacity
+                style={{ ...styles.button, marginRight: 10, backgroundColor: '#3dcc2d' }}
+                onPress={handleConfirm}
+              >
                 <Text style={styles.textStyle}>Aceptar</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={{...styles.button, marginLeft: 10, backgroundColor: '#d94a4a'}} onPress={() => setModalVisible(false)}>
+              <TouchableOpacity
+                style={{ ...styles.button, marginLeft: 10, backgroundColor: '#d94a4a' }}
+                onPress={() => setModalVisible(false)}
+              >
                 <Text style={styles.textStyle}>Cancelar</Text>
               </TouchableOpacity>
             </View>
@@ -378,7 +408,6 @@ const MyRoomsScreen = () => {
       </Modal>
     </View>
   );
-  
 };
 
 const styles = StyleSheet.create({
@@ -390,16 +419,16 @@ const styles = StyleSheet.create({
   interrogationContainer: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   interrogationImage: {
     width: 100,
     height: 100,
-    marginBottom: 20,
+    marginBottom: 20
   },
   centeredText: {
     textAlign: 'center',
-    color: 'gray',
+    color: 'gray'
   },
   loadingContainer: {
     flex: 1,
@@ -408,7 +437,7 @@ const styles = StyleSheet.create({
   },
   roomItem: {
     padding: 10,
-    
+
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
     flexDirection: 'row',
@@ -468,21 +497,21 @@ const styles = StyleSheet.create({
     paddingRight: 30,
     borderTopRightRadius: 20,
     borderBottomRightRadius: 20
-  }, 
+  },
   centeredView: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     marginTop: 22,
     width: '100%'
   },
   modalView: {
     margin: 20,
-    backgroundColor: "white",
+    backgroundColor: 'white',
     borderRadius: 20,
     padding: 35,
-    alignItems: "center",
-    shadowColor: "#000",
+    alignItems: 'center',
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2
@@ -495,12 +524,12 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 20,
     elevation: 4,
-    marginTop: 5,
+    marginTop: 5
   },
   textStyle: {
-    color:  "#505050",
-    fontWeight: "bold",
-    textAlign: "center", 
+    color: '#505050',
+    fontWeight: 'bold',
+    textAlign: 'center',
     color: 'white'
   },
   input: {
@@ -509,7 +538,7 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderWidth: 1,
     marginBottom: 20,
-    borderRadius: 20,
+    borderRadius: 20
   }
 });
 
