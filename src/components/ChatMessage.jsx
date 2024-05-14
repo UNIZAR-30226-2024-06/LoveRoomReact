@@ -76,18 +76,20 @@ const ChatMessage = ({ data }) => {
   React.useEffect(() => {
     console.log('useEffect', data.rutamultimedia);
     if (data.rutamultimedia) {
-      const url = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/${data.rutamultimedia}/${authState.id}`;
+      const url = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/${data.rutamultimedia}`;
       console.log('URL:', url);
 
       fetch(url, { method: 'HEAD' })
         .then((response) => {
-          multimediaType = response.headers.get('Tipo');
+          multimediaType = response.headers.get('Tipo-Multimedia');
           console.log('Tipo multimedia:', multimediaType);
           if (multimediaType == 'F') {
             setImageUrl(url);
           } else if (multimediaType == 'V') {
             setVideoUrl(url);
           }
+          console.log('videoUrl', videoUrl);
+          console.log('imageUrl', imageUrl);
         })
         .catch(console.error);
     }
@@ -115,25 +117,25 @@ const ChatMessage = ({ data }) => {
                 <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />
               )}
               <TouchableOpacity onPress={() => setModalImgVisible(true)}>
-                (imageUrl ? (
-                <Image
-                  source={{ uri: imageUrl }}
-                  style={{ width: 250, height: 250, borderRadius: 15 }}
-                  onLoad={() => setIsImageLoading(false)}
-                  resizeMode="contain"
-                />
+                {imageUrl ? (
+                  <Image
+                    source={{ uri: imageUrl }}
+                    style={{ width: 250, height: 250, borderRadius: 15 }}
+                    onLoad={() => setIsImageLoading(false)}
+                    resizeMode="contain"
+                  />
                 ) : (
-                <Video
-                  source={{ uri: videoUrl }}
-                  style={{ width: 250, height: 250, borderRadius: 15 }}
-                  resizeMode="contain"
-                  ref={(ref) => {
-                    this.player = ref;
-                  }} // Store reference
-                  onBuffer={this.onBuffer} // Callback when remote video is buffering
-                  onError={this.videoError} // Callback when video cannot be loaded
-                />
-                ))
+                  <Video
+                    source={{ uri: videoUrl }}
+                    style={{ width: 250, height: 250, borderRadius: 15 }}
+                    resizeMode="contain"
+                    // ref={(ref) => {
+                    //   this.player = ref;
+                    // }} // Store reference
+                    // onBuffer={this.onBuffer} // Callback when remote video is buffering
+                    // onError={this.videoError} // Callback when video cannot be loaded
+                  />
+                )}
                 {/* // style={{ width: '40%' }} resizeMode="contain" /> */}
               </TouchableOpacity>
 
@@ -151,6 +153,7 @@ const ChatMessage = ({ data }) => {
                     <Image
                       source={{ uri: imageUrl }}
                       style={{ width: 400, height: 400 }}
+                      resizeMode="contain"
                       onLoad={() => setIsImageLoading(false)}
                     />
                     {/* // styles.fullScreenImage} /> */}

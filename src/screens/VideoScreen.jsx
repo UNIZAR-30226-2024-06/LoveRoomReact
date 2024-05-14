@@ -422,10 +422,7 @@ const Video = () => {
       },
       body: formData
     })
-      .then((res) => {
-        res.json();
-        console.log(res);
-      })
+      .then((res) => res.json())
       .then((res) => {
         console.log('response' + JSON.stringify(res));
         if (res.error == null) {
