@@ -18,14 +18,14 @@ import Toast from 'react-native-toast-message';
 export default function App() {
   return (
     <AuthProvider>
-          <View
-            style={{
-              flex: 1
-            }}
-          >
-            <StackNavigator />
-            <Toast />
-          </View>
+      <View
+        style={{
+          flex: 1
+        }}
+      >
+        <StackNavigator />
+        <Toast />
+      </View>
     </AuthProvider>
   );
 }

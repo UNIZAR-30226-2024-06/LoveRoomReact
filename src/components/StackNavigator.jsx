@@ -20,6 +20,7 @@ import ChangePassword from '../screens/ChangePasswdScreen';
 import Premium from '../screens/BecomePremiumScreen';
 import Payment from '../screens/PaymentScreen';
 import ResetPasswdAfterCode from '../screens/ResPassAfterCodeScreen';
+import AdminScreen from '../screens/AdminScreen';
 import Banned from '../screens/BannedScreen';
 
 const Stack = createStackNavigator();
@@ -27,7 +28,7 @@ const Stack = createStackNavigator();
 export default function StackNavigator() {
   const dimensions = useWindowDimensions();
   const isLandscape = dimensions.width > dimensions.height;
-
+//
   return (
     <NavigationContainer>
       <Stack.Navigator>
@@ -97,7 +98,6 @@ export default function StackNavigator() {
           options={{ headerShown: false }}
         />
         <Stack.Screen name="Premium" component={Premium} options={{ headerShown: false }} />
-
         <Stack.Screen name="Payment" component={Payment} options={{ headerShown: false }} />
         <Stack.Screen name="ResetPasswdAfterCode" component={ResetPasswdAfterCode} options={{ headerShown: false }} />
         <Stack.Screen name="Banned" component={Banned} options={{ headerShown: false }} />

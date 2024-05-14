@@ -8,14 +8,13 @@ import {
   Image,
   StyleSheet,
   Modal,
-  ActivityIndicator,
+  ActivityIndicator
 } from 'react-native';
 import AuthContext from '../components/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import { correoFP, Code } from '../utils/globalVariables';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
 
 export default function ResetPassAfterCode({ navigation }) {
   const { authState, setAuthState } = React.useContext(AuthContext);
@@ -47,19 +46,19 @@ export default function ResetPassAfterCode({ navigation }) {
     setIsLoading(true);
     console.log('Nueva contraseña:', new1Password, 'Repetir nueva contraseña:', new2Password);
     fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/reset/password`, {
-        method: 'PATCH',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${authState.token}`
-        },
-        body: JSON.stringify({
-            nuevaContrasena: new1Password,
-            codigo: Code,
-            correo: correoFP
-        }),
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authState.token}`
+      },
+      body: JSON.stringify({
+        nuevaContrasena: new1Password,
+        codigo: Code,
+        correo: correoFP
+      })
     })
-    .then((response) => response.json())
-    .then((data) => {
+      .then((response) => response.json())
+      .then((data) => {
         console.log('Respuesta:', data);
         console.log('Correo:', correoFP);
         console.log('Codigo:', Code);
@@ -93,21 +92,23 @@ export default function ResetPassAfterCode({ navigation }) {
             text2: 'Se ha actualizado la contraseña correctamente',
             visibilityTime: 2500
           });
-        } else if (data.error === 'El usuario introducido no existe' || 
-                   data.error === 'Codigo introducido no es correcto' ||
-                   data.error === 'Error al resetear la contraseña') {
-            console.log('Error al actualizar la contraseña');
-            Toast.show({
-              type: 'error',
-              position: 'bottom',
-              text1: 'Error al actualizar la contraseña',
-              text2: 'Error al actualizar la contraseña, inténtalo de nuevo',
-              visibilityTime: 2500
-            });
+        } else if (
+          data.error === 'El usuario introducido no existe' ||
+          data.error === 'Codigo introducido no es correcto' ||
+          data.error === 'Error al resetear la contraseña'
+        ) {
+          console.log('Error al actualizar la contraseña');
+          Toast.show({
+            type: 'error',
+            position: 'bottom',
+            text1: 'Error al actualizar la contraseña',
+            text2: 'Error al actualizar la contraseña, inténtalo de nuevo',
+            visibilityTime: 2500
+          });
         }
-    })
-    .catch((error) => {
-      setIsLoading(false);
+      })
+      .catch((error) => {
+        setIsLoading(false);
         console.error('Error en la solicitud:', error);
         Toast.show({
           type: 'error',
@@ -116,10 +117,8 @@ export default function ResetPassAfterCode({ navigation }) {
           text2: 'Ocurrió un error durante la solicitud, inténtelo de nuevo',
           visibilityTime: 2500
         });
-    });
+      });
   };
-
-
 
   return (
     <ScrollView style={styles.container} keyboardShouldPersistTaps={'handled'}>
@@ -180,29 +179,30 @@ export default function ResetPassAfterCode({ navigation }) {
         <Text style={styles.label}>Repite nueva contraseña</Text>
         <View>
           <TextInput
-            style={[styles.input, { paddingRight: 40, flex: 1 },
-              new2PasswordError && { borderColor: 'red' }]}
+            style={[
+              styles.input,
+              { paddingRight: 40, flex: 1 },
+              new2PasswordError && { borderColor: 'red' }
+            ]}
             placeholder="Introduzca la nueva contraseña"
             secureTextEntry={new2HidePassword}
             onChangeText={handleNew2PasswordChange}
             maxLength={100}
           />
           <TouchableOpacity
-              onPress={() => setNew2HidePassword(!new2HidePassword)}
-              style={{
-                position: 'absolute',
-                right: 20,
-                height: 40,
-                top: 0,
-                justifyContent: 'center'
-              }}
-            >
-              <Ionicons name={new2HidePassword ? 'eye-off' : 'eye'} size={24} color="black" />
-            </TouchableOpacity>
+            onPress={() => setNew2HidePassword(!new2HidePassword)}
+            style={{
+              position: 'absolute',
+              right: 20,
+              height: 40,
+              top: 0,
+              justifyContent: 'center'
+            }}
+          >
+            <Ionicons name={new2HidePassword ? 'eye-off' : 'eye'} size={24} color="black" />
+          </TouchableOpacity>
           {new2PasswordError && (
-            <Text style={styles.errorText}>
-              * Las contraseñas no coindicen.
-            </Text>
+            <Text style={styles.errorText}>* Las contraseñas no coindicen.</Text>
           )}
         </View>
 
@@ -220,7 +220,7 @@ export default function ResetPassAfterCode({ navigation }) {
               setNew2PasswordError(true);
               isFormValid = false;
             }
-            
+
             if (isFormValid) {
               handlePasswordUpdate();
             }

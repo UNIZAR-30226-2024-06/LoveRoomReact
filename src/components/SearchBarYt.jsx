@@ -105,7 +105,9 @@ const SearchBarYt = ({ setVideoUrl, onHasInterestVideosChange }) => {
   };
 
   const fetchVideoDetails = async (videoId, viewers) => {
-    const response = await fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${process.env.EXPO_PUBLIC_YT_KEY}&part=snippet`);
+    const response = await fetch(
+      `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${process.env.EXPO_PUBLIC_YT_KEY}&part=snippet`
+    );
     const data = await response.json();
 
     // Extrae los detalles del video
@@ -238,6 +240,7 @@ const SearchBarYt = ({ setVideoUrl, onHasInterestVideosChange }) => {
           maxLength={50}
         />
       </View>
+
       <Modal transparent={true} animationType={'none'} visible={videosModal} onRequestClose={() => { setVideosModal(false); setListVideos([]) }}>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 20 }}>
           <View

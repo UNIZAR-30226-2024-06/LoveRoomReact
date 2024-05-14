@@ -95,6 +95,10 @@ export default function Login({ navigation }) {
             tipousuario: data.usuario.tipousuario,
             contrasena: data.usuario.contrasena
           });
+
+          if (data.usuario.tipousuario === 'administrador') {
+            navigation.navigate("Account", {screen : 'Admin'});
+          }
           AsyncStorage.setItem('token', data.token);
           navigation.navigate('RegisterPreferences');
         } else if (data.error === 'Ya existe un usuario con ese correo') {

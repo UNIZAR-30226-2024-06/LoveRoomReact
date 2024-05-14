@@ -1,12 +1,11 @@
 export let correoFP = '';
 
 export const actualizarCorreoFP = (nuevoCorreo) => {
-    correoFP = nuevoCorreo;
-  };
+  correoFP = nuevoCorreo;
+};
 
 export let Code = '';
 
 export const actualizarCode = (nuevoCode) => {
-    Code = nuevoCode;
-  }
-  
+  Code = nuevoCode;
+};

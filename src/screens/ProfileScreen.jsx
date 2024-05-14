@@ -120,36 +120,38 @@ export default function ProfileScreen({ navigation }) {
 
         <View style={styles.headlineContainer}>
           <View style={styles.headlineRectangle}>
-              <Text style={styles.headlineText}>Mi plan</Text>
+            <Text style={styles.headlineText}>Mi plan</Text>
           </View>
           <TouchableOpacity
-              style={styles.faqButton}
-              onPress={() => {
-                console.log(authState.tipousuario);
-                  if (authState.tipousuario === 'normal') {
-                      navigation.navigate('Premium');
-                  } else if (authState.tipousuario === 'premium') {
-                      Toast.show({
-                        type: 'success',
-                        position: 'bottom',
-                        text1: '¡Ya eres premium!',
-                        text2: 'Tienes disponibles las funcionalidades premium. ¡Disfruta!',
-                        visibilityTime: 2500
-                      });
-                    }
-              }}
+
+            style={styles.faqButton}
+            onPress={() => {
+              console.log(authState.tipousuario);
+              if (authState.tipousuario === 'normal') {
+                navigation.navigate('Premium');
+              } else if (authState.tipousuario === 'premium') {
+                Toast.show({
+                  type: 'success',
+                  position: 'bottom',
+                  text1: '¡Ya eres premium!',
+                  text2: 'Tienes disponibles todas las funcionalidades premium. ¡Disfruta!',
+                  visibilityTime: 2500
+                });
+              }
+            }}
+
           >
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Image source={require('../img/premium.png')} style={styles.faqIcon} />
-                  {authState.tipousuario === 'normal' ? (
-                      <Text style={styles.faqText}>¡Hazte premium!</Text>
-                  ) : (
-                      <Text style={styles.faqText}>Eres usuario premium</Text>
-                  )}
-              </View>
-              <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage} />
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Image source={require('../img/premium.png')} style={styles.faqIcon} />
+              {authState.tipousuario === 'normal' ? (
+                <Text style={styles.faqText}>¡Hazte premium!</Text>
+              ) : (
+                <Text style={styles.faqText}>Eres usuario premium</Text>
+              )}
+            </View>
+            <Icon name="chevron-right" size={25} color="#000" style={styles.arrowImage} />
           </TouchableOpacity>
-      </View>
+        </View>
 
         <View style={styles.headlineContainer}>
           <View style={styles.headlineRectangle}>
@@ -179,7 +181,6 @@ export default function ProfileScreen({ navigation }) {
                   text2: 'Correo: loveroomapp@gmail.com',
                   visibilityTime: 4000
                 });
-
               }}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>

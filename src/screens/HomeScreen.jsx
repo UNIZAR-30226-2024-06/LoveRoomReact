@@ -14,9 +14,9 @@ export default function HomeScreen({ navigation }) {
     return <NotRegisteredScreen />;
   }
 
-  if(authState.baneado){
-    return <BannedScreen />;
-  }
+  // if (authState.tipousuario === 'administrador') {
+  //   navigation.navigate("Account", {screen : 'Admin'});
+  // }
 
   return (
     <View style={{ flex: 1, alignItems: 'center' }}>
@@ -57,14 +57,14 @@ const styles = StyleSheet.create({
   interrogationContainer: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   interrogationImage: {
     width: 100,
-    height: 100,
+    height: 100
   },
   centeredText: {
     textAlign: 'center',
-    color: 'gray',
-  },
+    color: 'gray'
+  }
 });

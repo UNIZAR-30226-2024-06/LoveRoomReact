@@ -19,7 +19,7 @@ export default function GetCodeScreen({ navigation }) {
   const lastSentTimeRef = useRef(null);
   const [code, setCode] = useState('');
   const [isValidCode, setIsValidCode] = useState(false);
-  const [isSixDigits, setIsSixDigits] = useState(false); 
+  const [isSixDigits, setIsSixDigits] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [errorText, setErrorText] = useState('* El código debe tener 6 dígitos');
 
@@ -33,8 +33,6 @@ export default function GetCodeScreen({ navigation }) {
       setIsSixDigits(false);
     }
   };
-  
-
 
   const handleReSendCode = () => {
     const currentTime = Date.now();
@@ -70,7 +68,7 @@ export default function GetCodeScreen({ navigation }) {
       },
       body: JSON.stringify({ correo: correoFP })
     })
-      .then((response) => response.json()) 
+      .then((response) => response.json())
       .then((data) => {
         let respuestaValida = false;
         if (data.mensaje === 'Correo para resetear contraseña enviado con exito') {
@@ -80,15 +78,15 @@ export default function GetCodeScreen({ navigation }) {
           setIsValidEmail(false);
           setFormSubmitted(true);
           setErrorText('Usuario no existente');
-        } else if (respuestaValida === false){
+        } else if (respuestaValida === false) {
           Toast.show({
             type: 'error',
             position: 'bottom',
             text1: 'Error',
             text2: 'Error al enviar el correo para resetear la contraseña',
             visibilityTime: 2500
-          }); 
-         }
+          });
+        }
       })
       .catch((error) => {
         console.error('Error:', error);
@@ -108,12 +106,12 @@ export default function GetCodeScreen({ navigation }) {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         correo: correoFP,
         codigo: code
       })
     })
-      .then((response) => response.json()) 
+      .then((response) => response.json())
       .then((data) => {
         let respuestaValida = false;
         if (data.valido) {
@@ -128,7 +126,7 @@ export default function GetCodeScreen({ navigation }) {
             text1: 'Código correcto, resetee su contraseña',
             text2: 'El código introducido es correcto, resetea tu contraseña.',
             visibilityTime: 2500
-          }); 
+          });
         } else if (data.error === 'El usuario introducido no existe') {
           respuestaValida = true;
           Toast.show({
@@ -143,14 +141,14 @@ export default function GetCodeScreen({ navigation }) {
           setIsValidCode(false);
           setFormSubmitted(true);
           setErrorText('Código incorrecto');
-        } else if (respuestaValida === false){
+        } else if (respuestaValida === false) {
           Toast.show({
             type: 'error',
             position: 'bottom',
             text1: 'Error',
             text2: 'Error al enviar el correo para resetear la contraseña',
             visibilityTime: 2500
-          }); 
+          });
         }
       })
       .catch((error) => {
@@ -164,9 +162,6 @@ export default function GetCodeScreen({ navigation }) {
         });
       });
   };
-  
-  
-    
 
   return (
     <ScrollView style={styles.container} keyboardShouldPersistTaps={'handled'}>
@@ -176,27 +171,22 @@ export default function GetCodeScreen({ navigation }) {
 
       <View style={styles.formContainer}>
         <Text style={styles.label}>Código</Text>
-        <TextInput 
+        <TextInput
           style={[
             styles.input,
-            ((!isSixDigits || !isValidCode) && formSubmitted) && styles.inputError,
+            (!isSixDigits || !isValidCode) && formSubmitted && styles.inputError,
             errorText === '* El código debe tener 6 dígitos'
           ]}
-          placeholder="Introduzca el código enviado a su correo" 
+          placeholder="Introduzca el código enviado a su correo"
           onChangeText={handleCodeChange}
           maxLength={6}
         />
         {!isSixDigits && formSubmitted && errorText === '* El código debe tener 6 dígitos' && (
-          <Text style={styles.errorText}>
-            * El código debe tener 6 dígitos.
-          </Text>
+          <Text style={styles.errorText}>* El código debe tener 6 dígitos.</Text>
         )}
         {errorText === 'Código incorrecto' && (
-          <Text style={styles.errorText}>
-            * El código introducido no es correcto.
-          </Text>
+          <Text style={styles.errorText}>* El código introducido no es correcto.</Text>
         )}
-        
 
         <TouchableOpacity
           style={styles.button}

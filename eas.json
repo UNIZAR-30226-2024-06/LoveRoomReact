@@ -1,18 +1,37 @@
 {
-  "cli": {
-    "version": ">= 7.8.2"
-  },
   "build": {
-    "development": {
-      "developmentClient": true,
-      "distribution": "internal"
-    },
     "preview": {
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "preview2": {
+      "android": {
+        "gradleCommand": ":app:assembleRelease"
+      }
+    },
+    "preview3": {
+      "developmentClient": true
+    },
+    "preview4": {
       "distribution": "internal"
     },
-    "production": {}
-  },
-  "submit": {
-    "production": {}
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_API_URL": "http://40.121.163.248",
+        "EXPO_PUBLIC_YT_KEY":"AIzaSyBp1W4wcslXAGN_tPYoBLYSbhy8CbYN5l0"
+      }, "android": {
+        "buildType": "apk"
+      }
+    },
+    "test": {
+      "env": {
+        "EXPO_PUBLIC_API_URL": "http://40.121.163.248",
+        "EXPO_PUBLIC_YT_KEY":"AIzaSyBp1W4wcslXAGN_tPYoBLYSbhy8CbYN5l0"
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    }
   }
 }

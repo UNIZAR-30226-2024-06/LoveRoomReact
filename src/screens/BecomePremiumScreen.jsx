@@ -6,7 +6,7 @@ import {
   StatusBar,
   TouchableOpacity,
   SafeAreaView,
-  ScrollView,
+  ScrollView
 } from 'react-native';
 import SubscribeCard from 'react-native-subscribe-card';
 import AuthContext from '../components/AuthContext';
@@ -24,7 +24,7 @@ const App = ({ navigation }) => {
 
   const handleContinue = () => {
     console.log(authState.tipousuario);
-    console.log("plan selec:", selectedPlan);
+    console.log('plan selec:', selectedPlan);
     switch (selectedPlan) {
       case 'premium':
         navigation.navigate('Payment');
@@ -53,7 +53,7 @@ const App = ({ navigation }) => {
         style={{
           height: 50,
           borderRadius: 12,
-          width: ScreenWidth * 0.9, 
+          width: ScreenWidth * 0.9,
           alignItems: 'center',
           justifyContent: 'center',
           backgroundColor: '#F89F9F',
@@ -62,22 +62,24 @@ const App = ({ navigation }) => {
           shadowColor: '#F89F9F',
           shadowOffset: {
             width: 0,
-            height: 3,
-          },
-        }}>
+            height: 3
+          }
+        }}
+      >
         <Text style={{ color: '#fff', fontWeight: 'bold' }}>Continuar</Text>
       </TouchableOpacity>
     </View>
   );
-  
+
   const HeaderContainer = () => (
     <View style={{ width: '80%', marginTop: '20%' }}>
       <Text
         style={{
           textAlign: 'center',
           color: '#000',
-          fontSize: 32,
-        }}>
+          fontSize: 32
+        }}
+      >
         Planes disponibles
       </Text>
       <View style={{ marginTop: 24 }}>
@@ -85,9 +87,11 @@ const App = ({ navigation }) => {
           style={{
             color: '#000',
             lineHeight: 18,
-            textAlign: 'center',
-          }}>
-          Elige el plan premium para desbloquear todas las funcionalidades de la aplicación, como salas ilimitadas.
+            textAlign: 'center'
+          }}
+        >
+          Elige el plan premium para desbloquear todas las funcionalidades de la aplicación, como
+          salas ilimitadas.
         </Text>
       </View>
     </View>
@@ -121,7 +125,10 @@ const App = ({ navigation }) => {
   );
 
   return (
-    <ScrollView contentContainerStyle={{ flexGrow: 1, backgroundColor: '#ffffff' }} keyboardShouldPersistTaps={'handled'}>
+    <ScrollView
+      contentContainerStyle={{ flexGrow: 1, backgroundColor: '#ffffff' }}
+      keyboardShouldPersistTaps={'handled'}
+    >
       <StatusBar barStyle="light-content" />
       <SafeAreaView style={{ flex: 1 }}>
         <View style={{ flex: 1, alignItems: 'center' }}>

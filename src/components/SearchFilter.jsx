@@ -24,7 +24,7 @@ const SearchFilter = ({
   setListVideos,
   nextPageToken,
   setNextPageToken,
-  setVideoUrl, 
+  setVideoUrl,
   setVideosModal
 }) => {
   const navigation = useNavigation();
@@ -52,7 +52,7 @@ const SearchFilter = ({
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
-        console.log("data.error: ", data.error);
+        console.log('data.error: ', data.error);
         if (data.esSalaUnitaria == true) {
           setMensaje('No hay nadie viendo este vídeo, ¡espera a que alguien entre!');
           setSocketState((prevState) => ({
