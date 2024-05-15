@@ -1022,7 +1022,7 @@ const Video = () => {
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <View style={styles.contentContainer}>
-              <SearchBar setVideoUrl={handleSelectVideo} />
+              <SearchBar setVideoUrl={handleSelectVideo} useModal={false} />
             </View>
             <View style={[styles.button, styles.buttonClose]}>
               <Icon

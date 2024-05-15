@@ -7,7 +7,6 @@ import BannedScreen from './BannedScreen';
 
 export default function HomeScreen({ navigation }) {
   const { authState } = React.useContext(AuthContext);
-  const [hasInterestVideos, setHasInterestVideos] = useState(false);
   console.log("HOMESCREEN AUTHSTATE: ", authState);
 
   if (!authState.isLoggedIn) {
@@ -21,21 +20,7 @@ export default function HomeScreen({ navigation }) {
   return (
     <View style={{ flex: 1, alignItems: 'center' }}>
       <Text style={styles.TextBienvenida}> ¡Hola de nuevo, {authState.nombre}! </Text>
-      <SearchBar setVideoUrl={null} onHasInterestVideosChange={setHasInterestVideos} />
-      {hasInterestVideos ? (
-        <View style={styles.Video}>
-          {/* Aquí renderiza los videos de interés */}
-        </View>
-      ) : (
-        <View style={styles.interrogationContainer}>
-          <Image source={require('../img/camara.png')} style={[styles.interrogationImage, { tintColor: 'gray' }]} />
-          <Text style={styles.centeredText}>
-            ¡Busca tus vídeos favoritos,
-            {'\n'}
-            y conoce gente con los mismos gustos que tú!
-          </Text>
-        </View>
-      )}
+      <SearchBar setVideoUrl={null} useModal={true} />
     </View>
   );
 }
@@ -53,18 +38,5 @@ const styles = StyleSheet.create({
     width: '90%',
     justifyContent: 'center',
     alignItems: 'center'
-  },
-  interrogationContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  interrogationImage: {
-    width: 100,
-    height: 100
-  },
-  centeredText: {
-    textAlign: 'center',
-    color: 'gray'
   }
 });

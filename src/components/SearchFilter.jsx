@@ -129,6 +129,15 @@ const SearchFilter = ({
     }
   }, [isFocused, socketState.idVideo]);
 
+  useEffect(() => {
+    if(isFocused){
+      console.log('isFocused');
+      setListVideos([]);
+      setNextPageToken('');
+      setShowModal(false);
+    }
+  }, [isFocused]);
+
   const handlePeticionAux = () => {
     const params = new URLSearchParams({
       key: `${process.env.EXPO_PUBLIC_YT_KEY}`,

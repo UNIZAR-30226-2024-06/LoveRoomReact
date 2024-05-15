@@ -10,7 +10,7 @@ import { initializeSocket } from '../components/AuthContext';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 
-const SearchBarYt = ({ setVideoUrl, onHasInterestVideosChange }) => {
+const SearchBar = ({ setVideoUrl, useModal }) => {
   const { authState } = useContext(AuthContext);
   const navigation = useNavigation();
   const { socketState, setSocketState } = useContext(AuthContext);
@@ -151,14 +151,12 @@ const SearchBarYt = ({ setVideoUrl, onHasInterestVideosChange }) => {
       .then(async (data) => {
         console.log(data);
         if (data.length > 0) {
-          onHasInterestVideosChange(true);
           const videoDetailsPromises = data.map((video) => fetchVideoDetails(video.idvideo, video.viewers));
           const videosWithDetails = await Promise.all(videoDetailsPromises);
           setListVideosInterest(videosWithDetails);
           setLoading(false);
           console.log(videosWithDetails);
         } else {
-          onHasInterestVideosChange(false);
           setLoading(false);
         }
       });
@@ -210,7 +208,9 @@ const SearchBarYt = ({ setVideoUrl, onHasInterestVideosChange }) => {
     <View
       style={{
         margin: 15,
-        width: '90%'
+        width: '90%',
+        height: '100%'
+
       }}
     >
       <Modal transparent={true} animationType={'none'} visible={showModal}>
@@ -249,7 +249,7 @@ const SearchBarYt = ({ setVideoUrl, onHasInterestVideosChange }) => {
         />
       </View>
 
-      <Modal transparent={true} animationType={'none'} visible={videosModal} onRequestClose={() => { setVideosModal(false); setListVideos([]) }}>
+      {useModal? <Modal transparent={true} animationType={'none'} visible={videosModal} onRequestClose={() => { setVideosModal(false); setListVideos([]) }}>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 20 }}>
           <View
             style={{
@@ -284,8 +284,42 @@ const SearchBarYt = ({ setVideoUrl, onHasInterestVideosChange }) => {
             />
           </View>
         </View>
-      </Modal>
-      <FlatList
+      </Modal>:
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 20 }}>
+      <View
+        style={{
+          backgroundColor: 'white',
+          width: '80%', // Controla el ancho del modal
+          height: '80%', // Controla la altura del modal
+          borderRadius: 20, // Añade bordes redondeados
+          overflow: 'hidden'
+        }}
+      >
+        <SearchFilter
+          data={listVideos}
+          search={search}
+          setListVideos={setListVideos}
+          nextPageToken={nextPageToken}
+          setNextPageToken={setNextPageToken}
+          setVideoUrl={setVideoUrl}
+          videosInterest={listVideosInterest}
+          setVideosInterest={setListVideosInterest}
+          setVideosModal={setVideosModal}
+        />
+      </View>
+      <View style={[styles.button, styles.buttonClose]}>
+        <Icon
+          name="close"
+          type="ionicon"
+          color="white"
+          onPress={() => {
+            setVideosModal(false);
+            setListVideos([]);
+          }}
+        />
+      </View>
+    </View>  }
+      {listVideosInterest.length>0 && useModal? <FlatList
         data={listVideosInterest.filter((item) =>
           item.title.toLowerCase().includes(search.toLowerCase())
         )}
@@ -344,6 +378,13 @@ const SearchBarYt = ({ setVideoUrl, onHasInterestVideosChange }) => {
                       >
                         Fecha de publicación: {item.publishedAt}
                       </Text>
+                      <Text
+                        style={{
+                          fontSize: 10
+                        }}
+                      >
+                        Viewers: {item.viewers}
+                      </Text>
                     </View>
                   </View>
                 </View>
@@ -359,7 +400,15 @@ const SearchBarYt = ({ setVideoUrl, onHasInterestVideosChange }) => {
             </TouchableOpacity>
           );
         }}
-      />
+      />:
+      <View style={styles.interrogationContainer}>
+      <Image source={require('../img/camara.png')} style={[styles.interrogationImage, { tintColor: 'gray' }]} />
+      <Text style={styles.centeredText}>
+        ¡Busca tus vídeos favoritos,
+        {'\n'}
+        y conoce gente con los mismos gustos que tú!
+      </Text>
+    </View>}
     </View>
   );
 };
@@ -395,7 +444,20 @@ const styles = StyleSheet.create({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-around'
+  },
+  interrogationContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  interrogationImage: {
+    width: 100,
+    height: 100
+  },
+  centeredText: {
+    textAlign: 'center',
+    color: 'gray'
   }
 });
 
-export default SearchBarYt;
+export default SearchBar;
