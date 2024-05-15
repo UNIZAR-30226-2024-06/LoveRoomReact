@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from 'react';
+import { useState, useContext, useEffect, useRef } from 'react';
 import {
   ScrollView,
   View,
@@ -15,6 +15,8 @@ import AuthContext from '../components/AuthContext';
 import * as FileSystem from 'expo-file-system';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import { Feather } from '@expo/vector-icons';
+import mime from 'mime';
+import { set } from 'date-fns';
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
@@ -90,11 +92,13 @@ export default function RegisterPreferencesScreen({ navigation }) {
   ]);
   const [description, setDescription] = useState(authState.descripcion);
   const [profileImage, setProfileImage] = useState(authState.fotoperfil);
+  const serverNameProfileImage = useRef('null.jpg');
   const [idlocalidad, setIdLocalidad] = useState(authState.idlocalidad);
   const [cursorPosition, setCursorPosition] = useState(0);
   const [isProfileImageSelected, setIsProfileImageSelected] = useState();
   const { StorageAccessFramework } = FileSystem;
   const [descriptionLength, setDescriptionLength] = useState(description.length);
+
   const handleSave = () => {
     console.log(`${process.env.EXPO_PUBLIC_API_URL}/user/update`);
     fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/update`, {
@@ -113,7 +117,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
         buscasexo: sexualPreference,
         descripcion: description,
         //subir foto primero a multimedia yt luego actualizarla
-        fotoperfil: 'null.jpg', //para que se pueda actualziar, subirla al multimedia y nos devolvera un path para subir,
+        fotoperfil: serverNameProfileImage.current, //para que se pueda actualziar, subirla al multimedia y nos devolvera un path para subir,
         idlocalidad: idlocalidad
       })
     })
@@ -132,7 +136,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
             buscasexo: sexualPreference,
             descripcion: description,
             //subir foto primero a multimedia yt luego actualizarla
-            fotoperfil: 'null.jpg', //para que se pueda actualziar, subirla al multimedia y nos devolvera un path para subir,
+            fotoperfil: serverNameProfileImage.current, //para que se pueda actualziar, subirla al multimedia y nos devolvera un path para subir,
             idlocalidad: idlocalidad
           }));
           navigation.navigate("Account", {screen : 'Cuenta'});
@@ -186,10 +190,16 @@ export default function RegisterPreferencesScreen({ navigation }) {
 
   const fileName = FileSystem.documentDirectory + 'userProfileImage.jpeg';
   const checkProfileImage = async () => {
-    fileInfo = await FileSystem.getInfoAsync(fileName);
-    console.log('fileInfo', fileInfo);
-    setProfileImage(fileName);
-    setIsProfileImageSelected(fileInfo.exists);
+    console.log('checkProfileImage');
+    if (authState.fotoperfil == null) {
+      setProfileImage(require('../img/perfil-vacio-con-relleno.png'));
+    } else {
+      console.log('authState.fotoperfil', authState.fotoperfil);
+      const url = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/${authState.fotoperfil}`;
+      console.log('url', url);
+      setProfileImage(url);
+    }
+    setIsProfileImageSelected(true);
   };
   useEffect(() => {
     checkProfileImage();
@@ -204,25 +214,58 @@ export default function RegisterPreferencesScreen({ navigation }) {
       quality: 1
     });
 
-    // console.log(result);
-
     if (!result.cancelled) {
-      // TODO: Guardar imagen en el servidor
-      // Guarda la imagen en el almacenamiento local con expo-file-system
-      // TODO: conversión de tipos
-
-      //   console.log('\n\nfileName', fileName);
-      //   console.log('result.assets[0].uri', result.assets[0].uri);
-
       await FileSystem.moveAsync({
         from: result.assets[0].uri,
         to: fileName
       });
       //   fileInfo = await FileSystem.getInfoAsync(fileName);
       //   console.log('fileInfo dentro', fileInfo);
-      setProfileImage(fileName + '?' + new Date().getTime());
-      setIsProfileImageSelected(true);
+      // setProfileImage(fileName + '?' + new Date().getTime());
+      // setIsProfileImageSelected(true);
+      console.log('result.assets[0].uri', result.assets[0].uri);
+      updateProfileImage(fileName);
     }
+  };
+
+  const updateProfileImage = async (uri) => {
+    console.log('Subiendo media:', uri);
+
+    const formData = new FormData();
+
+    console.log('File type:', mime.getType(uri));
+    formData.append('file', {
+      uri: uri,
+      type: mime.getType(uri),
+      name: uri.split('/').pop()
+    });
+    console.log('Formdata: ', formData);
+    const url = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/upload/foto/${authState.id}`;
+    console.log('URL:', url);
+    console.log('Subiendo media:', uri);
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${authState.token}`
+      },
+      body: formData
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        console.log('response' + JSON.stringify(res));
+        if (res.error == null) {
+          const mediaUrl = res.nombreArchivo;
+          serverNameProfileImage.current = mediaUrl;
+          const url = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/${mediaUrl}`;
+          console.log('URL de la imagen:', url);
+          setProfileImage(url);
+        } else {
+          console.log('Error: guardando mensaje ', data.error);
+          alert('Ha habido un error en los datos de la imagen. Vuelva a intentarlo.');
+        }
+      })
+      .catch((e) => console.log(e));
   };
 
   const showDatepicker = () => {
@@ -247,11 +290,12 @@ export default function RegisterPreferencesScreen({ navigation }) {
           <View style={styles.profileImageBorder}>
             <Image
               style={styles.profileImage}
-              source={
-                isProfileImageSelected
-                  ? { uri: profileImage + '?' + new Date() }
-                  : require('../img/profileImage.jpg') //OBTENER FOTO DE LA BASE DE DATOS NO?
-              }
+              // source={
+              //   isProfileImageSelected
+              //     ? { uri: profileImage }
+              //     : require('../img/perfil-vacio-con-relleno.png') //OBTENER FOTO DE LA BASE DE DATOS NO?
+              // }
+              source={{ uri: profileImage }}
             />
           </View>
         </View>
@@ -273,8 +317,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
             onValueChange={(itemValue) => setGender(itemValue)}
             defaultValue={
               authState.sexo == 'H' ? 'Masculino' : authState.sexo == 'M' ? 'Femenino' : 'Otro'
-            }
-          >
+            }>
             <Picker.Item label="Masculino" value="H" />
             <Picker.Item label="Femenino" value="M" />
             <Picker.Item label="Otro" value="O" />
@@ -288,8 +331,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
             onValueChange={(itemValue) => {
               const index = provinciasDeEspana.indexOf(itemValue);
               setIdLocalidad(index + 1);
-            }}
-          >
+            }}>
             {provinciasDeEspana.map((provincia, index) => (
               <Picker.Item key={index} label={provincia} value={provincia} />
             ))}
@@ -300,15 +342,16 @@ export default function RegisterPreferencesScreen({ navigation }) {
         <View style={{ ...styles.input, justifyContent: 'center' }}>
           <Picker
             selectedValue={edad.toString()}
-            onValueChange={(itemValue) => setEdad(parseInt(itemValue))}
-          >
+            onValueChange={(itemValue) => setEdad(parseInt(itemValue))}>
             {[...Array(100)].map((_, index) => (
-              <Picker.Item key={index} label={(index + 18).toString()} value={(index + 18).toString()} />
+              <Picker.Item
+                key={index}
+                label={(index + 18).toString()}
+                value={(index + 18).toString()}
+              />
             ))}
           </Picker>
         </View>
-
-
 
         <Text style={styles.label}>Preferencia Sexual</Text>
         <View style={{ ...styles.input, justifyContent: 'center' }}>
@@ -321,8 +364,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
                 : authState.buscasexo == 'M'
                   ? 'Mujeres'
                   : 'Todos'
-            }
-          >
+            }>
             <Picker.Item label="Hombres" value="H" />
             <Picker.Item label="Mujeres" value="M" />
             <Picker.Item label="Ambos" value="T" />
@@ -379,15 +421,13 @@ export default function RegisterPreferencesScreen({ navigation }) {
           style={styles.button}
           onPress={() => {
             handleSave();
-          }}
-        >
+          }}>
           <Text style={styles.buttonText}> Guardar</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
