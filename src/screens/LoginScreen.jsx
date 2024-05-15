@@ -169,85 +169,70 @@ export default function LoginScreen({ navigation }) {
             </Text>
           )}
         </View>
-        <View style={styles.formContainer}>
-          <Text style={styles.label}>Correo Electrónico</Text>
+
+        <Text style={styles.label}>Contraseña</Text>
+        <View>
           <TextInput
-            style={[styles.input, emailError && styles.inputError]}
-            placeholder="Introduzca su correo electrónico"
-            onChangeText={handleEmailChange}
-            autoCapitalize="none"
-            maxLength={254}
+            style={[
+              styles.input,
+              { paddingRight: 40, flex: 0 }, // Estilos para ocupar todo el espacio horizontal disponible
+              passwordError && styles.inputError // Estilo de error si hay un error en la contraseña
+            ]}
+            placeholder="Introduzca la contraseña"
+            secureTextEntry={hidePassword}
+            onChangeText={handlePasswordChange}
+            maxLength={100}
           />
-          {emailError && (
-            <Text style={styles.errorText}>
-              * Por favor, introduzca un correo electrónico válido.
-            </Text>
+          <TouchableOpacity
+            onPress={() => setHidePassword(!hidePassword)}
+            style={{
+              position: 'absolute', // Posiciona el botón del ojo en relación con el contenedor View
+              right: 20, // Coloca el botón del ojo a 10px del borde derecho del contenedor View
+              height: 40,
+              top: 0, // Asegúrate de que el botón del ojo tenga la misma altura que el TextInput
+              justifyContent: 'center' // Centra el icono verticalmente dentro del botón del ojo
+            }}>
+            <Ionicons name={hidePassword ? 'eye-off' : 'eye'} size={24} color="black" />
+          </TouchableOpacity>
+          {passwordError && (
+            <Text style={[styles.errorText]}>* Por favor, introduzca una contraseña válida.</Text>
           )}
-
-          <Text style={styles.label}>Contraseña</Text>
-          <View>
-            <TextInput
-              style={[
-                styles.input,
-                { paddingRight: 40, flex: 0 }, // Estilos para ocupar todo el espacio horizontal disponible
-                passwordError && styles.inputError // Estilo de error si hay un error en la contraseña
-              ]}
-              placeholder="Introduzca la contraseña"
-              secureTextEntry={hidePassword}
-              onChangeText={handlePasswordChange}
-              maxLength={100}
-            />
-            <TouchableOpacity
-              onPress={() => setHidePassword(!hidePassword)}
-              style={{
-                position: 'absolute', // Posiciona el botón del ojo en relación con el contenedor View
-                right: 20, // Coloca el botón del ojo a 10px del borde derecho del contenedor View
-                height: 40,
-                top: 0, // Asegúrate de que el botón del ojo tenga la misma altura que el TextInput
-                justifyContent: 'center' // Centra el icono verticalmente dentro del botón del ojo
-              }}>
-              <Ionicons name={hidePassword ? 'eye-off' : 'eye'} size={24} color="black" />
-            </TouchableOpacity>
-            {passwordError && (
-              <Text style={[styles.errorText]}>* Por favor, introduzca una contraseña válida.</Text>
-            )}
-          </View>
-
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => {
-              if (!isValidEmail) {
-                setEmailError(true); // Establecer el estado de error del correo electrónico
-              }
-              if (!isValidPassword) {
-                setPasswordError(true); // Establecer el estado de error de la contraseña
-              } else {
-                handleLogin(); // Se ejecuta cuando tanto el correo electrónico como la contraseña son válidos
-              }
-            }}>
-            <Text style={styles.buttonText}>Iniciar sesión</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => {
-              navigation.navigate('GetEmail');
-            }}>
-            <Text style={styles.forgotPassword}>He olvidado mi contraseña</Text>
-          </TouchableOpacity>
         </View>
 
-        {/* <View style={[styles.line, { marginBottom: marginBottomLine }]} /> */}
-        <View style={[styles.registerContainer, { marginBottom: marginBottomBackToLogin }]}>
-          <View style={styles.line} />
-          <Text style={styles.registerText}>¿No tienes una cuenta? </Text>
-          <TouchableOpacity
-            onPress={() => {
-              navigation.navigate('Register');
-            }}>
-            <Text style={styles.registerLink}>Regístrate</Text>
-          </TouchableOpacity>
-          <View style={styles.line} />
-        </View>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            if (!isValidEmail) {
+              setEmailError(true); // Establecer el estado de error del correo electrónico
+            }
+            if (!isValidPassword) {
+              setPasswordError(true); // Establecer el estado de error de la contraseña
+            } else {
+              handleLogin(); // Se ejecuta cuando tanto el correo electrónico como la contraseña son válidos
+            }
+          }}>
+          <Text style={styles.buttonText}>Iniciar sesión</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('GetEmail');
+          }}>
+          <Text style={styles.forgotPassword}>He olvidado mi contraseña</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* <View style={[styles.line, { marginBottom: marginBottomLine }]} /> */}
+      <View style={[styles.registerContainer, { marginBottom: marginBottomBackToLogin }]}>
+        <View style={styles.line} />
+        <Text style={styles.registerText}>¿No tienes una cuenta? </Text>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('Register');
+          }}>
+          <Text style={styles.registerLink}>Regístrate</Text>
+        </TouchableOpacity>
+        <View style={styles.line} />
       </View>
     </ScrollView>
   );

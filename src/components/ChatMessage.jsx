@@ -13,7 +13,7 @@ import { useContext } from 'react';
 import AuthContext from '../components/AuthContext';
 import { Swipeable } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
-import Video from 'react-native-video';
+// import Video from 'react-native-video';
 
 const ChatMessage = ({ data }) => {
   const { authState } = useContext(AuthContext);
@@ -101,8 +101,7 @@ const ChatMessage = ({ data }) => {
         style={[
           styles.messageContainer,
           data.senderId == authState.id ? styles.currentUserMessage : styles.otherUserMessage
-        ]}
-      >
+        ]}>
         <View
           style={[
             styles.triangle,
@@ -112,33 +111,31 @@ const ChatMessage = ({ data }) => {
 
         <View>
           {/* TODO: así se llama a la ruta del backend o hay que hacer un fetch */}
-          {imageUrl || videoUrl ? (
+          {imageUrl ? (
             <View>
               {isImageLoading && (
                 <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />
               )}
               <TouchableOpacity onPress={() => setModalImgVisible(true)}>
-                {imageUrl ? (
-                  <Image
-                    source={{ uri: imageUrl }}
-                    style={{ width: 250, height: 250, borderRadius: 15 }}
-                    onLoad={() => setIsImageLoading(false)}
-                    resizeMode="contain"
-                  />
-                ) : (
-                  <Video
-                    source={{ uri: videoUrl }}
-                    style={{ width: 250, height: 250, borderRadius: 15 }}
-                    resizeMode="contain"
+                <Image
+                  source={{ uri: imageUrl }}
+                  style={{ width: 250, height: 250, borderRadius: 15 }}
+                  onLoad={() => setIsImageLoading(false)}
+                  resizeMode="contain"
+                />
+              </TouchableOpacity>
+              {/* // <Video
+                  //  source={{ uri: videoUrl }}
+                  //   style={{ width: 250, height: 250, borderRadius: 15 }}
+                  //   resizeMode="contain"
                     // ref={(ref) => {
                     //   this.player = ref;
                     // }} // Store reference
                     // onBuffer={this.onBuffer} // Callback when remote video is buffering
                     // onError={this.videoError} // Callback when video cannot be loaded
-                  />
-                )}
-                {/* // style={{ width: '40%' }} resizeMode="contain" /> */}
-              </TouchableOpacity>
+                  // />
+                
+                //  style={{ width: '40%' }} resizeMode="contain" />  */}
 
               <Modal
                 animationType="slide"
@@ -176,8 +173,7 @@ const ChatMessage = ({ data }) => {
         animationType="fade"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={handleCancel}
-      >
+        onRequestClose={handleCancel}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Reportar mensaje</Text>
@@ -217,11 +213,9 @@ const ChatMessage = ({ data }) => {
                 backgroundColor: 'transparent',
                 justifyContent: 'center',
                 padding: 20
-              }}
-            ></View>
+              }}></View>
           );
-        }}
-      >
+        }}>
         <MessageContent />
       </Swipeable>
     </>

@@ -139,7 +139,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
             fotoperfil: serverNameProfileImage.current, //para que se pueda actualziar, subirla al multimedia y nos devolvera un path para subir,
             idlocalidad: idlocalidad
           }));
-          navigation.navigate("Account", {screen : 'Cuenta'});
+          navigation.navigate('Account', { screen: 'Cuenta' });
           console.log('G: Actualizo bien');
         } else if (data.error == 'Error al actualizar el usuario') {
           console.log('G: Actualizo mal');
@@ -191,8 +191,8 @@ export default function RegisterPreferencesScreen({ navigation }) {
   const fileName = FileSystem.documentDirectory + 'userProfileImage.jpeg';
   const checkProfileImage = async () => {
     console.log('checkProfileImage');
-    if (authState.fotoperfil == null) {
-      setProfileImage(require('../img/perfil-vacio-con-relleno.png'));
+    if (authState.fotoperfil == null || authState.fotoperfil == 'null.jpg') {
+      // setProfileImage(require('../img/perfil-vacio-con-relleno.png'));
     } else {
       console.log('authState.fotoperfil', authState.fotoperfil);
       const url = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/${authState.fotoperfil}`;
@@ -295,7 +295,12 @@ export default function RegisterPreferencesScreen({ navigation }) {
               //     ? { uri: profileImage }
               //     : require('../img/perfil-vacio-con-relleno.png') //OBTENER FOTO DE LA BASE DE DATOS NO?
               // }
-              source={{ uri: profileImage }}
+              // source={{ uri: profileImage }}
+              source={
+                profileImage !== 'null.jpg'
+                  ? { uri: profileImage }
+                  : require('../img/perfil-vacio-con-relleno.png')
+              }
             />
           </View>
         </View>

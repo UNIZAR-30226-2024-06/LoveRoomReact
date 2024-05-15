@@ -16,6 +16,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
 import Toast from 'react-native-toast-message';
+import defaultProfilePicture from '../img/perfil-vacio-con-relleno.png';
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
@@ -53,8 +54,11 @@ export default function ProfileScreen({ navigation }) {
 
   const checkProfileImage = async () => {
     console.log('checkProfileImage');
-    if (authState.fotoperfil == null) {
-      setProfileImage(require('../img/perfil-vacio-con-relleno.png'));
+    if (authState.fotoperfil == null || authState.fotoperfil == 'null.jpg') {
+      console.log('authState.fotoperfil', authState.fotoperfil);
+      // setProfileImage('../img/perfil-vacio-con-relleno.png');
+      setProfileImage('null.jpg'); // "null.jpg
+      console.log('profileImage', profileImage);
     } else {
       console.log('authState.fotoperfil', authState.fotoperfil);
       const url = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/${authState.fotoperfil}`;
@@ -107,7 +111,11 @@ export default function ProfileScreen({ navigation }) {
               //     ? { uri: userProfileImage }
               //     : require('../img/perfil-vacio-con-relleno.png')
               // } // Ruta de la imagen de perfil
-              source={{ uri: profileImage }}
+              source={
+                profileImage !== 'null.jpg'
+                  ? { uri: profileImage }
+                  : require('../img/perfil-vacio-con-relleno.png')
+              }
               style={styles.profileImage}
             />
           </View>
@@ -133,7 +141,10 @@ export default function ProfileScreen({ navigation }) {
               console.log(authState.tipousuario);
               if (authState.tipousuario === 'normal') {
                 navigation.navigate('Premium');
-              } else if (authState.tipousuario === 'premium' || authState.tipousuario === 'administrador') {
+              } else if (
+                authState.tipousuario === 'premium' ||
+                authState.tipousuario === 'administrador'
+              ) {
                 console.log('Ya eres premium');
                 Toast.show({
                   type: 'success',
