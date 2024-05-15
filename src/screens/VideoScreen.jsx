@@ -144,7 +144,7 @@ const Video = () => {
             const transformedData = data.map((item) => {
               return {
                 id: item.id,
-                multimedia: item.rutamultimedia,
+                rutamultimedia: item.rutamultimedia,
                 message: item.texto,
                 timestamp: item.fechahora,
                 senderId: item.idusuario
