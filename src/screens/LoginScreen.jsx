@@ -9,7 +9,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   Modal,
-  Dimensions, 
+  Dimensions,
   Alert
 } from 'react-native';
 // import Orientation from 'react-native-orientation-locker';
@@ -90,14 +90,14 @@ export default function LoginScreen({ navigation }) {
             contrasena: data.usuario.contrasena
           });
           AsyncStorage.setItem('token', data.token);
-          
+
           if (data.usuario.tipousuario === 'administrador') {
             console.log('Admin');
-            navigation.navigate("Account", {screen : 'Admin'});
+            navigation.navigate('Account', { screen: 'Admin' });
           } else {
             navigation.pop();
-          } 
-        } else if (data.error === "El usuario está baneado") {
+          }
+        } else if (data.error === 'El usuario está baneado') {
           Toast.show({
             type: 'error',
             position: 'bottom',
@@ -105,7 +105,6 @@ export default function LoginScreen({ navigation }) {
             text2: 'Lo sentimos, pero tu cuenta ha sido suspendida.',
             visibilityTime: 5000
           });
-
         } else {
           Toast.show({
             type: 'error',
@@ -136,8 +135,7 @@ export default function LoginScreen({ navigation }) {
     <ScrollView style={styles.container} keyboardShouldPersistTaps={'handled'}>
       <View
         style={styles.container}
-        contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }}
-      >
+        contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }}>
         <View style={[styles.logoContainer, { marginBottom: -90 }]}>
           <Image style={styles.logo} source={require('../img/logoTexto.png')} />
         </View>
@@ -147,8 +145,7 @@ export default function LoginScreen({ navigation }) {
           visible={isLoading}
           onRequestClose={() => {
             console.log('close modal');
-          }}
-        >
+          }}>
           <View style={styles.modalBackground}>
             <View style={styles.activityIndicatorWrapper}>
               <ActivityIndicator animating={isLoading} size="large" color="#F89F9F" />
@@ -171,6 +168,7 @@ export default function LoginScreen({ navigation }) {
               * Por favor, introduzca un correo electrónico válido.
             </Text>
           )}
+        </View>
         <View style={styles.formContainer}>
           <Text style={styles.label}>Correo Electrónico</Text>
           <TextInput
@@ -207,8 +205,7 @@ export default function LoginScreen({ navigation }) {
                 height: 40,
                 top: 0, // Asegúrate de que el botón del ojo tenga la misma altura que el TextInput
                 justifyContent: 'center' // Centra el icono verticalmente dentro del botón del ojo
-              }}
-            >
+              }}>
               <Ionicons name={hidePassword ? 'eye-off' : 'eye'} size={24} color="black" />
             </TouchableOpacity>
             {passwordError && (
@@ -227,16 +224,14 @@ export default function LoginScreen({ navigation }) {
               } else {
                 handleLogin(); // Se ejecuta cuando tanto el correo electrónico como la contraseña son válidos
               }
-            }}
-          >
+            }}>
             <Text style={styles.buttonText}>Iniciar sesión</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => {
               navigation.navigate('GetEmail');
-            }}
-          >
+            }}>
             <Text style={styles.forgotPassword}>He olvidado mi contraseña</Text>
           </TouchableOpacity>
         </View>
@@ -248,8 +243,7 @@ export default function LoginScreen({ navigation }) {
           <TouchableOpacity
             onPress={() => {
               navigation.navigate('Register');
-            }}
-          >
+            }}>
             <Text style={styles.registerLink}>Regístrate</Text>
           </TouchableOpacity>
           <View style={styles.line} />
@@ -264,17 +258,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     paddingVertical: 20 // Ajusta el padding vertical según sea necesario
-    paddingVertical: 20 // Ajusta el padding vertical según sea necesario
   },
   logoContainer: {
     alignItems: 'center',
-    paddingTop: 130
     paddingTop: 130
   },
   logo: {
     width: 200,
     height: 200,
-    resizeMode: 'contain'
     resizeMode: 'contain'
   },
   formContainer: {
@@ -282,12 +273,10 @@ const styles = StyleSheet.create({
     marginTop: 20,
     padding: 20,
     borderRadius: 10
-    borderRadius: 10
   },
   label: {
     fontSize: 16,
     marginBottom: 5,
-    marginTop: 10
     marginTop: 10
   },
   input: {
@@ -298,10 +287,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 5,
     marginEnd: 5
-    marginEnd: 5
   },
   inputError: {
-    borderColor: 'red' // Cambia el borde a rojo si hay un error
     borderColor: 'red' // Cambia el borde a rojo si hay un error
   },
   button: {
@@ -309,11 +296,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 5,
     alignItems: 'center'
-    alignItems: 'center'
   },
   buttonText: {
     color: '#ffffff',
-    fontWeight: 'bold'
     fontWeight: 'bold'
   },
   forgotPassword: {
@@ -321,9 +306,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     color: '#F89F9F',
     textDecorationLine: 'underline'
-    textDecorationLine: 'underline'
   },
-
 
   registerContainer: {
     justifyContent: 'center',
@@ -332,7 +315,6 @@ const styles = StyleSheet.create({
     width: '100%',
     marginTop: 80, // Agrega un margen superior adecuado
     marginBottom: 20 // Agrega un margen inferior adecuado
-    marginBottom: 20 // Agrega un margen inferior adecuado
   },
   line: {
     flex: 1,
@@ -340,22 +322,18 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
     borderBottomWidth: 1,
     marginHorizontal: 5 // Ajusta esto según tu preferencia de espaciado
-    marginHorizontal: 5 // Ajusta esto según tu preferencia de espaciado
   },
   registerText: {
-    fontSize: 16
     fontSize: 16
   },
   registerLink: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#F89F9F'
-    color: '#F89F9F'
   },
   errorText: {
     color: 'red',
     fontSize: 12,
-    marginBottom: 5
     marginBottom: 5
   },
   modalBackground: {
@@ -363,7 +341,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'column',
     justifyContent: 'space-around',
-    backgroundColor: '#00000040'
     backgroundColor: '#00000040'
   },
   activityIndicatorWrapper: {
@@ -374,12 +351,9 @@ const styles = StyleSheet.create({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-around'
-    justifyContent: 'space-around'
   },
   loadingText: {
     textAlign: 'center', // Centra el texto
-    flexWrap: 'wrap' // Permite que el texto se ajuste
-  }
     flexWrap: 'wrap' // Permite que el texto se ajuste
   }
 });
