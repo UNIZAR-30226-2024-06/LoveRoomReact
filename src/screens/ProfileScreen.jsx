@@ -129,12 +129,13 @@ export default function ProfileScreen({ navigation }) {
               console.log(authState.tipousuario);
               if (authState.tipousuario === 'normal') {
                 navigation.navigate('Premium');
-              } else if (authState.tipousuario === 'premium') {
+              } else if (authState.tipousuario === 'premium' || authState.tipousuario === 'administrador') {
+                console.log('Ya eres premium');
                 Toast.show({
                   type: 'success',
                   position: 'bottom',
                   text1: '¡Ya eres premium!',
-                  text2: 'Tienes disponibles todas las funcionalidades premium. ¡Disfruta!',
+                  text2: 'Tienes disponibles todas las funcionalidades premium.',
                   visibilityTime: 2500
                 });
               }
