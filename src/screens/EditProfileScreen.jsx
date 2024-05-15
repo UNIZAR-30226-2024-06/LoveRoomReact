@@ -141,6 +141,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
           }));
           navigation.navigate('Account', { screen: 'Cuenta' });
           console.log('G: Actualizo bien');
+          console.log('serverNameProfileImage.current ', serverNameProfileImage.current);
         } else if (data.error == 'Error al actualizar el usuario') {
           console.log('G: Actualizo mal');
         }
@@ -197,6 +198,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
       console.log('authState.fotoperfil', authState.fotoperfil);
       const url = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/${authState.fotoperfil}`;
       console.log('url', url);
+      serverNameProfileImage.current = authState.fotoperfil;
       setProfileImage(url);
     }
     setIsProfileImageSelected(true);

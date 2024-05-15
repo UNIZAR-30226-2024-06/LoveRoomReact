@@ -36,7 +36,7 @@ export default function UserGuidelinesScreen({ navigation }) {
         {/* <View style={styles.logoImageContainer}> */}
         {/* <View style={styles.logoImageBorder}> */}
         <Image
-          source={require('../img/logo.png')} // Ruta de la imagen de perfil
+          source={require('../img/logo.png')} // Ruta de la imagen de logo
           style={styles.logoImage}
         />
 
@@ -65,9 +65,8 @@ export default function UserGuidelinesScreen({ navigation }) {
         style={styles.button}
         onPress={() => {
           // TODO: handleRegister();
-          navigation.navigate("Account", {screen : 'Cuenta'});
-        }}
-      >
+          navigation.navigate('Cuenta');
+        }}>
         <Text style={styles.buttonText}>Aceptar y continuar</Text>
       </TouchableOpacity>
     </ScrollView>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ScrollView,
   View,
@@ -7,17 +7,18 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
+  Platform,
+  StatusBar,
   ActivityIndicator,
   Modal,
-  Dimensions,
-  Alert
+  Dimensions
 } from 'react-native';
 // import Orientation from 'react-native-orientation-locker';
 import AuthContext from '../components/AuthContext';
+import RegisterScreen from './RegisterScreen';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
-import { useFocusEffect } from '@react-navigation/native';
 
 export default function LoginScreen({ navigation }) {
   const { authState, setAuthState } = React.useContext(AuthContext);
@@ -32,16 +33,7 @@ export default function LoginScreen({ navigation }) {
   const [hidePassword, setHidePassword] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
-  useFocusEffect(
-    useCallback(() => {
-      setEmail('');
-      setPassword('');
-      setIsValidEmail(true);
-      setEmailError(false);
-      setIsValidPassword(true);
-      setPasswordError(false);
-    }, [])
-  );
+  // Orientation.lockToPortrait();
 
   const handleEmailChange = (text) => {
     setEmail(text);
@@ -55,9 +47,11 @@ export default function LoginScreen({ navigation }) {
     setPasswordError(false); // Reinicia el estado de error de la contraseña
   };
 
+  // FALTA: MODIFICAR ESTO PARA QUE PRIMERO SE VERIFIQUE QUE EL CORREO EXISTA Y LUEGO SE HAGA EL LOGIN, ASI PODEMOS DAR
+  // A SABER AL USUARIO SI FALLA EL CORREO O LA CONTRASEÑA
   const handleLogin = () => {
     setIsLoading(true);
-    // Alert.alert(`${process.env.EXPO_PUBLIC_API_URL}/user/login`);
+    console.log(`${process.env.EXPO_PUBLIC_API_URL}/user/login`);
     fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/login`, {
       method: 'POST',
       headers: {
@@ -69,7 +63,6 @@ export default function LoginScreen({ navigation }) {
       .then((data) => {
         setIsLoading(false);
         console.log(data);
-        // alert('respuesta recibida');
         if (data.token != null) {
           setAuthState({
             isLoggedIn: true,
@@ -90,21 +83,7 @@ export default function LoginScreen({ navigation }) {
             contrasena: data.usuario.contrasena
           });
           AsyncStorage.setItem('token', data.token);
-
-          if (data.usuario.tipousuario === 'administrador') {
-            console.log('Admin');
-            navigation.navigate('Account', { screen: 'Admin' });
-          } else {
-            navigation.pop();
-          }
-        } else if (data.error === 'El usuario está baneado') {
-          Toast.show({
-            type: 'error',
-            position: 'bottom',
-            text1: 'Usuario baneado',
-            text2: 'Lo sentimos, pero tu cuenta ha sido suspendida.',
-            visibilityTime: 5000
-          });
+          navigation.pop();
         } else {
           Toast.show({
             type: 'error',
@@ -116,7 +95,6 @@ export default function LoginScreen({ navigation }) {
         }
       })
       .catch((error) => {
-        // Alert.alert('Error: ', error);
         setIsLoading(false);
         console.error('Error:', error);
       });
@@ -132,43 +110,40 @@ export default function LoginScreen({ navigation }) {
   const marginBottomBackToLogin = height * 0.03;
 
   return (
-    <ScrollView style={styles.container} keyboardShouldPersistTaps={'handled'}>
-      <View
-        style={styles.container}
-        contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }}>
-        <View style={[styles.logoContainer, { marginBottom: -90 }]}>
-          <Image style={styles.logo} source={require('../img/logoTexto.png')} />
-        </View>
-        <Modal
-          transparent={true}
-          animationType={'none'}
-          visible={isLoading}
-          onRequestClose={() => {
-            console.log('close modal');
-          }}>
-          <View style={styles.modalBackground}>
-            <View style={styles.activityIndicatorWrapper}>
-              <ActivityIndicator animating={isLoading} size="large" color="#F89F9F" />
-              <Text style={styles.loadingText}>Iniciando sesión...</Text>
-            </View>
+    <View
+      style={styles.container}
+      contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }}>
+      <View style={[styles.logoContainer, { marginBottom: -90 }]}>
+        <Image style={styles.logo} source={require('../img/logoTexto.png')} />
+      </View>
+      <Modal
+        transparent={true}
+        animationType={'none'}
+        visible={isLoading}
+        onRequestClose={() => {
+          console.log('close modal');
+        }}>
+        <View style={styles.modalBackground}>
+          <View style={styles.activityIndicatorWrapper}>
+            <ActivityIndicator animating={isLoading} size="large" color="#F89F9F" />
+            <Text style={styles.loadingText}>Iniciando sesión...</Text>
           </View>
-        </Modal>
-
-        <View style={styles.formContainer}>
-          <Text style={styles.label}>Correo Electrónico</Text>
-          <TextInput
-            style={[styles.input, emailError && styles.inputError]}
-            placeholder="Introduzca su correo electrónico"
-            onChangeText={handleEmailChange}
-            autoCapitalize="none"
-            maxLength={254}
-          />
-          {emailError && (
-            <Text style={styles.errorText}>
-              * Por favor, introduzca un correo electrónico válido.
-            </Text>
-          )}
         </View>
+      </Modal>
+
+      <View style={styles.formContainer}>
+        <Text style={styles.label}>Correo Electrónico</Text>
+        <TextInput
+          style={[styles.input, emailError && styles.inputError]}
+          placeholder="Introduzca su correo electrónico"
+          onChangeText={handleEmailChange}
+          autoCapitalize="none"
+        />
+        {emailError && (
+          <Text style={styles.errorText}>
+            * Por favor, introduzca un correo electrónico válido.
+          </Text>
+        )}
 
         <Text style={styles.label}>Contraseña</Text>
         <View>
@@ -181,7 +156,6 @@ export default function LoginScreen({ navigation }) {
             placeholder="Introduzca la contraseña"
             secureTextEntry={hidePassword}
             onChangeText={handlePasswordChange}
-            maxLength={100}
           />
           <TouchableOpacity
             onPress={() => setHidePassword(!hidePassword)}
@@ -222,9 +196,8 @@ export default function LoginScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      {/* <View style={[styles.line, { marginBottom: marginBottomLine }]} /> */}
+      <View style={[styles.line, { marginBottom: marginBottomLine }]} />
       <View style={[styles.registerContainer, { marginBottom: marginBottomBackToLogin }]}>
-        <View style={styles.line} />
         <Text style={styles.registerText}>¿No tienes una cuenta? </Text>
         <TouchableOpacity
           onPress={() => {
@@ -232,17 +205,15 @@ export default function LoginScreen({ navigation }) {
           }}>
           <Text style={styles.registerLink}>Regístrate</Text>
         </TouchableOpacity>
-        <View style={styles.line} />
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    paddingVertical: 20 // Ajusta el padding vertical según sea necesario
+    backgroundColor: '#fff'
   },
   logoContainer: {
     alignItems: 'center',
@@ -292,21 +263,23 @@ const styles = StyleSheet.create({
     color: '#F89F9F',
     textDecorationLine: 'underline'
   },
-
-  registerContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: 'row',
-    width: '100%',
-    marginTop: 80, // Agrega un margen superior adecuado
-    marginBottom: 20 // Agrega un margen inferior adecuado
-  },
   line: {
-    flex: 1,
-    height: 1,
+    height: 2,
+    width: '100%', // Ancho del 80% de la pantalla
+    position: 'absolute', // Posicionamiento absoluto para colocar la línea en una posición específica
+    bottom: 0, // Al principio, la línea estará al fondo de la pantalla
     borderBottomColor: '#ccc',
     borderBottomWidth: 1,
-    marginHorizontal: 5 // Ajusta esto según tu preferencia de espaciado
+    alignSelf: 'stretch' // Ajuste para que la línea ocupe todo el ancho
+  },
+
+  registerContainer: {
+    position: 'absolute',
+    bottom: 0, // Coloca el contenedor en la parte inferior de la pantalla
+    justifyContent: 'center', // Centra el contenido horizontalmente
+    alignItems: 'center', // Centra el contenido verticalmente
+    flexDirection: 'row',
+    width: '100%' // Asegura que el contenedor ocupe todo el ancho de la pantalla
   },
   registerText: {
     fontSize: 16

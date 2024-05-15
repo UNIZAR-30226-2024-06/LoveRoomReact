@@ -1086,7 +1086,7 @@ const Video = () => {
                   width: '90%',
                   maxHeight: '70%'
                 }}>
-                <OtherProfile user={user} />
+                <OtherProfile user={user} userPhotoUrl={userPhotoUrl.current} />
               </ScrollView>
               <View style={[styles.button, styles.buttonClose]}>
                 <Icon

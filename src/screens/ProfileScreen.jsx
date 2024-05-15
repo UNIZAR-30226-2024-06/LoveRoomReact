@@ -89,6 +89,11 @@ export default function ProfileScreen({ navigation }) {
     }, [profileImage])
   );
 
+  useEffect(() => {
+    console.log(authState);
+    checkProfileImage();
+  }, [authState]);
+
   if (!authState.isLoggedIn) {
     return <NotRegisteredScreen />;
   }
