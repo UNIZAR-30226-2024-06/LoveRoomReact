@@ -50,6 +50,7 @@ const Video = () => {
   const playerRef = useRef(null); // Referencia al reproductor de video
   const [isEnabled, setIsEnabled] = useState(true); // Sincronización activada al principio por defecto
   const emitirGetSync = useRef(false); // Se activa solo para indicar que cuando llegue el play hay que pausar (necesario para sincronizar)
+  const userPhotoUrl = useRef('null.jpg'); // Foto de perfil del usuario (por defecto vacía
   const currentTime = useRef(0); // Tiempo actual del video
   // console.log('SocketState en video Screen: ', socketState);
   const [modalUserVisible, setModalUserVisible] = useState(false);
@@ -389,65 +390,84 @@ const Video = () => {
         console.log('Cancelado');
       }
     }
-    // TODO: no sirve para nada
   };
 
-  // const uploadMedia = async (uri, mediaType) => {
-  //   const multimedia = await fetch(uri);
+  const uploadMedia = async (uri, mediaType) => {
+    const multimedia = await fetch(uri);
 
-  //   console.log('Subiendo media:', uri);
+    console.log('Subiendo media:', uri);
 
-  //   const formData = new FormData();
-  //   const uriParts = uri.split('.');
-  //   const fileType = uriParts[uriParts.length - 1];
+    const formData = new FormData();
+    const uriParts = uri.split('.');
+    const fileType = uriParts[uriParts.length - 1];
 
-  //   formData.append('file', {
-  //     uri: uri,
-  //     type: mime.getType(uri),
-  //     name: uri.split('/').pop()
-  //   });
-  //   console.log('Formdata: ', formData);
+    console.log('File type:', mime.getType(uri));
+    formData.append('file', {
+      uri: uri,
+      type: mime.getType(uri),
+      name: uri.split('/').pop()
+    });
+    console.log('Formdata: ', formData);
 
-  //   const url = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/upload/${mediaType}/${authState.id}`;
-  //   console.log('URL:', url);
-  //   fetch(uri)
-  //   .then(response => response)
-  //   .then(blob => {
-  //     formData.append('file', blob);
+    const url = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/upload/${mediaType}/${authState.id}`;
+    console.log('URL:', url);
+    console.log('Subiendo media:', uri);
 
-  //   console.log('URL:', url);
-  //   fetch(url, {
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'multipart/form-data',
-  //       Authorization: `Bearer ${authState.token}`
-  //     },
-  //     body: formData
-  //   })
-  //     .then((res) => res.json())
-  //     .then((res) => {
-  //       console.log('response' + JSON.stringify(res));
-  //       if (res.error == null) {
-  //         const mediaName = res.nombreArchivo;
-  //         console.log('URL de la imagen:', mediaName);
-  //         const data = {
-  //           id: null,
-  //           senderId: authState.id,
-  //           message: mediaName,
-  //           timestamp: null,
-  //           rutamultimedia: mediaName
-  //         };
-  //         setMessages((prevState) => [...prevState, data]);
-  //         sendMessage();
-  //       } else {
-  //         console.log('Error: guardando mensaje ', data.error);
-  //         alert('Ha habido un error en los datos de la imagen. Vuelva a intentarlo.');
-  //       }
-  //     })
-  //     .catch((e) => console.log(e));
-  //   // .done();
-  //   );
-  // };
+    console.log('URL:', url);
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${authState.token}`
+      },
+      body: formData
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        console.log('response' + JSON.stringify(res));
+        if (res.error == null) {
+          const mediaUrl = res.nombreArchivo;
+          console.log('URL de la imagen:', mediaUrl);
+          const data = {
+            id: null,
+            senderId: authState.id,
+            message: mediaUrl,
+            timestamp: null,
+            rutamultimedia: mediaUrl
+          };
+          sendMessageMultimedia(data);
+        } else {
+          console.log('Error: guardando mensaje ', data.error);
+          alert('Ha habido un error en los datos de la imagen. Vuelva a intentarlo.');
+        }
+      })
+      .catch((e) => console.log(e));
+  };
+
+  const sendMessageMultimedia = (data) => {
+    if (socketState.socket != null && socketState.socket.connected == true) {
+      console.log('Enviando mensaje multimedia: ', data.message);
+      const idsala = socketState.idSala;
+      const texto = data.message;
+      const rutamultimedia = data.rutamultimedia;
+      const callback = (message, idMsg, timestamp) => {
+        console.log('Respuesta del servidor:', message);
+        console.log('ID del mensaje:', idMsg);
+        console.log('Timestamp:', timestamp);
+        data.id = idMsg;
+        data.timestamp = timestamp;
+        data.senderId = socketState.senderId;
+        // data.rutamultimedia = rutamultimedia;
+        console.log('SocketState para mensaje:', socketState);
+        console.log(socketState.senderId);
+        console.log('Data en el callback: ', data);
+        setMessages((prevState) => [...prevState, data]);
+        // setNewMessage('');
+      };
+
+      socketState.socket.emit(socketEvents.CREATE_MESSAGE, idsala, texto, rutamultimedia, callback);
+    }
+  };
 
   const toggleSwitch = () => {
     setIsEnabled((previousState) => {
@@ -805,6 +825,8 @@ const Video = () => {
           console.log('Success info receiver');
           console.log('Success:', data);
           setUser(data);
+          userPhotoUrl.current = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/${data.fotoperfil}`;
+          console.log('userphotourl', userPhotoUrl.current);
         })
         .catch((error) => {
           console.error('Error:', error);
@@ -996,8 +1018,7 @@ const Video = () => {
         visible={modalVisible}
         onRequestClose={() => {
           setModalVisible(false);
-        }}
-      >
+        }}>
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <View style={styles.contentContainer}>
@@ -1030,12 +1051,13 @@ const Video = () => {
             onPress={() => {
               console.log('Ver perfil');
               setModalUserVisible(true);
-            }}
-          >
+            }}>
             <View style={{ flex: 1, alignItems: 'center', flexDirection: 'row' }}>
               <Image
                 source={
-                  user.fotoperfil === 'null.jpg' ? defaultProfilePicture : { uri: user.fotoperfil }
+                  userPhotoUrl.current === 'null.jpg'
+                    ? defaultProfilePicture
+                    : { uri: userPhotoUrl.current }
                 }
                 style={{ width: 50, height: 50, backgroundColor: 'white', borderRadius: 60 }}
               />
@@ -1054,8 +1076,7 @@ const Video = () => {
             onRequestClose={() => {
               setModalUserVisible(false);
             }}
-            style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-          >
+            style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
               <ScrollView
                 keyboardShouldPersistTaps={'handled'}
@@ -1064,8 +1085,7 @@ const Video = () => {
                   borderRadius: 10,
                   width: '90%',
                   maxHeight: '70%'
-                }}
-              >
+                }}>
                 <OtherProfile user={user} />
               </ScrollView>
               <View style={[styles.button, styles.buttonClose]}>
@@ -1095,8 +1115,7 @@ const Video = () => {
         />
       </View>
       <View
-        style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10, flex: 0.2 }}
-      >
+        style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 10, flex: 0.2 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Text style={{ fontSize: 12, fontWeight: 'bold', padding: 10 }}>¡Cambia el vídeo!</Text>
           <Icon

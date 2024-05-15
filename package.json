@@ -58,6 +58,7 @@
     "react-native-svg": "^15.2.0",
     "react-native-swipe-list-view": "^3.2.9",
     "react-native-toast-message": "^2.2.0",
+    "react-native-video": "^5.2.1",
     "react-native-webview": "13.8.6",
     "react-native-youtube": "^2.0.2",
     "react-native-youtube-iframe": "^2.3.0",

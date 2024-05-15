@@ -56,8 +56,7 @@ const provinciasDeEspana = [
   'Zaragoza'
 ];
 
-const OtherProfile = ({ user }) => {
-
+const OtherProfile = ({ user, userPhotoUrl }) => {
   const idToValue = (id) => {
     return provinciasDeEspana[id - 1];
   };
@@ -75,8 +74,8 @@ const OtherProfile = ({ user }) => {
             <Image
               style={styles.profileImage}
               source={
-                user.fotoperfil !== 'null.jpg'
-                  ? { uri: user.fotoperfil }
+                userPhotoUrl !== 'null.jpg'
+                  ? { uri: userPhotoUrl }
                   : require('../img/perfil-vacio-con-relleno.png')
               }
             />
@@ -102,7 +101,6 @@ const OtherProfile = ({ user }) => {
         <Text style={styles.label}>Descripción:</Text>
         <Text style={styles.text}>{user.descripcion}</Text>
       </View>
-
     </View>
   );
 };
