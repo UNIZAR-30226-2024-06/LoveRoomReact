@@ -290,8 +290,7 @@ function Admin({ navigation }) {
   
 
   return (
-    // <ScrollView contentContainerStyle={styles.container}>
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.cardContainer}>
         <View style={styles.card}>
             <Text style={styles.title}>Número de usuarios: {users.length}</Text>
@@ -638,8 +637,7 @@ function Admin({ navigation }) {
                         </View>
                     </Modal>
         </View>
-    </View>
-    
+    </ScrollView>
   );
 };
 
