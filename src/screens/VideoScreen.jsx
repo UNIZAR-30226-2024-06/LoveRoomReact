@@ -50,6 +50,7 @@ const Video = () => {
   const playerRef = useRef(null); // Referencia al reproductor de video
   const [isEnabled, setIsEnabled] = useState(true); // Sincronización activada al principio por defecto
   const emitirGetSync = useRef(false); // Se activa solo para indicar que cuando llegue el play hay que pausar (necesario para sincronizar)
+  const userPhotoUrl = useRef('null.jpg'); // Foto de perfil del usuario (por defecto vacía
   const currentTime = useRef(0); // Tiempo actual del video
   // console.log('SocketState en video Screen: ', socketState);
   const [modalUserVisible, setModalUserVisible] = useState(false);
@@ -389,7 +390,6 @@ const Video = () => {
         console.log('Cancelado');
       }
     }
-    // TODO: no sirve para nada
   };
 
   const uploadMedia = async (uri, mediaType) => {
@@ -435,15 +435,38 @@ const Video = () => {
             timestamp: null,
             rutamultimedia: mediaUrl
           };
-          setMessages((prevState) => [...prevState, data]);
-          sendMessage();
+          sendMessageMultimedia(data);
         } else {
           console.log('Error: guardando mensaje ', data.error);
           alert('Ha habido un error en los datos de la imagen. Vuelva a intentarlo.');
         }
       })
-      .catch((e) => console.log(e))
-      .done();
+      .catch((e) => console.log(e));
+  };
+
+  const sendMessageMultimedia = (data) => {
+    if (socketState.socket != null && socketState.socket.connected == true) {
+      console.log('Enviando mensaje multimedia: ', data.message);
+      const idsala = socketState.idSala;
+      const texto = data.message;
+      const rutamultimedia = data.rutamultimedia;
+      const callback = (message, idMsg, timestamp) => {
+        console.log('Respuesta del servidor:', message);
+        console.log('ID del mensaje:', idMsg);
+        console.log('Timestamp:', timestamp);
+        data.id = idMsg;
+        data.timestamp = timestamp;
+        data.senderId = socketState.senderId;
+        // data.rutamultimedia = rutamultimedia;
+        console.log('SocketState para mensaje:', socketState);
+        console.log(socketState.senderId);
+        console.log('Data en el callback: ', data);
+        setMessages((prevState) => [...prevState, data]);
+        // setNewMessage('');
+      };
+
+      socketState.socket.emit(socketEvents.CREATE_MESSAGE, idsala, texto, rutamultimedia, callback);
+    }
   };
 
   const toggleSwitch = () => {
@@ -802,6 +825,8 @@ const Video = () => {
           console.log('Success info receiver');
           console.log('Success:', data);
           setUser(data);
+          userPhotoUrl.current = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/${data.fotoperfil}`;
+          console.log('userphotourl', userPhotoUrl.current);
         })
         .catch((error) => {
           console.error('Error:', error);
@@ -1030,7 +1055,9 @@ const Video = () => {
             <View style={{ flex: 1, alignItems: 'center', flexDirection: 'row' }}>
               <Image
                 source={
-                  user.fotoperfil === 'null.jpg' ? defaultProfilePicture : { uri: user.fotoperfil }
+                  userPhotoUrl.current === 'null.jpg'
+                    ? defaultProfilePicture
+                    : { uri: userPhotoUrl.current }
                 }
                 style={{ width: 50, height: 50, backgroundColor: 'white', borderRadius: 60 }}
               />
@@ -1059,7 +1086,7 @@ const Video = () => {
                   width: '90%',
                   maxHeight: '70%'
                 }}>
-                <OtherProfile user={user} />
+                <OtherProfile user={user} userPhotoUrl={userPhotoUrl.current} />
               </ScrollView>
               <View style={[styles.button, styles.buttonClose]}>
                 <Icon

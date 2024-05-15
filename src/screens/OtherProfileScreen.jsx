@@ -56,7 +56,7 @@ const provinciasDeEspana = [
   'Zaragoza'
 ];
 
-const OtherProfile = ({ user }) => {
+const OtherProfile = ({ user, userPhotoUrl }) => {
   // Obtener el usuario desde los parámetros de navegación
 
   return (
@@ -70,8 +70,8 @@ const OtherProfile = ({ user }) => {
             <Image
               style={styles.profileImage}
               source={
-                user.fotoperfil !== 'null.jpg'
-                  ? { uri: user.fotoperfil }
+                userPhotoUrl !== 'null.jpg'
+                  ? { uri: userPhotoUrl }
                   : require('../img/perfil-vacio-con-relleno.png')
               }
             />
