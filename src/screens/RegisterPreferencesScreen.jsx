@@ -9,7 +9,7 @@ import {
   StyleSheet,
   Dimensions,
   Modal,
-  ActivityIndicator,
+  ActivityIndicator
 } from 'react-native';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import { Picker } from '@react-native-picker/picker';
@@ -18,7 +18,7 @@ import AuthContext from '../components/AuthContext';
 import * as FileSystem from 'expo-file-system';
 import { Feather } from '@expo/vector-icons';
 import { differenceInYears } from 'date-fns';
-
+import mime from 'mime';
 
 const screenHeight = Dimensions.get('window').height;
 const screenWidth = Dimensions.get('window').width;
@@ -89,8 +89,9 @@ export default function RegisterPreferencesScreen({ navigation }) {
   const [agePreference, setAgePreference] = useState([18, 100]);
   const [description, setDescription] = useState('');
   const [profileImage, setProfileImage] = useState('');
+  const serverNameProfileImage = useRef('null.jpg');
   const [idlocalidad, setIdLocalidad] = useState(0);
-  const [isProfileImageSelected, setIsProfileImageSelected] = useState();
+  const [isProfileImageSelected, setIsProfileImageSelected] = useState(false);
   const { StorageAccessFramework } = FileSystem;
   const isDataSaved = useRef(false);
   const [descriptionLength, setDescriptionLength] = useState(0);
@@ -118,14 +119,14 @@ export default function RegisterPreferencesScreen({ navigation }) {
     const birthday = new Date(year, month - 1, day); // Date espera el mes basado en 0-index
     const currentDate = new Date();
     const edad = differenceInYears(currentDate, birthday);
-    console.log('Edad:', edad)
-  
+    console.log('Edad:', edad);
+
     // Verificar si la edad es mayor o igual a 18 años
     if (edad < 18) {
       setFechaNacimientoError(true); // Establecer el error de fecha de nacimiento
       return; // Salir de la función si la edad no es válida
     }
-  
+
     setIsLoading(true);
     fetch(`${process.env.EXPO_PUBLIC_API_URL}/user/update`, {
       method: 'PUT',
@@ -142,40 +143,38 @@ export default function RegisterPreferencesScreen({ navigation }) {
         buscaedadmax: agePreference[1],
         buscasexo: sexualPreference,
         descripcion: description,
-        fotoperfil: 'null.jpg',
+        fotoperfil: serverNameProfileImage.current,
         idlocalidad: idlocalidad
       })
     })
-    .then((response) => response.json())
-    .then((data) => {
-      setIsLoading(false);
-      console.log(data);
-      if (data === 'Usuario actualizado correctamente') {
-        isDataSaved.current = true;
-        setAuthState((prevState) => ({
-          ...prevState,
-          edad: edad, // Actualiza la edad con el valor calculado
-          sexo: gender,
-          buscaedadmin: agePreference[0],
-          buscaedadmax: agePreference[1],
-          buscasexo: sexualPreference,
-          descripcion: description,
-          fotoperfil: 'null.jpg',
-          idlocalidad: idlocalidad
-        }));
-        navigation.navigate('Cuenta');
-        console.log('Preferencias del registro configuradas correctamente');
-      } else if (data.error === 'Error al actualizar el usuario') {
-        console.log('Error al configurar las preferencias del usuario');
-      }
-    })
-    .catch((error) => {
-      setIsLoading(false);
-      console.error('Error:', error);
-    });
+      .then((response) => response.json())
+      .then((data) => {
+        setIsLoading(false);
+        console.log(data);
+        if (data === 'Usuario actualizado correctamente') {
+          isDataSaved.current = true;
+          setAuthState((prevState) => ({
+            ...prevState,
+            edad: edad, // Actualiza la edad con el valor calculado
+            sexo: gender,
+            buscaedadmin: agePreference[0],
+            buscaedadmax: agePreference[1],
+            buscasexo: sexualPreference,
+            descripcion: description,
+            fotoperfil: serverNameProfileImage.current,
+            idlocalidad: idlocalidad
+          }));
+          navigation.navigate('Cuenta');
+          console.log('Preferencias del registro configuradas correctamente');
+        } else if (data.error === 'Error al actualizar el usuario') {
+          console.log('Error al configurar las preferencias del usuario');
+        }
+      })
+      .catch((error) => {
+        setIsLoading(false);
+        console.error('Error:', error);
+      });
   };
-  
-  
 
   const idToValue = (id) => {
     return provinciasDeEspana[id];
@@ -273,15 +272,15 @@ export default function RegisterPreferencesScreen({ navigation }) {
   };
 
   const fileName = FileSystem.documentDirectory + 'userProfileImage.jpeg';
-  const checkProfileImage = async () => {
-    fileInfo = await FileSystem.getInfoAsync(fileName);
-    console.log('fileInfo', fileInfo);
-    setProfileImage(fileName);
-    setIsProfileImageSelected(fileInfo.exists);
-  };
-  useEffect(() => {
-    checkProfileImage();
-  }, []);
+  // const checkProfileImage = async () => {
+  //   fileInfo = await FileSystem.getInfoAsync(fileName);
+  //   console.log('fileInfo', fileInfo);
+  //   setProfileImage(fileName);
+  //   setIsProfileImageSelected(fileInfo.exists);
+  // };
+  // useEffect(() => {
+  //   checkProfileImage();
+  // }, []);
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
@@ -310,7 +309,49 @@ export default function RegisterPreferencesScreen({ navigation }) {
       //   console.log('fileInfo dentro', fileInfo);
       setProfileImage(fileName + '?' + new Date());
       setIsProfileImageSelected(true);
+      updateProfileImage(fileName);
     }
+  };
+
+  const updateProfileImage = async (uri) => {
+    console.log('Subiendo media:', uri);
+
+    const formData = new FormData();
+
+    console.log('File type:', mime.getType(uri));
+    formData.append('file', {
+      uri: uri,
+      type: mime.getType(uri),
+      name: uri.split('/').pop()
+    });
+    console.log('Formdata: ', formData);
+
+    const url = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/upload/foto/${authState.id}`;
+    console.log('URL:', url);
+    console.log('Subiendo media:', uri);
+
+    console.log('URL:', url);
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${authState.token}`
+      },
+      body: formData
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        console.log('response' + JSON.stringify(res));
+        if (res.error == null) {
+          const mediaUrl = res.nombreArchivo;
+          console.log('URL de la imagen:', mediaUrl);
+          serverNameProfileImage.current = mediaUrl;
+        } else {
+          console.log('Error: guardando mensaje ', data.error);
+          alert('Ha habido un error en los datos de la imagen. Vuelva a intentarlo.');
+        }
+      })
+      .catch((e) => console.log(e));
   };
 
   return (
@@ -341,8 +382,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
         visible={isLoading}
         onRequestClose={() => {
           console.log('close modal');
-        }}
-      >
+        }}>
         <View style={styles.modalBackground}>
           <View style={styles.activityIndicatorWrapper}>
             <ActivityIndicator animating={isLoading} size="large" color="#F89F9F" />
@@ -359,8 +399,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
             onValueChange={(itemValue) => {
               setGender(itemValue);
               setGenderError(false);
-            }}
-          >
+            }}>
             <Picker.Item label="-- Seleccione su género --" value="" />
             <Picker.Item label="Masculino" value="H" />
             <Picker.Item label="Femenino" value="M" />
@@ -377,8 +416,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
               const index = provinciasDeEspana.indexOf(itemValue);
               setIdLocalidad(index);
               setIdLocalidadError(false);
-            }}
-          >
+            }}>
             {provinciasDeEspana.map((provincia, index) => (
               <Picker.Item key={index} label={provincia} value={provincia} />
             ))}
@@ -388,53 +426,6 @@ export default function RegisterPreferencesScreen({ navigation }) {
           <Text style={styles.errorText}>* Por favor, seleccione una localidad.</Text>
         )}
 
-<<<<<<< HEAD
-        <Text style={styles.label}>Sexo</Text>
-        <Picker
-          selectedValue={gender}
-          style={styles.input}
-          onValueChange={(itemValue, itemIndex) => setGender(itemValue)}>
-          <Picker.Item label="Masculino" value="H" />
-          <Picker.Item label="Femenino" value="M" />
-          <Picker.Item label="Otro" value="O" />
-        </Picker>
-
-        <Text style={styles.label}>Preferencia Sexual</Text>
-        <Picker
-          selectedValue={sexualPreference}
-          style={styles.input}
-          onValueChange={(itemValue, itemIndex) => setSexualPreference(itemValue)}>
-          <Picker.Item label="Seleccione su preferencia sexual" value="" />
-          <Picker.Item label="Hombres" value="H" />
-          <Picker.Item label="Mujeres" value="M" />
-          <Picker.Item label="Ambos" value="T" />
-          {/* <Picker.Item label="Heterosexual" value="heterosexual" />
-          <Picker.Item label="Homosexual" value="homosexual" />
-          <Picker.Item label="Bisexual" value="bisexual" />
-          <Picker.Item label="Pansexual" value="pansexual" />
-          <Picker.Item label="Otro" value="other" /> */}
-        </Picker>
-
-        <Text style={styles.label}>Preferencia de edad</Text>
-        <View style={{ ...styles.agePreferenceContainer, flexDirection: 'row' }}>
-          <Picker
-            selectedValue={agePreferenceStart}
-            style={styles.ageInput}
-            onValueChange={(itemValue, itemIndex) => setAgePreferenceStart(itemValue)}>
-            {[...Array(100).keys()].map((value, index) => (
-              <Picker.Item key={index} label={value.toString()} value={value} />
-            ))}
-          </Picker>
-          <Text> _ </Text>
-          <Picker
-            selectedValue={agePreferenceEnd}
-            style={styles.ageInput}
-            onValueChange={(itemValue, itemIndex) => setAgePreferenceEnd(itemValue)}>
-            {[...Array(100).keys()].map((value, index) => (
-              <Picker.Item key={index} label={value.toString()} value={value} />
-            ))}
-          </Picker>
-=======
         <Text style={styles.label}>Fecha de nacimiento</Text>
         <TextInput
           style={[styles.dateInput, fechaNacimientoError && styles.dateInputError]}
@@ -462,8 +453,7 @@ export default function RegisterPreferencesScreen({ navigation }) {
               // Utiliza llaves para encapsular ambas instrucciones
               setSexualPreference(itemValue);
               setSexualPreferenceError(false);
-            }}
-          >
+            }}>
             <Picker.Item label="-- Seleccione su preferencia sexual --" value="" />
             <Picker.Item label="Hombres" value="H" />
             <Picker.Item label="Mujeres" value="M" />
@@ -501,7 +491,6 @@ export default function RegisterPreferencesScreen({ navigation }) {
               return <View style={styles.customMarker} />;
             }}
           />
->>>>>>> main
         </View>
 
         <Text style={styles.label}>Descripción</Text>
@@ -524,21 +513,6 @@ export default function RegisterPreferencesScreen({ navigation }) {
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
-<<<<<<< HEAD
-            // TODO: handleRegister();
-            setAuthState((prevState) => ({
-              ...prevState,
-              sexo: gender,
-              buscaedadmin: agePreferenceStart,
-              buscaedadmax: agePreferenceEnd,
-              buscasexo: sexualPreference,
-              fotoperfil: fileName,
-              descripcion: description
-            }));
-            navigation.navigate('UserGuidelines');
-          }}>
-          <Text style={styles.buttonText}>Registrarse</Text>
-=======
             let isFormValid = true;
             if (gender === '') {
               setGenderError(true);
@@ -560,10 +534,8 @@ export default function RegisterPreferencesScreen({ navigation }) {
               console.log('Guardando...: ', authState);
               handleSave();
             }
-          }}
-        >
+          }}>
           <Text style={styles.buttonText}> Guardar</Text>
->>>>>>> main
         </TouchableOpacity>
       </View>
     </ScrollView>

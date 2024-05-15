@@ -52,31 +52,37 @@ export default function ProfileScreen({ navigation }) {
   };
 
   const checkProfileImage = async () => {
-    const fileInfo = await FileSystem.getInfoAsync(userProfileImage);
-    setIsProfileImageSelected(fileInfo.exists);
-    if (fileInfo.exists) {
-      updateProfileImage(FileSystem.documentDirectory + 'userProfileImage.jpeg');
-      console.log('Profile image updated');
+    console.log('checkProfileImage');
+    if (authState.fotoperfil == null) {
+      setProfileImage(require('../img/perfil-vacio-con-relleno.png'));
+    } else {
+      console.log('authState.fotoperfil', authState.fotoperfil);
+      const url = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/${authState.fotoperfil}`;
+      console.log('url', url);
+      setProfileImage(url);
     }
+    setIsProfileImageSelected(true);
   };
-
-  const [userProfileImage, setUserProfileImage] = useState(
-    FileSystem.documentDirectory + 'userProfileImage.jpeg'
-  );
-
-  const updateProfileImage = async (newImageUri) => {
-    setUserProfileImage(newImageUri);
-  };
-
   useEffect(() => {
     checkProfileImage();
-  }, [userProfileImage]);
+  }, []);
+
+  const [profileImage, setProfileImage] = useState();
+  // FileSystem.documentDirectory + 'userProfileImage.jpeg'
+
+  const updateProfileImage = async (newImageUri) => {
+    setProfileImage(newImageUri);
+  };
+
+  // useEffect(() => {
+  //   checkProfileImage();
+  // }, [userProfileImage]);
 
   useFocusEffect(
     React.useCallback(() => {
       checkProfileImage();
       return () => {};
-    }, [userProfileImage])
+    }, [profileImage])
   );
 
   if (!authState.isLoggedIn) {
@@ -96,11 +102,12 @@ export default function ProfileScreen({ navigation }) {
         <View style={styles.profileImageContainer}>
           <View style={styles.profileImageBorder}>
             <Image
-              source={
-                isProfileImageSelected
-                  ? { uri: userProfileImage + '?' + new Date() }
-                  : require('../img/profileImage.jpg')
-              } // Ruta de la imagen de perfil
+              // source={
+              //   isProfileImageSelected
+              //     ? { uri: userProfileImage }
+              //     : require('../img/perfil-vacio-con-relleno.png')
+              // } // Ruta de la imagen de perfil
+              source={{ uri: profileImage }}
               style={styles.profileImage}
             />
           </View>
