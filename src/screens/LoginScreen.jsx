@@ -110,6 +110,7 @@ export default function LoginScreen({ navigation }) {
   const marginBottomBackToLogin = height * 0.03;
 
   return (
+    <ScrollView style={styles.container} keyboardShouldPersistTaps={'handled'}>
     <View
       style={styles.container}
       contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }}>
@@ -138,6 +139,7 @@ export default function LoginScreen({ navigation }) {
           placeholder="Introduzca su correo electrónico"
           onChangeText={handleEmailChange}
           autoCapitalize="none"
+          maxLength={254}
         />
         {emailError && (
           <Text style={styles.errorText}>
@@ -156,6 +158,7 @@ export default function LoginScreen({ navigation }) {
             placeholder="Introduzca la contraseña"
             secureTextEntry={hidePassword}
             onChangeText={handlePasswordChange}
+            maxLength={100}
           />
           <TouchableOpacity
             onPress={() => setHidePassword(!hidePassword)}
@@ -196,8 +199,9 @@ export default function LoginScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      <View style={[styles.line, { marginBottom: marginBottomLine }]} />
+      {/* <View style={[styles.line, { marginBottom: marginBottomLine }]} /> */}
       <View style={[styles.registerContainer, { marginBottom: marginBottomBackToLogin }]}>
+      <View style={styles.line} />
         <Text style={styles.registerText}>¿No tienes una cuenta? </Text>
         <TouchableOpacity
           onPress={() => {
@@ -205,15 +209,18 @@ export default function LoginScreen({ navigation }) {
           }}>
           <Text style={styles.registerLink}>Regístrate</Text>
         </TouchableOpacity>
+        <View style={styles.line} />
       </View>
     </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff'
+    backgroundColor: '#fff',
+    paddingVertical: 20,
   },
   logoContainer: {
     alignItems: 'center',
@@ -264,22 +271,20 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline'
   },
   line: {
-    height: 2,
-    width: '100%', // Ancho del 80% de la pantalla
-    position: 'absolute', // Posicionamiento absoluto para colocar la línea en una posición específica
-    bottom: 0, // Al principio, la línea estará al fondo de la pantalla
+    flex: 1,
+    height: 1,
     borderBottomColor: '#ccc',
     borderBottomWidth: 1,
-    alignSelf: 'stretch' // Ajuste para que la línea ocupe todo el ancho
+    marginHorizontal: 5, 
   },
 
   registerContainer: {
-    position: 'absolute',
-    bottom: 0, // Coloca el contenedor en la parte inferior de la pantalla
     justifyContent: 'center', // Centra el contenido horizontalmente
     alignItems: 'center', // Centra el contenido verticalmente
     flexDirection: 'row',
-    width: '100%' // Asegura que el contenedor ocupe todo el ancho de la pantalla
+    // width: '100%' // Asegura que el contenedor ocupe todo el ancho de la pantalla
+    marginTop: 80,
+    marginBottom: 20
   },
   registerText: {
     fontSize: 16
