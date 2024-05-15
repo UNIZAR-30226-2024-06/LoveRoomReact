@@ -307,17 +307,6 @@ const SearchBar = ({ setVideoUrl, useModal }) => {
           setVideosModal={setVideosModal}
         />
       </View>
-      <View style={[styles.button, styles.buttonClose]}>
-        <Icon
-          name="close"
-          type="ionicon"
-          color="white"
-          onPress={() => {
-            setVideosModal(false);
-            setListVideos([]);
-          }}
-        />
-      </View>
     </View>  }
       {listVideosInterest.length>0 && useModal? <FlatList
         data={listVideosInterest.filter((item) =>
@@ -400,15 +389,15 @@ const SearchBar = ({ setVideoUrl, useModal }) => {
             </TouchableOpacity>
           );
         }}
-      />:
-      <View style={styles.interrogationContainer}>
+      />: 
+      useModal? <View style={styles.interrogationContainer}>
       <Image source={require('../img/camara.png')} style={[styles.interrogationImage, { tintColor: 'gray' }]} />
       <Text style={styles.centeredText}>
         ¡Busca tus vídeos favoritos,
         {'\n'}
         y conoce gente con los mismos gustos que tú!
       </Text>
-    </View>}
+    </View> : <></>}
     </View>
   );
 };

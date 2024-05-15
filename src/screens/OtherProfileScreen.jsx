@@ -62,6 +62,7 @@ const OtherProfile = ({ user, userPhotoUrl }) => {
   };
 
   // Obtener el usuario desde los parámetros de navegación
+  console.log('user:', userPhotoUrl);
 
   return (
     <View style={styles.container}>
@@ -74,7 +75,7 @@ const OtherProfile = ({ user, userPhotoUrl }) => {
             <Image
               style={styles.profileImage}
               source={
-                userPhotoUrl !== 'null.jpg'
+                userPhotoUrl !== 'http://48.216.156.246/multimedia/null.jpg'
                   ? { uri: userPhotoUrl }
                   : require('../img/perfil-vacio-con-relleno.png')
               }

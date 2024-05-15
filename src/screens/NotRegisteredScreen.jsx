@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
 
@@ -8,6 +8,7 @@ export default function NotRegisteredScreen() {
   return (
     <View style={styles.container}>
       {/* <Text style={styles.text}>X</Text> */}
+      <Image source={require('../../assets/logoLoveRoom.png')} style={{ width: 300, height: 300 }} />
       <Text style={styles.text}>Necesitas registrarte para ver este contenido{'\n'}</Text>
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Login')}>
         <Text style={styles.buttonText}>Iniciar sesión</Text>
