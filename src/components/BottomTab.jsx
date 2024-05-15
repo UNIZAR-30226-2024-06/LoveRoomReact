@@ -105,10 +105,15 @@ export default function BottomTab({ initialScreen, navigation }) {
         component={ProfileScreen}
         options={{
           tabBarIcon: ({ focused, color, size }) => ImageProfile(size, color),
-          //PEDIR IMAGEN A BACKEND
+          // PEDIR IMAGEN A BACKEND
           headerTitle: () => (
             <Image
-              source={require('../img/logo.png')}
+              source={
+                authState.fotoperfil !== "null.jpg" && 
+                authState.fotoperfil !== "http://48.216.156.246/multimedia/null.jpg"
+                  ? { uri: authState.fotoperfil }
+                  : require('../img/logo.png')
+              }
               style={{ width: 200, height: 32, backgroundColor: '#F89F9F' }}
             />
           ),
@@ -119,6 +124,7 @@ export default function BottomTab({ initialScreen, navigation }) {
           headerShadowVisible: false
         }}
       />
+
       {authState.tipousuario === 'administrador' && (
         <Tab.Screen
           name="Admin"
