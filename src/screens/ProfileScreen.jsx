@@ -52,37 +52,31 @@ export default function ProfileScreen({ navigation }) {
   };
 
   const checkProfileImage = async () => {
-    console.log('checkProfileImage');
-    if (authState.fotoperfil == null) {
-      setProfileImage(require('../img/perfil-vacio-con-relleno.png'));
-    } else {
-      console.log('authState.fotoperfil', authState.fotoperfil);
-      const url = `${process.env.EXPO_PUBLIC_API_URL}/multimedia/${authState.fotoperfil}`;
-      console.log('url', url);
-      setProfileImage(url);
+    const fileInfo = await FileSystem.getInfoAsync(userProfileImage);
+    setIsProfileImageSelected(fileInfo.exists);
+    if (fileInfo.exists) {
+      updateProfileImage(FileSystem.documentDirectory + 'userProfileImage.jpeg');
+      console.log('Profile image updated');
     }
-    setIsProfileImageSelected(true);
   };
-  useEffect(() => {
-    checkProfileImage();
-  }, []);
 
-  const [profileImage, setProfileImage] = useState();
-  // FileSystem.documentDirectory + 'userProfileImage.jpeg'
+  const [userProfileImage, setUserProfileImage] = useState(
+    FileSystem.documentDirectory + 'userProfileImage.jpeg'
+  );
 
   const updateProfileImage = async (newImageUri) => {
-    setProfileImage(newImageUri);
+    setUserProfileImage(newImageUri);
   };
 
-  // useEffect(() => {
-  //   checkProfileImage();
-  // }, [userProfileImage]);
+  useEffect(() => {
+    checkProfileImage();
+  }, [userProfileImage]);
 
   useFocusEffect(
     React.useCallback(() => {
       checkProfileImage();
       return () => {};
-    }, [profileImage])
+    }, [userProfileImage])
   );
 
   if (!authState.isLoggedIn) {
@@ -95,19 +89,19 @@ export default function ProfileScreen({ navigation }) {
       style={styles.container}
       ref={scrollViewRef}
       scrollEventThrottle={16}
-      onScroll={handleScroll}>
+      onScroll={handleScroll}
+    >
       <View style={styles.header} />
       <View style={styles.profileInfo}>
         <Text style={styles.profileText}>Perfil</Text>
         <View style={styles.profileImageContainer}>
           <View style={styles.profileImageBorder}>
             <Image
-              // source={
-              //   isProfileImageSelected
-              //     ? { uri: userProfileImage }
-              //     : require('../img/perfil-vacio-con-relleno.png')
-              // } // Ruta de la imagen de perfil
-              source={{ uri: profileImage }}
+              source={
+                isProfileImageSelected
+                  ? { uri: userProfileImage + '?' + new Date() }
+                  : require('../img/profileImage.jpg')
+              } // Ruta de la imagen de perfil
               style={styles.profileImage}
             />
           </View>
@@ -119,7 +113,8 @@ export default function ProfileScreen({ navigation }) {
             console.log(authState);
             navigation.navigate('EditProfile');
             //navigation.navigate('RegisterPreferences');
-          }}>
+          }}
+        >
           <Text style={styles.editButtonText}>Editar perfil</Text>
         </TouchableOpacity>
 
@@ -128,6 +123,7 @@ export default function ProfileScreen({ navigation }) {
             <Text style={styles.headlineText}>Mi plan</Text>
           </View>
           <TouchableOpacity
+
             style={styles.faqButton}
             onPress={() => {
               console.log('Ya eres premium');
@@ -144,7 +140,9 @@ export default function ProfileScreen({ navigation }) {
                   visibilityTime: 2500
                 });
               }
-            }}>
+            }}
+
+          >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Image source={require('../img/premium.png')} style={styles.faqIcon} />
               {authState.tipousuario === 'normal' ? (
@@ -166,7 +164,8 @@ export default function ProfileScreen({ navigation }) {
               style={styles.faqButton}
               onPress={() => {
                 navigation.navigate('FAQ');
-              }}>
+              }}
+            >
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Image source={require('../img/ayudar.png')} style={styles.faqIcon} />
                 <Text style={styles.faqText}>Preguntas frecuentes</Text>
@@ -184,7 +183,8 @@ export default function ProfileScreen({ navigation }) {
                   text2: 'Correo: loveroomapp@gmail.com',
                   visibilityTime: 4000
                 });
-              }}>
+              }}
+            >
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Image source={require('../img/llamada.png')} style={styles.faqIcon} />
                 <Text style={styles.faqText}>Contáctanos</Text>
@@ -196,7 +196,8 @@ export default function ProfileScreen({ navigation }) {
               style={styles.faqButton}
               onPress={() => {
                 navigation.navigate('ChangePassword');
-              }}>
+              }}
+            >
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Image source={require('../img/verificado.png')} style={styles.faqIcon} />
                 <Text style={styles.faqText}>Gestión de credenciales</Text>
@@ -248,7 +249,8 @@ export default function ProfileScreen({ navigation }) {
                 ],
                 { cancelable: false }
               );
-            }}>
+            }}
+          >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Image source={require('../img/salida.png')} style={styles.faqIcon} />
               <Text style={styles.faqText}>Cerrar sesión</Text>
@@ -295,7 +297,8 @@ export default function ProfileScreen({ navigation }) {
                 ],
                 { cancelable: false }
               );
-            }}>
+            }}
+          >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Image source={require('../img/borrar.png')} style={styles.faqIcon} />
               <Text style={styles.faqText}>Borrar cuenta</Text>

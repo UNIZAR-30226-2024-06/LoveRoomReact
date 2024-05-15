@@ -12,7 +12,6 @@ import {
   Dimensions, 
   Alert
 } from 'react-native';
-// import Orientation from 'react-native-orientation-locker';
 import AuthContext from '../components/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -171,20 +170,6 @@ export default function LoginScreen({ navigation }) {
               * Por favor, introduzca un correo electrónico válido.
             </Text>
           )}
-        <View style={styles.formContainer}>
-          <Text style={styles.label}>Correo Electrónico</Text>
-          <TextInput
-            style={[styles.input, emailError && styles.inputError]}
-            placeholder="Introduzca su correo electrónico"
-            onChangeText={handleEmailChange}
-            autoCapitalize="none"
-            maxLength={254}
-          />
-          {emailError && (
-            <Text style={styles.errorText}>
-              * Por favor, introduzca un correo electrónico válido.
-            </Text>
-          )}
 
           <Text style={styles.label}>Contraseña</Text>
           <View>
@@ -264,17 +249,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     paddingVertical: 20 // Ajusta el padding vertical según sea necesario
-    paddingVertical: 20 // Ajusta el padding vertical según sea necesario
   },
   logoContainer: {
     alignItems: 'center',
-    paddingTop: 130
     paddingTop: 130
   },
   logo: {
     width: 200,
     height: 200,
-    resizeMode: 'contain'
     resizeMode: 'contain'
   },
   formContainer: {
@@ -282,12 +264,10 @@ const styles = StyleSheet.create({
     marginTop: 20,
     padding: 20,
     borderRadius: 10
-    borderRadius: 10
   },
   label: {
     fontSize: 16,
     marginBottom: 5,
-    marginTop: 10
     marginTop: 10
   },
   input: {
@@ -298,10 +278,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 5,
     marginEnd: 5
-    marginEnd: 5
   },
   inputError: {
-    borderColor: 'red' // Cambia el borde a rojo si hay un error
     borderColor: 'red' // Cambia el borde a rojo si hay un error
   },
   button: {
@@ -309,11 +287,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 5,
     alignItems: 'center'
-    alignItems: 'center'
   },
   buttonText: {
     color: '#ffffff',
-    fontWeight: 'bold'
     fontWeight: 'bold'
   },
   forgotPassword: {
@@ -321,9 +297,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     color: '#F89F9F',
     textDecorationLine: 'underline'
-    textDecorationLine: 'underline'
   },
-
 
   registerContainer: {
     justifyContent: 'center',
@@ -332,7 +306,6 @@ const styles = StyleSheet.create({
     width: '100%',
     marginTop: 80, // Agrega un margen superior adecuado
     marginBottom: 20 // Agrega un margen inferior adecuado
-    marginBottom: 20 // Agrega un margen inferior adecuado
   },
   line: {
     flex: 1,
@@ -340,22 +313,18 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
     borderBottomWidth: 1,
     marginHorizontal: 5 // Ajusta esto según tu preferencia de espaciado
-    marginHorizontal: 5 // Ajusta esto según tu preferencia de espaciado
   },
   registerText: {
-    fontSize: 16
     fontSize: 16
   },
   registerLink: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#F89F9F'
-    color: '#F89F9F'
   },
   errorText: {
     color: 'red',
     fontSize: 12,
-    marginBottom: 5
     marginBottom: 5
   },
   modalBackground: {
@@ -363,7 +332,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'column',
     justifyContent: 'space-around',
-    backgroundColor: '#00000040'
     backgroundColor: '#00000040'
   },
   activityIndicatorWrapper: {
@@ -374,12 +342,9 @@ const styles = StyleSheet.create({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-around'
-    justifyContent: 'space-around'
   },
   loadingText: {
     textAlign: 'center', // Centra el texto
-    flexWrap: 'wrap' // Permite que el texto se ajuste
-  }
     flexWrap: 'wrap' // Permite que el texto se ajuste
   }
 });
