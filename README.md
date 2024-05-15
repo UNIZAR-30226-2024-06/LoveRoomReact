@@ -19,3 +19,7 @@ npx expo start
 Para poder usar hooks varios (hay algunos bastante útiles, se pueden ver en github.com/react-native-community/hooks):
 npm i @react-native-community/hooks
 npm install
+
+Para probar junto al backend de forma local, seguir el readme del backend, por tanto iniciándolo desde http://localhost:5000 Cambiar .env tomando la dirección IP del ordenador
+
+Adaptador de LAN inalámbrica Wi-Fi: Dirección IPv4. . . . . . . . . . . . .
